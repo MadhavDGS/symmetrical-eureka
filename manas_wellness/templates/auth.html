@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Aarohan{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 bg-indigo-100 rounded-full flex items-center justify-center">
+                <span class="text-2xl">🧠</span>
+            </div>
+            <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+                Welcome to Aarohan
+            </h2>
+            <p class="mt-2 text-sm text-gray-600">
+                Your AI-powered mental wellness companion
+            </p>
+        </div>
+        
+        <div class="bg-white shadow-xl rounded-lg p-8 glass-effect">
+            <form class="space-y-6" onsubmit="registerUser(event)">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">
+                        Your Name
+                    </label>
+                    <div class="mt-1">
+                        <input id="name" name="name" type="text" required 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                               placeholder="Enter your name">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="age" class="block text-sm font-medium text-gray-700">
+                        Age
+                    </label>
+                    <div class="mt-1">
+                        <input id="age" name="age" type="number" min="13" max="25" required 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                               placeholder="Your age">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="language" class="block text-sm font-medium text-gray-700">
+                        Preferred Language
+                    </label>
+                    <div class="mt-1">
+                        <select id="language" name="language" required 
+                                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
+                            <option value="english">English</option>
+                            <option value="hindi">Hindi</option>
+                            <option value="telugu">Telugu</option>
+                            <option value="gujarati">Gujarati</option>
+                            <option value="tamil">Tamil</option>
+                            <option value="bengali">Bengali</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="accessibility" class="block text-sm font-medium text-gray-700">
+                        Accessibility Needs (Optional)
+                    </label>
+                    <div class="mt-1">
+                        <textarea id="accessibility" name="accessibility" rows="3"
+                                  class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                  placeholder="Let us know about any accessibility features you might need..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex items-center">
+                    <input id="privacy-agreement" name="privacy-agreement" type="checkbox" required
+                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="privacy-agreement" class="ml-2 block text-sm text-gray-900">
+                        I agree to the <a href="#" class="text-indigo-600 hover:text-indigo-500">privacy policy</a> and 
+                        understand my data will be kept confidential
+                    </label>
+                </div>
+                
+                <div>
+                    <button type="submit" 
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Start Your Wellness Journey
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-xs text-gray-500">
+                        🔒 Your privacy is our priority. All data is encrypted and secure.
+                    </p>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Emergency Support -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-red-800 mb-2">Need Immediate Help?</h3>
+            <div class="text-xs text-red-600 space-y-1">
+                <p>AASRA: <a href="tel:+912227546669" class="underline">91-22-27546669</a></p>
+                <p>Emergency: <a href="tel:112" class="underline">112</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function registerUser(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const userData = {
+        name: formData.get('name'),
+        age: parseInt(formData.get('age')),
+        language: formData.get('language'),
+        accessibility_needs: formData.get('accessibility')
+    };
+    
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            window.location.href = '/dashboard';
+        } else {
+            alert('Registration failed: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        alert('Registration failed. Please try again.');
+    }
+}
+</script>
+{% endblock %}

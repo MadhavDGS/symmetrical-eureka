@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}Crisis Support - Aarohan{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Emergency Banner -->
+    <div class="bg-red-600 text-white p-6 rounded-xl mb-8 shadow-lg">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <span class="text-3xl mr-4">🚨</span>
+                <div>
+                    <h1 class="text-2xl font-bold">Crisis Support Center</h1>
+                    <p class="text-red-100">Immediate help and professional resources</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-red-100 text-sm">Emergency</p>
+                <a href="tel:112" class="text-2xl font-bold hover:text-red-200 transition-colors">112</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Immediate Help Section -->
+    <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <!-- Crisis Hotlines -->
+        <div class="bg-white rounded-xl shadow-lg p-6 glass-effect">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <span class="text-2xl mr-3">📞</span>
+                Crisis Hotlines
+            </h2>
+            <div class="space-y-4">
+                <div class="border-l-4 border-red-500 pl-4">
+                    <h3 class="font-semibold text-red-800">AASRA (24/7)</h3>
+                    <p class="text-gray-600 text-sm">Suicide prevention helpline</p>
+                    <a href="tel:+912227546669" class="text-red-600 font-medium hover:text-red-700">
+                        91-22-27546669
+                    </a>
+                </div>
+                
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h3 class="font-semibold text-blue-800">Sneha (24/7)</h3>
+                    <p class="text-gray-600 text-sm">Emotional support helpline</p>
+                    <a href="tel:+914424640050" class="text-blue-600 font-medium hover:text-blue-700">
+                        044-24640050
+                    </a>
+                </div>
+                
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h3 class="font-semibold text-green-800">Vandrevala Foundation</h3>
+                    <p class="text-gray-600 text-sm">Free counseling service</p>
+                    <a href="tel:+919999666555" class="text-green-600 font-medium hover:text-green-700">
+                        9999666555
+                    </a>
+                </div>
+                
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h3 class="font-semibold text-purple-800">iCall (8 AM - 10 PM)</h3>
+                    <p class="text-gray-600 text-sm">TISS psychological helpline</p>
+                    <a href="tel:+919152987821" class="text-purple-600 font-medium hover:text-purple-700">
+                        9152987821
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Immediate Actions -->
+        <div class="bg-white rounded-xl shadow-lg p-6 glass-effect">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <span class="text-2xl mr-3">⚡</span>
+                Immediate Actions
+            </h2>
+            <div class="space-y-4">
+                <button onclick="startCalmingExercise()" 
+                        class="w-full text-left p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-2 border-blue-200">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🫁</span>
+                        <div>
+                            <p class="font-medium text-blue-900">Emergency Breathing</p>
+                            <p class="text-sm text-blue-600">Calm panic attacks</p>
+                        </div>
+                    </div>
+                </button>
+                
+                <button onclick="showGroundingTechnique()" 
+                        class="w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors border-2 border-green-200">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🌱</span>
+                        <div>
+                            <p class="font-medium text-green-900">5-4-3-2-1 Grounding</p>
+                            <p class="text-sm text-green-600">Get back to the present</p>
+                        </div>
+                    </div>
+                </button>
+                
+                <button onclick="showSafetyPlan()" 
+                        class="w-full text-left p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors border-2 border-purple-200">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🛡️</span>
+                        <div>
+                            <p class="font-medium text-purple-900">Safety Planning</p>
+                            <p class="text-sm text-purple-600">Create your safety net</p>
+                        </div>
+                    </div>
+                </button>
+                
+                <button onclick="findProfessionalHelp()" 
+                        class="w-full text-left p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors border-2 border-orange-200">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">👨‍⚕️</span>
+                        <div>
+                            <p class="font-medium text-orange-900">Find Professional Help</p>
+                            <p class="text-sm text-orange-600">Locate mental health services</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Crisis Assessment -->
+    <div class="bg-white rounded-xl shadow-lg p-6 glass-effect mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="text-2xl mr-3">🎯</span>
+            Quick Crisis Assessment
+        </h2>
+        <p class="text-gray-600 mb-4">Help us understand how you're feeling so we can provide the best support.</p>
+        
+        <form onsubmit="submitCrisisAssessment(event)" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    How would you rate your current distress level? (1-10)
+                </label>
+                <input type="range" id="distress-level" min="1" max="10" value="5" 
+                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider">
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>1 - Mild</span>
+                    <span id="distress-value">5</span>
+                    <span>10 - Severe</span>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Are you having thoughts of hurting yourself or others?
+                </label>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="radio" name="self-harm" value="no" class="mr-2">
+                        <span>No, I am not having these thoughts</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="self-harm" value="yes" class="mr-2">
+                        <span class="text-red-600 font-medium">Yes, I am having these thoughts</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    What's bothering you most right now?
+                </label>
+                <textarea id="main-concern" rows="3" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Share what's on your mind..."></textarea>
+            </div>
+            
+            <button type="submit" 
+                    class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                Get Personalized Support
+            </button>
+        </form>
+    </div>
+    
+    <!-- Professional Resources -->
+    <div class="bg-white rounded-xl shadow-lg p-6 glass-effect">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="text-2xl mr-3">🏥</span>
+            Professional Mental Health Services
+        </h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="font-medium text-gray-900 mb-3">Online Counseling Platforms</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <span>YourDOST</span>
+                        <a href="https://yourdost.com" target="_blank" class="text-blue-600 hover:text-blue-700">Visit</a>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <span>BetterHelp India</span>
+                        <a href="https://betterhelp.com" target="_blank" class="text-blue-600 hover:text-blue-700">Visit</a>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <span>Manasthali</span>
+                        <a href="https://manasthali.org" target="_blank" class="text-blue-600 hover:text-blue-700">Visit</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="font-medium text-gray-900 mb-3">Emergency Services</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                        <span>National Emergency</span>
+                        <a href="tel:112" class="text-red-600 hover:text-red-700 font-medium">112</a>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                        <span>Police</span>
+                        <a href="tel:100" class="text-red-600 hover:text-red-700 font-medium">100</a>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                        <span>Ambulance</span>
+                        <a href="tel:108" class="text-red-600 hover:text-red-700 font-medium">108</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emergency Breathing Modal -->
+<div id="emergency-breathing-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-8 max-w-lg w-full mx-4">
+        <div class="text-center">
+            <h3 class="text-2xl font-semibold mb-4 text-gray-900">Emergency Breathing Exercise</h3>
+            <p class="text-gray-600 mb-6">Follow the rhythm to calm your nervous system</p>
+            
+            <div id="emergency-breathing-circle" class="w-40 h-40 mx-auto mb-6 rounded-full bg-blue-200 flex items-center justify-center">
+                <div class="w-32 h-32 rounded-full bg-blue-500 transition-all duration-1000" id="emergency-breathing-inner"></div>
+            </div>
+            
+            <p id="emergency-breathing-instruction" class="text-xl mb-6 font-medium">Click Start to begin</p>
+            
+            <div class="flex space-x-4">
+                <button onclick="closeEmergencyBreathing()" 
+                        class="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-400 transition-colors">
+                    Close
+                </button>
+                <button id="emergency-breathing-btn" onclick="startEmergencyBreathing()" 
+                        class="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                    Start
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grounding Technique Modal -->
+<div id="grounding-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-8 max-w-lg w-full mx-4">
+        <h3 class="text-xl font-semibold mb-4">5-4-3-2-1 Grounding Technique</h3>
+        <div id="grounding-content">
+            <p class="text-gray-600 mb-4">This technique helps you reconnect with the present moment.</p>
+            <button onclick="startGrounding()" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                Start Grounding Exercise
+            </button>
+        </div>
+        <div class="mt-4 text-center">
+            <button onclick="closeGrounding()" class="text-gray-500 hover:text-gray-700">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update distress level display
+document.getElementById('distress-level').addEventListener('input', function() {
+    document.getElementById('distress-value').textContent = this.value;
+});
+
+// Crisis assessment
+async function submitCrisisAssessment(event) {
+    event.preventDefault();
+    
+    const distressLevel = document.getElementById('distress-level').value;
+    const selfHarm = document.querySelector('input[name="self-harm"]:checked')?.value;
+    const mainConcern = document.getElementById('main-concern').value;
+    
+    if (selfHarm === 'yes') {
+        alert('Based on your responses, we strongly recommend contacting a crisis hotline immediately. Your safety is our priority.');
+        return;
+    }
+    
+    const userData = {
+        distress_level: parseInt(distressLevel),
+        self_harm_thoughts: selfHarm === 'yes',
+        main_concern: mainConcern
+    };
+    
+    try {
+        const response = await fetch('/api/crisis/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_data: userData })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            if (result.risk_level >= 0.8) {
+                alert('High risk detected. Please contact emergency services or a crisis hotline immediately.');
+            } else if (result.risk_level >= 0.5) {
+                alert('We recommend speaking with a counselor or trusted person. Consider the resources provided below.');
+            } else {
+                alert('Thank you for sharing. Consider the self-care techniques and resources available.');
+            }
+        }
+    } catch (error) {
+        console.error('Crisis assessment error:', error);
+        alert('Unable to process assessment. Please contact a crisis hotline if you need immediate help.');
+    }
+}
+
+// Emergency breathing exercise
+function startCalmingExercise() {
+    document.getElementById('emergency-breathing-modal').classList.remove('hidden');
+}
+
+function closeEmergencyBreathing() {
+    document.getElementById('emergency-breathing-modal').classList.add('hidden');
+}
+
+function startEmergencyBreathing() {
+    const instruction = document.getElementById('emergency-breathing-instruction');
+    const innerCircle = document.getElementById('emergency-breathing-inner');
+    const btn = document.getElementById('emergency-breathing-btn');
+    
+    btn.textContent = 'Running...';
+    btn.disabled = true;
+    
+    let phase = 0;
+    let cycles = 0;
+    const maxCycles = 10;
+    
+    function emergencyBreatheCycle() {
+        if (cycles >= maxCycles) {
+            instruction.textContent = 'Excellent! You completed the emergency breathing exercise.';
+            btn.textContent = 'Start Again';
+            btn.disabled = false;
+            return;
+        }
+        
+        switch(phase) {
+            case 0: // Inhale
+                instruction.textContent = 'Breathe in for 4 seconds...';
+                innerCircle.style.transform = 'scale(1.2)';
+                innerCircle.style.transition = 'transform 4s ease-in-out';
+                setTimeout(() => { phase = 1; emergencyBreatheCycle(); }, 4000);
+                break;
+            case 1: // Exhale
+                instruction.textContent = 'Breathe out for 6 seconds...';
+                innerCircle.style.transform = 'scale(0.8)';
+                innerCircle.style.transition = 'transform 6s ease-in-out';
+                setTimeout(() => { 
+                    phase = 0; 
+                    cycles++; 
+                    setTimeout(emergencyBreatheCycle, 1000);
+                }, 6000);
+                break;
+        }
+    }
+    
+    emergencyBreatheCycle();
+}
+
+// Grounding technique
+function showGroundingTechnique() {
+    document.getElementById('grounding-modal').classList.remove('hidden');
+}
+
+function closeGrounding() {
+    document.getElementById('grounding-modal').classList.add('hidden');
+}
+
+function startGrounding() {
+    const content = document.getElementById('grounding-content');
+    const exercises = [
+        { text: "Look around and name 5 things you can see", type: "sight" },
+        { text: "Notice 4 things you can touch or feel", type: "touch" },
+        { text: "Listen for 3 sounds you can hear", type: "sound" },
+        { text: "Identify 2 scents you can smell", type: "smell" },
+        { text: "Think of 1 thing you can taste", type: "taste" }
+    ];
+    
+    let currentExercise = 0;
+    
+    function nextExercise() {
+        if (currentExercise >= exercises.length) {
+            content.innerHTML = `
+                <div class="text-center">
+                    <div class="text-4xl mb-4">✅</div>
+                    <h4 class="text-lg font-medium text-green-800 mb-2">Grounding Complete!</h4>
+                    <p class="text-green-600">You've successfully connected with the present moment.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const exercise = exercises[currentExercise];
+        content.innerHTML = `
+            <div class="text-center">
+                <div class="text-6xl mb-4">${currentExercise + 1}</div>
+                <h4 class="text-lg font-medium mb-4">${exercise.text}</h4>
+                <p class="text-gray-600 mb-6">Take your time and really focus on this.</p>
+                <button onclick="nextGroundingStep()" 
+                        class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                    Next (${currentExercise + 1}/${exercises.length})
+                </button>
+            </div>
+        `;
+        currentExercise++;
+    }
+    
+    window.nextGroundingStep = nextExercise;
+    nextExercise();
+}
+
+// Safety planning
+function showSafetyPlan() {
+    alert('Safety planning feature will help you create a personalized crisis response plan. This feature is coming soon.');
+}
+
+// Professional help
+function findProfessionalHelp() {
+    window.open('https://www.google.com/maps/search/mental+health+services+near+me', '_blank');
+}
+</script>
+{% endblock %}

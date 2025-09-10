@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Aarohan - Youth Mental Wellness Platform{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10b981',
+                        secondary: '#06d6a0',
+                        accent: '#4ade80',
+                        mental: '#22d3ee',
+                        wellness: '#a78bfa',
+                        dark: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+/* --- MINIMAL, ROBUST LANGUAGE FONT SWITCHING --- */
+html.hindi-font body, html.hindi-font body * {
+  font-family: 'Noto Sans Devanagari', 'Nunito', system-ui, sans-serif !important;
+}
+html.telugu-font body, html.telugu-font body * {
+  font-family: 'Noto Sans Telugu', 'Nunito', system-ui, sans-serif !important;
+}
+html.kannada-font body, html.kannada-font body * {
+  font-family: 'Noto Sans Kannada', 'Nunito', system-ui, sans-serif !important;
+}
+html.english-font body, html.english-font body * {
+  font-family: 'Nunito', system-ui, sans-serif !important;
+}
+
+.container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  --color: rgba(114, 114, 114, 0.08);
+  background-color: rgba(15, 23, 42, 0.85);
+  background-image: linear-gradient(0deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent),
+      linear-gradient(90deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent);
+  background-size: 55px 55px;
+  min-width: 100vw;
+  min-height: 100vh;
+  right: 0;
+  bottom: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-width: 100vw;
+  background: none !important;
+}
+
+/* Aurora Gradient Background */
+.aurora-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -3;
+  pointer-events: none;
+  /* Mental wellness themed aurora gradient */
+  background: 
+    radial-gradient(ellipse 80% 60% at 50% 0%, #10b981 0%, #22d3ee 40%, #a78bfa 70%, #4ade80 85%, #18181b 100%),
+    radial-gradient(ellipse 60% 40% at 20% 20%, #a78bfa 0%, #22d3ee 30%, #10b981 60%, #4ade80 80%, transparent 100%),
+    radial-gradient(ellipse 70% 50% at 80% 30%, #22d3ee 0%, #10b981 30%, #a78bfa 60%, #4ade80 80%, transparent 100%);
+  background-size: 100% 100%, 120% 120%, 110% 110%;
+  background-position: 50% 50%, 30% 20%, 70% 40%;
+  opacity: 1;
+  filter: blur(16px) saturate(1.2);
+  transition: opacity 0.5s;
+  animation: aurora-wave 8s ease-in-out infinite;
+}
+
+@keyframes aurora-wave {
+  0% {
+    background-position: 50% 50%, 30% 20%, 70% 40%;
+    filter: blur(16px) saturate(1.2) hue-rotate(0deg);
+  }
+  12.5% {
+    background-position: 60% 30%, 40% 10%, 80% 20%;
+    filter: blur(18px) saturate(1.3) hue-rotate(45deg);
+  }
+  25% {
+    background-position: 70% 40%, 50% 30%, 90% 50%;
+    filter: blur(14px) saturate(1.1) hue-rotate(90deg);
+  }
+  37.5% {
+    background-position: 40% 60%, 20% 40%, 60% 70%;
+    filter: blur(20px) saturate(1.4) hue-rotate(135deg);
+  }
+  50% {
+    background-position: 30% 70%, 10% 50%, 50% 80%;
+    filter: blur(16px) saturate(1.2) hue-rotate(180deg);
+  }
+  62.5% {
+    background-position: 20% 60%, 0% 40%, 40% 70%;
+    filter: blur(18px) saturate(1.3) hue-rotate(225deg);
+  }
+  75% {
+    background-position: 30% 50%, 10% 30%, 50% 60%;
+    filter: blur(14px) saturate(1.1) hue-rotate(270deg);
+  }
+  87.5% {
+    background-position: 40% 40%, 20% 20%, 60% 50%;
+    filter: blur(20px) saturate(1.4) hue-rotate(315deg);
+  }
+  100% {
+    background-position: 50% 50%, 30% 20%, 70% 40%;
+    filter: blur(16px) saturate(1.2) hue-rotate(360deg);
+  }
+}
+
+/* Glassy effect for main content cards */
+.bg-white.rounded-xl,
+.bg-white.rounded-lg,
+.bg-white.p-8,
+.bg-white.p-6,
+.dark\:bg-dark-800.rounded-xl,
+.dark\:bg-dark-800.rounded-lg,
+.dark\:bg-dark-800.p-8,
+.dark\:bg-dark-800.p-6 {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(4px);
+}
+.dark .dark\:bg-dark-800.rounded-xl,
+.dark .dark\:bg-dark-800.rounded-lg,
+.dark .dark\:bg-dark-800.p-8,
+.dark .dark\:bg-dark-800.p-6 {
+  background: rgba(30, 41, 59, 0.55) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Navigation glassy effect */
+nav.bg-white {
+  background: rgba(30, 41, 59, 0.35) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Uniform button and input radius */
+.button,
+.button-secondary,
+input[type='text'],
+input[type='search'],
+button,
+select,
+textarea,
+.rounded,
+.rounded-lg,
+.rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+/* SVG Icon Styles */
+.svg-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.svg-icon-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.svg-icon-lg {
+    width: 2rem;
+    height: 2rem;
+}
+
+.svg-icon-xl {
+    width: 3rem;
+    height: 3rem;
+}
+
+.svg-icon-2xl {
+    width: 4rem;
+    height: 4rem;
+}
+
+/* Input and Form Styling for Better Visibility */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+textarea,
+select {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid rgba(16, 185, 129, 0.3) !important;
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+input[type='text']:focus,
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='search']:focus,
+textarea:focus,
+select:focus {
+    outline: none !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+    background-color: #ffffff !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #6b7280 !important;
+    opacity: 0.8 !important;
+}
+
+/* Dark mode input adjustments */
+.dark input[type='text'],
+.dark input[type='email'],
+.dark input[type='password'],
+.dark input[type='search'],
+.dark textarea,
+.dark select {
+    background-color: rgba(31, 41, 55, 0.95) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    color: #f9fafb !important;
+}
+
+.dark input[type='text']:focus,
+.dark input[type='email']:focus,
+.dark input[type='password']:focus,
+.dark input[type='search']:focus,
+.dark textarea:focus,
+.dark select:focus {
+    background-color: rgba(31, 41, 55, 1) !important;
+    border-color: #10b981 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #9ca3af !important;
+}
+
+/* Button improvements */
+button,
+.btn {
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.025em !important;
+}
+
+/* Text visibility improvements */
+.text-gray-700 {
+    color: #374151 !important;
+}
+
+.text-gray-600 {
+    color: #4b5563 !important;
+}
+
+.text-gray-500 {
+    color: #6b7280 !important;
+}
+
+.text-gray-400 {
+    color: #9ca3af !important;
+}
+
+.text-gray-300 {
+    color: #d1d5db !important;
+}
+
+/* Labels and form text */
+label {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+}
+
+.dark label {
+    color: #f9fafb !important;
+}
+
+/* Card text improvements */
+.bg-white p,
+.bg-white span,
+.bg-white div {
+    color: #1f2937;
+}
+
+.dark .bg-dark-800 p,
+.dark .bg-dark-800 span,
+.dark .bg-dark-800 div {
+    color: #f9fafb;
+}
+
+/* Custom animations and styles */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mental wellness breathing animation */
+.breathing-card {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Accessibility improvements */
+.focus-visible:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .aurora-bg { opacity: 0.3; }
+  .container { opacity: 0.8; }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in, .aurora-bg, .breathing-card {
+    animation: none;
+  }
+}
+
+/* Override default body styles */
+html, body {
+  overflow-x: hidden;
+}
+
+#mainContent {
+  min-height: 100vh;
+  background: none;
+}
+
+/* Enhanced SVG Icon System */
+.svg-icon { 
+    width: 1.25rem; 
+    height: 1.25rem; 
+    vertical-align: middle; 
+}
+.svg-icon-lg { 
+    width: 1.5rem; 
+    height: 1.5rem; 
+    vertical-align: middle; 
+}
+.svg-icon-2xl { 
+    width: 2.5rem; 
+    height: 2.5rem; 
+    vertical-align: middle; 
+}
+
+/* Professional Animations */
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Gradient Text Support */
+.gradient-text {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Glass Morphism Effect */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced Loading States */
+.loading-shimmer {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Focus States for Accessibility */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+}
+
+/* Enhanced Button States */
+.btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+}
+    </style>
+    
+    <!-- Meta tags for accessibility and SEO -->
+    <meta name="description" content="Aarohan - AI-powered mental wellness platform for Indian youth with multi-modal support and accessibility features">
+    <meta name="keywords" content="mental health, youth wellness, AI therapy, accessibility, Indian languages">
+    <meta name="author" content="Aarohan Team">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Aarohan - Youth Mental Wellness Platform">
+    <meta property="og:description" content="AI-powered mental wellness support for Indian youth">
+    <meta property="og:type" content="website">
+    
+    <!-- Accessibility -->
+    <meta name="theme-color" content="#10b981">
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen text-gray-900 dark:text-white">
+    <!-- Aurora Gradient Background -->
+    <div class="aurora-bg"></div>
+    <div class="container"></div>
+    
+    <!-- Skip to main content link for screen readers -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-green-600 text-white px-4 py-2 rounded">
+        Skip to main content
+    </a>
+    
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white shadow-lg border-b border-dark-700 sticky top-0 z-50" role="navigation" aria-label="Main navigation">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg p-2">
+                        <img src="{{ url_for('static', filename='aarohan-logo.png') }}" alt="Aarohan Logo" class="w-full h-full object-contain">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xl text-white">Aarohan</span>
+                        <span class="text-sm text-green-300 font-medium">Mental Wellness</span>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation Links -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="/" class="nav-link text-gray-300 hover:text-green-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible">
+                        <svg class="svg-icon-sm inline mr-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg> Home
+                    </a>
+                    <a href="/dashboard" class="nav-link text-gray-300 hover:text-green-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible">
+                        <svg class="svg-icon-sm inline mr-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                        </svg> Dashboard
+                    </a>
+                    <a href="/emotion-analysis" class="nav-link text-gray-300 hover:text-green-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible">
+                        <svg class="svg-icon-sm inline mr-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                        </svg> Emotion Analysis
+                    </a>
+                    <a href="/therapy-session" class="nav-link text-gray-300 hover:text-green-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible">
+                        <svg class="svg-icon-sm inline mr-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                        </svg> Therapy Session
+                    </a>
+                    <a href="/accessibility" class="nav-link text-gray-300 hover:text-green-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible">
+                        <svg class="svg-icon-sm inline mr-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>
+                        </svg> Accessibility
+                    </a>
+                    <a href="/analytics" class="nav-link text-gray-300 hover:text-green-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible">
+                        <svg class="svg-icon-sm inline mr-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/>
+                        </svg> Analytics
+                    </a>
+                    <a href="/crisis-support" class="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-xl text-sm font-medium focus-visible transition-all duration-200 shadow-lg">
+                        <svg class="svg-icon-sm inline mr-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                        </svg> Crisis Support
+                    </a>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button type="button" id="mobile-menu-btn" class="text-white hover:text-green-400 focus:outline-none focus:text-green-400 p-2 rounded-lg" 
+                            aria-label="Toggle mobile menu">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-dark-800 border-t border-dark-700">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="/" class="block text-gray-300 hover:text-green-400 hover:bg-dark-700 px-3 py-2 rounded-lg text-base font-medium">
+                    <svg class="svg-icon-sm inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg> Home
+                </a>
+                <a href="/dashboard" class="block text-gray-300 hover:text-green-400 hover:bg-dark-700 px-3 py-2 rounded-lg text-base font-medium">
+                    <svg class="svg-icon-sm inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg> Dashboard
+                </a>
+                <a href="/emotion-analysis" class="block text-gray-300 hover:text-green-400 hover:bg-dark-700 px-3 py-2 rounded-lg text-base font-medium">
+                    <svg class="svg-icon-sm inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                    </svg> Emotion Analysis
+                </a>
+                <a href="/therapy-session" class="block text-gray-300 hover:text-green-400 hover:bg-dark-700 px-3 py-2 rounded-lg text-base font-medium">
+                    <svg class="svg-icon-sm inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                    </svg> Therapy Session
+                </a>
+                <a href="/accessibility" class="block text-gray-300 hover:text-green-400 hover:bg-dark-700 px-3 py-2 rounded-lg text-base font-medium">♿ Accessibility</a>
+                <a href="/analytics" class="block text-gray-300 hover:text-green-400 hover:bg-dark-700 px-3 py-2 rounded-lg text-base font-medium">
+                    <svg class="svg-icon-sm inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/>
+                    </svg> Analytics
+                </a>
+                <a href="/crisis-support" class="block bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-lg text-base font-medium mx-3 mt-2">🚨 Crisis Support</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1" role="main">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} bg-dark-800 border border-{{ 'green' if category == 'success' else 'red' if category == 'error' else 'blue' }}-400 text-{{ 'green' if category == 'success' else 'red' if category == 'error' else 'blue' }}-300 px-4 py-3 rounded-xl mb-4 backdrop-filter backdrop-blur-sm" role="alert">
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-dark-800 text-white mt-12 border-t border-dark-700" role="contentinfo" style="background: rgba(30, 41, 59, 0.35) !important; backdrop-filter: blur(8px);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <img src="{{ url_for('static', filename='aarohan-logo.png') }}" alt="Aarohan Logo" class="w-8 h-8 object-contain mr-3">
+                        Aarohan
+                    </h3>
+                    <p class="text-gray-300 text-sm">
+                        AI-powered mental wellness platform designed specifically for Indian youth, 
+                        with multi-modal support and accessibility features.
+                    </p>
+                    <div class="mt-4 flex items-center space-x-2">
+                        <svg class="svg-icon text-green-400" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 11H7l1.5-5L10 11zM13 7h2l-1.5 5L12 7zM12 2l1.09 3.26L16 6l-2.91.74L12 10l-1.09-3.26L8 6l2.91-.74L12 2zM21 9l-.36 1.09L19 10.5l1.64.41L21 13l.36-1.09L23 11.5l-1.64-.41L21 9z"/>
+                        </svg>
+                        <span class="text-sm text-gray-400">Powered by Real AI</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-red-400">🚨 Crisis Support</h3>
+                    <div class="text-gray-300 text-sm space-y-2">
+                        <p>AASRA: <a href="tel:+912227546669" class="text-blue-400 hover:text-blue-300 underline">91-22-27546669</a></p>
+                        <p>Sneha: <a href="tel:+914424640050" class="text-blue-400 hover:text-blue-300 underline">044-24640050</a></p>
+                        <p>Vandrevala: <a href="tel:+919999666555" class="text-blue-400 hover:text-blue-300 underline">9999666555</a></p>
+                        <p>Emergency: <a href="tel:112" class="text-red-400 hover:text-red-300 underline font-bold">112</a></p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-purple-400">♿ Accessibility Features</h3>
+                    <div class="text-gray-300 text-sm space-y-2">
+                        <p>• 👁️ Eye tracking navigation</p>
+                        <p>• 🗣️ Multi-language support</p>
+                        <p>• 🎤 Voice control</p>
+                        <p>• 🔆 High contrast mode</p>
+                        <p>• 📱 Screen reader support</p>
+                        <p>• 🌐 Offline capabilities</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-dark-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2025 Aarohan - Youth Mental Wellness Platform. Built for Google GenAI Exchange Hackathon 2025.</p>
+                <p class="mt-2 flex items-center justify-center space-x-2">
+                    <svg class="svg-icon text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg> 
+                    <span>Built with care for Indian youth mental wellness</span>
+                    <span class="text-green-400">•</span>
+                    <span class="text-blue-400">Real AI • Multi-modal • Accessible</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle with modern functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                    
+                    // Update aria attributes for accessibility
+                    const isExpanded = !mobileMenu.classList.contains('hidden');
+                    mobileMenuBtn.setAttribute('aria-expanded', isExpanded);
+                    
+                    // Update icon
+                    const icon = mobileMenuBtn.querySelector('svg');
+                    if (isExpanded) {
+                        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+                    } else {
+                        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+                    }
+                });
+            }
+        });
+        
+        // Accessibility: Close mobile menu on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                    if (mobileMenuBtn) {
+                        mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                        const icon = mobileMenuBtn.querySelector('svg');
+                        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+                    }
+                }
+            }
+        });
+        
+        // Auto-hide flash messages with smooth animation
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s, transform 0.5s';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            });
+        }, 5000);
+        
+        // Enhanced accessibility: Focus management and navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus indicators for better accessibility
+            const focusableElements = document.querySelectorAll('a, button, input, textarea, select');
+            focusableElements.forEach(function(element) {
+                element.addEventListener('focus', function() {
+                    this.classList.add('focus-visible');
+                });
+                element.addEventListener('blur', function() {
+                    this.classList.remove('focus-visible');
+                });
+            });
+            
+            // Update active navigation states
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(function(link) {
+                const href = link.getAttribute('href');
+                if (href === currentPath || (href !== '/' && currentPath.includes(href))) {
+                    link.classList.remove('text-gray-300');
+                    link.classList.add('text-green-400', 'bg-dark-700');
+                }
+            });
+            
+            // Mental wellness breathing indicator
+            const cards = document.querySelectorAll('.breathing-card');
+            cards.forEach(function(card) {
+                card.style.animationDelay = Math.random() * 2 + 's';
+            });
+        });
+        
+        // Language support initialization
+        function initializeLanguageSupport() {
+            const savedLang = localStorage.getItem('selectedLanguage') || 'english';
+            const savedFont = localStorage.getItem('selectedFont') || 'english-font';
+            applyLanguage(savedLang, savedFont);
+        }
+        
+        function applyLanguage(lang, fontClass) {
+            const html = document.documentElement;
+            const fontClasses = ['english-font', 'hindi-font', 'telugu-font', 'kannada-font'];
+            
+            // Remove all font classes
+            fontClasses.forEach(cls => html.classList.remove(cls));
+            // Add the new font class
+            html.classList.add(fontClass);
+            
+            // Save preference
+            localStorage.setItem('selectedLanguage', lang);
+            localStorage.setItem('selectedFont', fontClass);
+        }
+        
+        // Initialize language support on load
+        document.addEventListener('DOMContentLoaded', initializeLanguageSupport);
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Performance: Lazy load images
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+
+        // SVG Icon Loading Function
+        async function loadInlineSVG(iconName, className = 'svg-icon') {
+            try {
+                const response = await fetch(`/svgicons/${iconName}`);
+                const svgText = await response.text();
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+                const svg = svgDoc.querySelector('svg');
+                if (svg) {
+                    svg.classList.add(...className.split(' '));
+                    return svg.outerHTML;
+                }
+            } catch (error) {
+                console.warn('Failed to load SVG icon:', iconName);
+                return '';
+            }
+        }
+
+        // Icon mapping for mental wellness
+        const iconMap = {
+            'brain': 'research-svgrepo-com.svg',
+            'heart': 'heart-svgrepo-com.svg',
+            'home': 'front-page-svgrepo-com.svg',
+            'analytics': 'matemathic-svgrepo-com.svg',
+            'chat': 'discuss-svgrepo-com.svg',
+            'therapy': 'life-buoy-svgrepo-com.svg',
+            'goal': 'achievement-svgrepo-com.svg',
+            'idea': 'light-bulb-1-svgrepo-com.svg',
+            'growth': 'coconut-tree-svgrepo-com.svg',
+            'trophy': 'trophy-1-svgrepo-com.svg',
+            'medal': 'medal-svgrepo-com.svg',
+            'star': 'star-svgrepo-com.svg',
+            'energy': 'rocket-svgrepo-com.svg',
+            'writing': 'drawing-svgrepo-com.svg',
+            'creative': 'drawing-svgrepo-com.svg'
+        };
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

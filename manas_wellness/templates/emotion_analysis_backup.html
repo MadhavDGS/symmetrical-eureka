@@ -1,0 +1,711 @@
+{% extends "base.html" %}
+
+{% block title %}Emotion Analysis - Aarohan{% endblock %}
+                    <button onclick="analyzeText()" 
+                            class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-all duration-300 font-bold text-base transform hover:scale-105 shadow-lg">
+                        <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                        </svg> Analyze My Emotions
+                    </button>
+                    <button onclick="clearText()" 
+                            class="bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all duration-300 font-bold text-base">
+                        Clear Text
+                    </button>
+                </div>b-6">
+                    <label for="emotion-text" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        How are you feeling? Share your thoughts...
+                    </label>
+                    <textarea id="emotion-text" 
+                              rows="6" 
+                              class="w-full p-4 border-2 border-green-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white text-gray-900 font-medium text-base transition-all duration-300"
+                              style="background-color: rgba(255, 255, 255, 0.95) !important; color: #1f2937 !important; font-weight: 500 !important;"
+                              placeholder="I'm feeling... Today has been... I'm worried about..."></textarea>
+                </div>lness{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">
+            <svg class="svg-icon-lg inline mr-2 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+            </svg> Emotion Analysis
+        </h1>
+        <p class="text-lg text-gray-600">
+            Share your feelings through text, voice, or camera. Our AI will help you understand your emotional state.
+        </p>
+    </div>
+    
+    <!-- Analysis Methods -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Text Analysis -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+            <div class="text-center">
+                <div class="mb-4">
+                    <svg class="svg-icon-xl mx-auto text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Text Analysis</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                    Write about how you're feeling and let our AI analyze your emotions.
+                </p>
+                <button onclick="showTextAnalysis()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Start Writing
+                </button>
+            </div>
+        </div>
+        
+        <!-- Voice Analysis -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+            <div class="text-center">
+                <div class="mb-4">
+                    <svg class="svg-icon-xl mx-auto text-green-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2zm5.3 6c-.08 0-.15.04-.2.1-.05.06-.08.14-.08.24v1.16c0 3.27-2.64 5.9-5.9 5.9s-5.9-2.63-5.9-5.9V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1-.08 0-.15.04-.21.1-.06.07-.1.15-.1.24v1.16C5 13.93 8.04 17.62 12 18v2h-4v2h8v-2h-4v-2c3.96-.38 7-4.07 7-8.5V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Voice Analysis</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                    Speak about your feelings and we'll analyze your voice patterns.
+                </p>
+                <button onclick="showVoiceAnalysis()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                    Start Recording
+                </button>
+            </div>
+        </div>
+        
+        <!-- Camera Analysis -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+            <div class="text-center">
+                <div class="mb-4">
+                    <svg class="svg-icon-xl mx-auto text-purple-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-9l1.25 2.75L16 13l-2.75 1.25L12 17l-1.25-2.75L8 13l2.75-1.25L12 9z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Facial Analysis</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                    Use your camera to analyze facial expressions and emotions.
+                </p>
+                <button onclick="showCameraAnalysis()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                    Use Camera
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analysis Interface -->
+    <div id="analysis-interface" class="bg-white rounded-xl shadow-lg p-8 hidden">
+        <!-- Text Analysis -->
+        <div id="text-analysis" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <svg class="svg-icon inline mr-2 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                </svg> Text Emotion Analysis
+            </h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="emotion-text" class="block text-sm font-medium text-gray-700 mb-2">
+                        How are you feeling? Share your thoughts...
+                    </label>
+                    <textarea id="emotion-text" 
+                              rows="6" 
+                              class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="I'm feeling... Today has been... I'm worried about..."></textarea>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="analyzeText()" 
+                            class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        Analyze My Emotions
+                    </button>
+                    <button onclick="clearText()" 
+                            class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
+                        Clear Text
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Voice Analysis -->
+        <div id="voice-analysis" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <svg class="svg-icon inline mr-2 text-green-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2zm5.3 6c-.08 0-.15.04-.2.1-.05.06-.08.14-.08.24v1.16c0 3.27-2.64 5.9-5.9 5.9s-5.9-2.63-5.9-5.9V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1-.08 0-.15.04-.21.1-.06.07-.1.15-.1.24v1.16C5 13.93 8.04 17.62 12 18v2h-4v2h8v-2h-4v-2c3.96-.38 7-4.07 7-8.5V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1z"/>
+                </svg> Voice Emotion Analysis
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="text-center">
+                    <div id="recording-status" class="text-lg text-gray-600 mb-4">
+                        Click the button below to start recording
+                    </div>
+                    
+                    <div class="mb-6">
+                        <button id="record-button" 
+                                onclick="toggleRecording()" 
+                                class="bg-green-600 text-white px-8 py-4 rounded-full hover:bg-green-700 transition-colors text-lg font-semibold">
+                            <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2zm5.3 6c-.08 0-.15.04-.2.1-.05.06-.08.14-.08.24v1.16c0 3.27-2.64 5.9-5.9 5.9s-5.9-2.63-5.9-5.9V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1-.08 0-.15.04-.21.1-.06.07-.1.15-.1.24v1.16C5 13.93 8.04 17.62 12 18v2h-4v2h8v-2h-4v-2c3.96-.38 7-4.07 7-8.5V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1z"/>
+                            </svg> Start Recording
+                        </button>
+                    </div>
+                    
+                    <div id="recording-timer" class="text-2xl font-mono text-gray-800 hidden">
+                        00:00
+                    </div>
+                </div>
+                
+                <div id="audio-preview" class="hidden">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Recording Preview:</h3>
+                    <audio id="audio-playback" controls class="w-full"></audio>
+                    
+                    <div class="mt-4 flex gap-4">
+                        <button onclick="analyzeVoice()" 
+                                class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                            Analyze Voice
+                        </button>
+                        <button onclick="retryRecording()" 
+                                class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
+                            Record Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Camera Analysis -->
+        <div id="camera-analysis" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <svg class="svg-icon inline mr-2 text-purple-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-9l1.25 2.75L16 13l-2.75 1.25L12 17l-1.25-2.75L8 13l2.75-1.25L12 9z"/>
+                </svg> Facial Emotion Analysis
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="text-center">
+                    <div id="camera-status" class="text-lg text-gray-600 mb-4">
+                        Click the button below to start camera
+                    </div>
+                    
+                    <div class="mb-6">
+                        <video id="camera-feed" 
+                               class="w-full max-w-md mx-auto rounded-lg border-2 border-gray-300 hidden" 
+                               autoplay muted></video>
+                        
+                        <canvas id="capture-canvas" class="hidden"></canvas>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button id="camera-button" 
+                                onclick="toggleCamera()" 
+                                class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                            <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-9l1.25 2.75L16 13l-2.75 1.25L12 17l-1.25-2.75L8 13l2.75-1.25L12 9z"/>
+                            </svg> Start Camera
+                        </button>
+                        <button id="capture-button" 
+                                onclick="captureImage()" 
+                                class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors hidden">
+                            <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-9l1.25 2.75L16 13l-2.75 1.25L12 17l-1.25-2.75L8 13l2.75-1.25L12 9z"/>
+                            </svg> Capture & Analyze
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div id="results-section" class="mt-8 hidden">
+        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <svg class="svg-icon inline mr-2 text-indigo-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
+                </svg> Analysis Results
+            </h2>
+            
+            <div id="results-content" class="space-y-6">
+                <!-- Results will be populated here -->
+            </div>
+            
+            <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                <button onclick="getTherapyRecommendations()" 
+                        class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                    Get Therapy Recommendations
+                </button>
+                <button onclick="saveResults()" 
+                        class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                    Save to Dashboard
+                </button>
+                <button onclick="startNewAnalysis()" 
+                        class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
+                    New Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Notice -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start">
+            <div class="mr-3">
+                <svg class="svg-icon text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18,8h-1V6c0-2.76-2.24-5-5-5S7,3.24,7,6v2H6c-1.1,0-2,0.9-2,2v10c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V10 C20,8.9,19.1,8,18,8z M12,17c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.1,17,12,17z M15.1,8H8.9V6c0-1.71,1.39-3.1,3.1-3.1 s3.1,1.39,3.1,3.1V8z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-blue-800">Privacy & Security</h3>
+                <p class="text-sm text-blue-700 mt-1">
+                    Your emotional data is processed securely and stored locally. You have full control over your data and can delete it at any time.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentAnalysisType = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let cameraStream = null;
+    let recordingTimer = null;
+    let recordingStartTime = null;
+    
+    // Show specific analysis interface
+    function showTextAnalysis() {
+        showAnalysisInterface('text');
+    }
+    
+    function showVoiceAnalysis() {
+        showAnalysisInterface('voice');
+    }
+    
+    function showCameraAnalysis() {
+        showAnalysisInterface('camera');
+    }
+    
+    function showAnalysisInterface(type) {
+        currentAnalysisType = type;
+        
+        // Hide all analysis types
+        document.getElementById('text-analysis').classList.add('hidden');
+        document.getElementById('voice-analysis').classList.add('hidden');
+        document.getElementById('camera-analysis').classList.add('hidden');
+        
+        // Show selected type
+        document.getElementById(type + '-analysis').classList.remove('hidden');
+        document.getElementById('analysis-interface').classList.remove('hidden');
+        
+        // Hide results
+        document.getElementById('results-section').classList.add('hidden');
+        
+        // Scroll to interface
+        document.getElementById('analysis-interface').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Text Analysis Functions
+    function analyzeText() {
+        const text = document.getElementById('emotion-text').value.trim();
+        
+        if (!text) {
+            alert('Please enter some text to analyze.');
+            return;
+        }
+        
+        // Show loading
+        showLoading('Analyzing your text...');
+        
+        // Send to backend
+        fetch('/api/emotion/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                session_id: Date.now().toString()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                displayResults(data.emotion_result, 'text');
+            } else {
+                alert('Error analyzing text: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Error:', error);
+            alert('Error analyzing text. Please try again.');
+        });
+    }
+    
+    function clearText() {
+        document.getElementById('emotion-text').value = '';
+    }
+    
+    // Voice Analysis Functions
+    function toggleRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    }
+    
+    function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                recordedChunks = [];
+                
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(blob);
+                    
+                    document.getElementById('audio-playback').src = audioUrl;
+                    document.getElementById('audio-preview').classList.remove('hidden');
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+                
+                // Update UI
+                document.getElementById('record-button').innerHTML = `
+                    <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 6h12v12H6z"/>
+                    </svg> Stop Recording
+                `;
+                document.getElementById('record-button').classList.remove('bg-green-600', 'hover:bg-green-700');
+                document.getElementById('record-button').classList.add('bg-red-600', 'hover:bg-red-700');
+                document.getElementById('recording-status').textContent = 'Recording in progress...';
+                document.getElementById('recording-timer').classList.remove('hidden');
+                
+                // Start timer
+                recordingStartTime = Date.now();
+                recordingTimer = setInterval(updateRecordingTimer, 1000);
+            })
+            .catch(error => {
+                console.error('Error accessing microphone:', error);
+                alert('Error accessing microphone. Please check permissions.');
+            });
+    }
+    
+    function stopRecording() {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            
+            // Update UI
+            document.getElementById('record-button').innerHTML = `
+                <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2zm5.3 6c-.08 0-.15.04-.2.1-.05.06-.08.14-.08.24v1.16c0 3.27-2.64 5.9-5.9 5.9s-5.9-2.63-5.9-5.9V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1-.08 0-.15.04-.21.1-.06.07-.1.15-.1.24v1.16C5 13.93 8.04 17.62 12 18v2h-4v2h8v-2h-4v-2c3.96-.38 7-4.07 7-8.5V8.34c0-.09-.04-.17-.1-.24-.06-.06-.13-.1-.21-.1z"/>
+                </svg> Start Recording
+            `;
+            document.getElementById('record-button').classList.remove('bg-red-600', 'hover:bg-red-700');
+            document.getElementById('record-button').classList.add('bg-green-600', 'hover:bg-green-700');
+            document.getElementById('recording-status').textContent = 'Recording completed';
+            document.getElementById('recording-timer').classList.add('hidden');
+            
+            // Clear timer
+            if (recordingTimer) {
+                clearInterval(recordingTimer);
+                recordingTimer = null;
+            }
+        }
+    }
+    
+    function updateRecordingTimer() {
+        if (recordingStartTime) {
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('recording-timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    function analyzeVoice() {
+        if (recordedChunks.length === 0) {
+            alert('No recording found. Please record your voice first.');
+            return;
+        }
+        
+        const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append('audio', blob, 'recording.wav');
+        
+        showLoading('Analyzing your voice...');
+        
+        fetch('/api/emotion/analyze', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                displayResults(data.emotion_result, 'voice');
+            } else {
+                alert('Error analyzing voice: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Error:', error);
+            alert('Error analyzing voice. Please try again.');
+        });
+    }
+    
+    function retryRecording() {
+        document.getElementById('audio-preview').classList.add('hidden');
+        recordedChunks = [];
+    }
+    
+    // Camera Analysis Functions
+    function toggleCamera() {
+        if (cameraStream) {
+            stopCamera();
+        } else {
+            startCamera();
+        }
+    }
+    
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                cameraStream = stream;
+                const video = document.getElementById('camera-feed');
+                video.srcObject = stream;
+                video.classList.remove('hidden');
+                
+                // Update UI
+                document.getElementById('camera-button').innerHTML = `
+                    <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 6h12v12H6z"/>
+                    </svg> Stop Camera
+                `;
+                document.getElementById('camera-button').classList.remove('bg-purple-600', 'hover:bg-purple-700');
+                document.getElementById('camera-button').classList.add('bg-red-600', 'hover:bg-red-700');
+                document.getElementById('capture-button').classList.remove('hidden');
+                document.getElementById('camera-status').textContent = 'Camera is active - position yourself in the frame';
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+                alert('Error accessing camera. Please check permissions.');
+            });
+    }
+    
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+            
+            document.getElementById('camera-feed').classList.add('hidden');
+            document.getElementById('camera-button').innerHTML = `
+                <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-9l1.25 2.75L16 13l-2.75 1.25L12 17l-1.25-2.75L8 13l2.75-1.25L12 9z"/>
+                </svg> Start Camera
+            `;
+            document.getElementById('camera-button').classList.remove('bg-red-600', 'hover:bg-red-700');
+            document.getElementById('camera-button').classList.add('bg-purple-600', 'hover:bg-purple-700');
+            document.getElementById('capture-button').classList.add('hidden');
+            document.getElementById('camera-status').textContent = 'Camera stopped';
+        }
+    }
+    
+    function captureImage() {
+        const video = document.getElementById('camera-feed');
+        const canvas = document.getElementById('capture-canvas');
+        const context = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+        
+        canvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append('image', blob, 'capture.jpg');
+            
+            showLoading('Analyzing your facial expression...');
+            
+            fetch('/api/emotion/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    displayResults(data.emotion_result, 'camera');
+                    stopCamera(); // Stop camera after successful capture
+                } else {
+                    alert('Error analyzing image: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                alert('Error analyzing image. Please try again.');
+            });
+        }, 'image/jpeg');
+    }
+    
+    // Results Display Functions
+    function displayResults(emotionResult, analysisType) {
+        const resultsContent = document.getElementById('results-content');
+        
+        const primaryEmotion = emotionResult.primary_emotion || 'neutral';
+        const intensity = emotionResult.emotion_intensity || 5;
+        const confidence = Math.round((emotionResult.confidence || 0.5) * 100);
+        
+        resultsContent.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Primary Emotion</h3>
+                    <div class="text-3xl mb-2">${getEmotionEmoji(primaryEmotion)}</div>
+                    <div class="text-xl font-bold text-indigo-600">${primaryEmotion.charAt(0).toUpperCase() + primaryEmotion.slice(1)}</div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Intensity</h3>
+                    <div class="text-2xl font-bold text-orange-600">${intensity}/10</div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div class="bg-orange-600 h-2 rounded-full" style="width: ${intensity * 10}%"></div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confidence</h3>
+                    <div class="text-2xl font-bold text-green-600">${confidence}%</div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div class="bg-green-600 h-2 rounded-full" style="width: ${confidence}%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            ${emotionResult.recommendations ? `
+                <div class="bg-white p-6 rounded-lg shadow mt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <svg class="svg-icon inline mr-2 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
+                        </svg> Recommendations
+                    </h3>
+                    <p class="text-gray-700">${emotionResult.recommendations}</p>
+                </div>
+            ` : ''}
+            
+            <div class="bg-white p-6 rounded-lg shadow mt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <svg class="svg-icon inline mr-2 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg> Analysis Details
+                </h3>
+                <div class="text-sm text-gray-600 space-y-2">
+                    <p><strong>Analysis Method:</strong> ${analysisType.charAt(0).toUpperCase() + analysisType.slice(1)}</p>
+                    <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+                    ${emotionResult.cultural_context ? `<p><strong>Cultural Context:</strong> ${emotionResult.cultural_context}</p>` : ''}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('results-section').classList.remove('hidden');
+        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function getEmotionEmoji(emotion) {
+        const emojiMap = {
+            'happy': '😊',
+            'sad': '😢',
+            'angry': '😠',
+            'anxious': '😰',
+            'stressed': '😤',
+            'calm': '😌',
+            'excited': '🤩',
+            'neutral': '😐',
+            'surprised': '😲',
+            'confused': '😕',
+            'depressed': '😔',
+            'hopeless': '😞'
+        };
+        return emojiMap[emotion] || '😐';
+    }
+    
+    // Utility Functions
+    function showLoading(message) {
+        // Create loading overlay
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'loading-overlay';
+        loadingDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        loadingDiv.innerHTML = `
+            <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p class="text-lg font-semibold text-gray-900">${message}</p>
+            </div>
+        `;
+        document.body.appendChild(loadingDiv);
+    }
+    
+    function hideLoading() {
+        const loadingDiv = document.getElementById('loading-overlay');
+        if (loadingDiv) {
+            loadingDiv.remove();
+        }
+    }
+    
+    function getTherapyRecommendations() {
+        // This would integrate with the therapy system
+        alert('Therapy recommendations feature coming soon!');
+    }
+    
+    function saveResults() {
+        // This would save to the user's dashboard
+        alert('Results saved to your dashboard!');
+    }
+    
+    function startNewAnalysis() {
+        // Reset the interface
+        document.getElementById('analysis-interface').classList.add('hidden');
+        document.getElementById('results-section').classList.add('hidden');
+        
+        // Clean up any active streams
+        if (cameraStream) {
+            stopCamera();
+        }
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            stopRecording();
+        }
+        
+        // Clear form data
+        document.getElementById('emotion-text').value = '';
+        document.getElementById('audio-preview').classList.add('hidden');
+        recordedChunks = [];
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+        if (recordingTimer) {
+            clearInterval(recordingTimer);
+        }
+    });
+</script>
+{% endblock %}

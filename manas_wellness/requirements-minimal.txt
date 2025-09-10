@@ -1,0 +1,25 @@
+# 🧠 Manas: Minimal Dependencies for Quick Setup
+# Use this for faster installation during development
+
+# Core Web Framework
+Flask>=3.0.0
+python-dotenv>=1.0.0
+
+# AI and ML (Essential)
+google-generativeai>=0.8.0
+requests>=2.31.0
+
+# Basic Data Processing
+numpy>=1.24.0
+Pillow>=10.2.0
+
+# Security
+cryptography>=41.0.0
+
+# Optional but recommended
+flask-cors>=4.0.0
+jsonschema>=4.20.0
+tqdm>=4.66.0
+
+# For development
+colorlog>=6.8.0
