@@ -1,0 +1,1787 @@
+{% extends "base.html" %}
+
+{% block title %}Voice AI Mentor - Aarohan{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* Voice Chat Specific Styles */
+.voice-chat-container {
+    background: linear-gradient(135deg, rgba(76, 29, 149, 0.1), rgba(124, 58, 237, 0.05));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-bubble {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-message {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(99, 102, 241, 0.1));
+}
+
+.ai-message {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 214, 160, 0.1));
+}
+
+.voice-controls {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.voice-visualizer {
+    background: linear-gradient(45deg, #4f46e5, #7c3aed, #ec4899);
+}
+
+.recording-animation {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.05);
+    }
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4b5563;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #10b981;
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px #10b981;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #e5e7eb;
+}
+
+.audio-wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.wave-bar {
+    width: 3px;
+    background: linear-gradient(to top, #4f46e5, #7c3aed);
+    border-radius: 2px;
+    animation: wave 1.5s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(1) { height: 10px; animation-delay: 0s; }
+.wave-bar:nth-child(2) { height: 15px; animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { height: 8px; animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { height: 20px; animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { height: 12px; animation-delay: 0.4s; }
+
+@keyframes wave {
+    0%, 100% { height: 10px; }
+    50% { height: 25px; }
+}
+
+.analysis-card {
+    background: rgba(30, 41, 59, 0.3);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sentiment-positive { color: #10b981; }
+.sentiment-negative { color: #ef4444; }
+.sentiment-neutral { color: #f59e0b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8">
+    <!-- Header -->
+    <div class="max-w-6xl mx-auto px-4 mb-8">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-white mb-4">
+                🎤 Voice AI Mentor
+            </h1>
+            <p class="text-xl text-gray-300 mb-6">
+                Speak your thoughts, get AI-powered insights and guidance
+            </p>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Voice Chat Interface -->
+            <div class="lg:col-span-2">
+                <div class="voice-chat-container rounded-xl p-6 h-[600px] flex flex-col">
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="flex-1 overflow-y-auto mb-4 space-y-4">
+                        <div class="ai-message message-bubble rounded-xl p-4 max-w-[80%]">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                    AI
+                                </div>
+                                <div>
+                                    <p class="text-white">Hello! I'm your AI voice mentor. 🎯 Start **Conversation Mode** above for natural, real-time dialogue in your preferred language. Just speak naturally and I'll listen and respond automatically! How are you feeling today?</p>
+                                    <span class="text-xs text-gray-400 mt-2 block">Just now</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice Controls -->
+                    <div class="voice-controls rounded-xl p-4">
+                        <!-- Primary Conversation Mode -->
+                        <div class="text-center mb-4">
+                            <button id="conversationModeBtn" class="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-blue-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg mx-auto">
+                                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                </svg>
+                            </button>
+                            <div class="mt-2">
+                                <div class="text-lg font-semibold text-white">🎯 Conversation Mode</div>
+                                <div class="text-sm text-gray-300">Natural, real-time AI conversation</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div id="audioVisualizer" class="audio-wave hidden">
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                    <div class="wave-bar"></div>
+                                </div>
+                                
+                                <div id="recordingStatus" class="text-gray-300">
+                                    <span id="statusText">Start natural conversation above</span>
+                                    <div id="conversationModeStatus" class="text-xs text-green-400 mt-1 hidden">
+                                        🎯 Real-time conversation active
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4 flex-wrap">
+                                <select id="languageSelect" class="px-3 py-1 bg-gray-700 text-white rounded-lg text-sm border border-gray-600">
+                                    <option value="en-US">English (US)</option>
+                                    <option value="en-GB">English (UK)</option>
+                                    <option value="hi-IN">हिंदी (Hindi)</option>
+                                    <option value="te-IN">తెలుగు (Telugu)</option>
+                                    <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+                                </select>
+                                
+                                <!-- Manual Options Toggle Switch -->
+                                <div class="toggle-label">
+                                    <span>Manual Options</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="toggleManualControls">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span id="toggleStatus" class="text-xs text-gray-400">OFF</span>
+                                </div>
+                                
+                                <button id="clearChat" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                    Clear Chat
+                                </button>
+                                <button id="testMic" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    🎤 Test Mic
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Optional Manual Controls (Collapsible) -->
+                        <div id="manualControls" class="mt-4 hidden border-t border-gray-600 pt-4">
+                            <div class="text-sm text-gray-400 mb-3">Optional: Manual recording and playback controls</div>
+                            <div class="flex items-center space-x-4">
+                                <button id="recordBtn" class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center hover:from-red-600 hover:to-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-300">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                    </svg>
+                                </button>
+                                <button id="speakBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm" disabled>
+                                    🔊 Speak Response
+                                </button>
+                                <span class="text-xs text-gray-400">Manual record & playback</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Recording Progress -->
+                        <div id="recordingProgress" class="mt-4 hidden">
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div id="progressBar" class="bg-gradient-to-r from-red-500 to-pink-600 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-2">Recording... <span id="recordingTime">0:00</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Panel -->
+            <div class="space-y-6">
+                <!-- Real-time Analysis -->
+                <div class="analysis-card rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        📊 Speech Analysis
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm text-gray-400">Sentiment</label>
+                            <div id="sentimentDisplay" class="text-lg font-semibold sentiment-neutral">
+                                Neutral
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm text-gray-400">Confidence</label>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <div class="flex-1 bg-gray-700 rounded-full h-2">
+                                    <div id="confidenceBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="confidenceText" class="text-sm text-white">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm text-gray-400">Emotional State</label>
+                            <div id="emotionDisplay" class="text-white font-medium">
+                                -
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm text-gray-400">Keywords</label>
+                            <div id="keywordsDisplay" class="flex flex-wrap gap-2 mt-2">
+                                <!-- Keywords will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversation Stats -->
+                <div class="analysis-card rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">📈 Session Stats</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Messages:</span>
+                            <span id="messageCount" class="text-white font-medium">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Duration:</span>
+                            <span id="sessionDuration" class="text-white font-medium">0:00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Avg Sentiment:</span>
+                            <span id="avgSentiment" class="text-white font-medium">Neutral</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="analysis-card rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">⚡ Quick Actions</h3>
+                    
+                    <div class="space-y-2">
+                        <button onclick="askQuestion('How are you feeling today?')" class="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                            💭 Ask about feelings
+                        </button>
+                        <button onclick="askQuestion('What challenges are you facing?')" class="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                            🎯 Discuss challenges
+                        </button>
+                        <button onclick="askQuestion('What are your goals?')" class="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                            🎯 Talk about goals
+                        </button>
+                        <button onclick="requestAdvice()" class="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                            💡 Get advice
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Privacy Notice -->
+                <div class="analysis-card rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">🔒 Privacy & Safety</h3>
+                    
+                    <div class="space-y-3 text-sm text-gray-300">
+                        <p>• Your voice data is processed securely and not stored permanently</p>
+                        <p>• Conversations are analyzed to provide better mental wellness support</p>
+                        <p>• In crisis situations, please contact emergency services immediately</p>
+                        <p>• This AI mentor supplements but doesn't replace professional counseling</p>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                        <p class="text-red-300 text-sm font-medium">🚨 Crisis Support</p>
+                        <p class="text-red-200 text-xs mt-1">For immediate help, contact your local emergency services or mental health crisis line.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Voice AI Chat Implementation
+class VoiceAIChat {
+    constructor() {
+        this.isRecording = false;
+        this.isSpeaking = false;
+        this.recognition = null;
+        this.synthesis = window.speechSynthesis;
+        this.messages = [];
+        this.sessionStart = Date.now();
+        this.totalSentiment = 0;
+        this.sentimentCount = 0;
+        this.lastAIResponse = null;
+        this.recordingTimer = null;
+        this.conversationMode = false;
+        this.silenceTimer = null;
+        this.lastSpeechTime = null;
+        this.silenceThreshold = 15000; // 15 seconds of silence before auto-prompt (less aggressive)
+        this.isWaitingForSpeech = false;
+        
+        this.initializeVoiceRecognition();
+        this.bindEvents();
+        this.updateSessionStats();
+        this.updateWelcomeMessage('en-US'); // Initialize with English
+    }
+    
+    getWelcomeMessage(languageCode) {
+        const welcomeMessages = {
+            'en-US': "Hello! I'm your AI voice mentor. 🎯 Start **Conversation Mode** above for natural, real-time dialogue in English. Just speak naturally and I'll listen and respond automatically! How are you feeling today?",
+            'en-GB': "Hello! I'm your AI voice mentor. 🎯 Start **Conversation Mode** above for natural, real-time dialogue in English. Just speak naturally and I'll listen and respond automatically! How are you feeling today?",
+            'hi-IN': "नमस्ते! मैं आपका AI आवाज मेंटور हूं। 🎯 प्राकृतिक, रियल-टाइम हिंदी बातचीत के लिए ऊपर **वार्तालाप मोड** शुरू करें। बस स्वाभाविक रूप से बोलें और मैं सुनूंगा और स्वचालित रूप से जवाब दूंगा! आज आप कैसा महसूस कर रहे हैं?",
+            'te-IN': "నమస్కారం! నేను మీ AI వాయిస్ మెంటర్‌ని. 🎯 సహజమైన, రియల్-టైమ్ తెలుగు సంభాషణ కోసం పైన **సంభాషణ మోడ్** ప్రారంభించండి. సహజంగా మాట్లాడండి మరియు నేను వింటాను మరియు స్వయంచాలకంగా ప్రతిస్పందిస్తాను! ఈరోజు మీరు ఎలా అనిపిస్తున్నారు?",
+            'kn-IN': "ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ AI ಧ್ವನಿ ಮಾರ್ಗದರ್ಶಕ. 🎯 ನೈಸರ್ಗಿಕ, ನೈಜ-ಸಮಯದ ಕನ್ನಡ ಸಂಭಾಷಣೆಗಾಗಿ ಮೇಲೆ **ಸಂಭಾಷಣೆ ಮೋಡ್** ಪ್ರಾರಂಭಿಸಿ. ಸಹಜವಾಗಿ ಮಾತನಾಡಿ ಮತ್ತು ನಾನು ಕೇಳುತ್ತೇನೆ ಮತ್ತು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತೇನೆ! ಇಂದು ನೀವು ಹೇಗೆ ಅನಿಸುತ್ತಿದೆ?"
+        };
+        
+        return welcomeMessages[languageCode] || welcomeMessages['en-US'];
+    }
+    
+    updateWelcomeMessage(languageCode) {
+        // Find the initial AI welcome message and update it
+        const chatMessages = document.getElementById('chatMessages');
+        const firstMessage = chatMessages?.querySelector('.ai-message p');
+        
+        if (firstMessage) {
+            const welcomeText = this.getWelcomeMessage(languageCode);
+            firstMessage.innerHTML = welcomeText;
+        }
+    }
+    
+    initializeVoiceRecognition() {
+        console.log('🎤 Initializing voice recognition...');
+        
+        if ('webkitSpeechRecognition' in window) {
+            console.log('✅ Using webkitSpeechRecognition');
+            this.recognition = new webkitSpeechRecognition();
+        } else if ('SpeechRecognition' in window) {
+            console.log('✅ Using SpeechRecognition');
+            this.recognition = new SpeechRecognition();
+        } else {
+            console.error('❌ Speech recognition not supported in this browser');
+        }
+        
+        if (this.recognition) {
+            console.log('🎤 Configuring speech recognition...');
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+            this.recognition.lang = 'en-US';
+            this.recognition.maxAlternatives = 1;
+            
+            // Remove grammars configuration for better multilingual support
+            console.log('🎤 Speech recognition configured for multilingual support');
+            
+            this.recognition.onstart = () => {
+                console.log('🎤 Recognition started - onstart event fired');
+                console.log('🎤 Recognition configuration:');
+                console.log('   - Language:', this.recognition.lang);
+                console.log('   - Continuous:', this.recognition.continuous);
+                console.log('   - Interim results:', this.recognition.interimResults);
+                console.log('   - Max alternatives:', this.recognition.maxAlternatives);
+                this.onRecordingStart();
+            };
+            
+            this.recognition.onresult = (event) => {
+                console.log('🎤 SPEECH RESULT EVENT FIRED!', event);
+                console.log('🎤 Recognition language setting:', this.recognition.lang);
+                console.log('🎤 Number of results:', event.results.length);
+                for (let i = 0; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    const confidence = event.results[i][0].confidence;
+                    console.log(`🎤 Result ${i}:`, transcript, 'Final:', event.results[i].isFinal, 'Confidence:', confidence);
+                    
+                    // Check if this looks like Telugu text
+                    if (transcript && /[\u0C00-\u0C7F]/.test(transcript)) {
+                        console.log('🎯 Telugu script detected in transcript!');
+                    }
+                }
+                this.onSpeechResult(event);
+            };
+            
+            this.recognition.onerror = (event) => {
+                console.error('🚨 SPEECH RECOGNITION ERROR:', event.error);
+                console.error('🚨 Error details:', event);
+                this.onRecordingError(event);
+            };
+            
+            this.recognition.onend = () => {
+                this.onRecordingEnd();
+            };
+        } else {
+            this.showMessage('ai', 'Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari for the best experience.');
+        }
+    }
+    
+    bindEvents() {
+        const recordBtn = document.getElementById('recordBtn');
+        const speakBtn = document.getElementById('speakBtn');
+        const clearBtn = document.getElementById('clearChat');
+        const languageSelect = document.getElementById('languageSelect');
+        const conversationModeBtn = document.getElementById('conversationModeBtn');
+        
+        if (recordBtn) {
+            recordBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleRecording();
+            });
+        }
+        
+        if (speakBtn) {
+            speakBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.speakLastResponse();
+            });
+        }
+        
+        if (clearBtn) {
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.clearChat();
+            });
+        }
+        
+        const testMicBtn = document.getElementById('testMic');
+        if (testMicBtn) {
+            testMicBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.testMicrophone();
+            });
+        }
+        
+        if (languageSelect) {
+            languageSelect.addEventListener('change', (e) => {
+                this.changeLanguage(e.target.value);
+            });
+        }
+        
+        if (conversationModeBtn) {
+            conversationModeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleConversationMode();
+            });
+        }
+        
+        // Toggle manual controls
+        const toggleManualControls = document.getElementById('toggleManualControls');
+        if (toggleManualControls) {
+            toggleManualControls.addEventListener('change', (e) => {
+                this.toggleManualControls();
+            });
+        }
+    }
+    
+    changeLanguage(languageCode) {
+        if (this.recognition) {
+            // Temporarily stop any active recording to prevent conflicts
+            const wasInConversationMode = this.conversationMode;
+            if (this.isRecording) {
+                this.stopRecording();
+            }
+            
+            // Update speech recognition language
+            this.recognition.lang = languageCode;
+            console.log(`🎤 Speech recognition language changed to: ${languageCode}`);
+            
+            // Enhanced language-specific configuration
+            if (languageCode === 'te-IN') {
+                console.log('🎯 Telugu language selected - configuring optimal recognition settings');
+                this.recognition.lang = 'te-IN';
+                // For Telugu, use more alternatives and interim results for better accuracy
+                this.recognition.maxAlternatives = 3;
+                this.recognition.interimResults = true;
+                console.log('🎯 Telugu recognition optimized: maxAlternatives=3, interimResults=true');
+            } else if (languageCode === 'hi-IN') {
+                console.log('🎯 Hindi language selected - configuring optimal recognition settings');
+                this.recognition.lang = 'hi-IN';
+                this.recognition.maxAlternatives = 2;
+                this.recognition.interimResults = true;
+            } else if (languageCode === 'kn-IN') {
+                console.log('🎯 Kannada language selected - configuring optimal recognition settings');
+                this.recognition.lang = 'kn-IN';
+                this.recognition.maxAlternatives = 2;
+                this.recognition.interimResults = true;
+            } else {
+                // English or other languages
+                this.recognition.maxAlternatives = 1;
+                this.recognition.interimResults = true;
+            }
+            
+            // Force recognition to restart with new language if in conversation mode
+            if (wasInConversationMode && this.recognition) {
+                console.log('🔄 Restarting recognition with new language');
+                try {
+                    this.recognition.stop();
+                } catch (e) {
+                    console.log('Recognition already stopped');
+                }
+            }
+            
+            // Update welcome message to new language
+            this.updateWelcomeMessage(languageCode);
+            
+            // Show confirmation message in the selected language
+            const confirmationMessages = {
+                'en-US': 'Voice recognition language changed to English (US). You can now speak in English!',
+                'en-GB': 'Voice recognition language changed to English (UK). You can now speak in English!',
+                'hi-IN': 'आवाज पहचान भाषा हिंदी में बदल गई। अब आप हिंदी में बोल सकते हैं!',
+                'te-IN': 'వాయిస్ రికగ్నిషన్ భాష తెలుగుకు మార్చబడింది. ఇప్పుడు మీరు తెలుగులో మాట్లాడవచ్చు!',
+                'kn-IN': 'ಧ್ವನಿ ಗುರುತಿಸುವಿಕೆ ಭಾಷೆಯನ್ನು ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿಸಲಾಗಿದೆ. ಈಗ ನೀವು ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಬಹುದು!'
+            };
+            
+            const confirmationMessage = confirmationMessages[languageCode] || confirmationMessages['en-US'];
+            console.log(`DEBUG: Showing confirmation in ${languageCode}: ${confirmationMessage}`);
+            
+            // Clear any pending automatic prompts or messages
+            clearTimeout(this.silenceTimer);
+            
+            // Show the confirmation message
+            this.showMessage('ai', confirmationMessage);
+            
+            // Speak the confirmation message in the new language
+            this.speakResponse(confirmationMessage);
+            
+            // If we were in conversation mode, restart it after speaking confirmation
+            if (wasInConversationMode) {
+                // Wait for the TTS to finish before restarting
+                setTimeout(() => {
+                    if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                        console.log(`🔄 Restarting conversation mode with ${languageCode} language`);
+                        this.startRecording();
+                    }
+                }, 4000); // Longer delay to let TTS finish
+            }
+        }
+    }
+    
+    toggleConversationMode() {
+        this.conversationMode = !this.conversationMode;
+        console.log('🎯 Conversation mode toggled to:', this.conversationMode);
+        const conversationModeBtn = document.getElementById('conversationModeBtn');
+        const statusText = document.getElementById('statusText');
+        const conversationModeStatus = document.getElementById('conversationModeStatus');
+        
+        if (this.conversationMode) {
+            // Enable conversation mode - update the large button
+            conversationModeBtn.classList.remove('from-green-500', 'to-blue-600', 'hover:from-green-600', 'hover:to-blue-700');
+            conversationModeBtn.classList.add('from-red-500', 'to-red-600', 'hover:from-red-600', 'hover:to-red-700');
+            
+            // Update button content
+            conversationModeBtn.innerHTML = `
+                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 6h12v12H6z"/>
+                </svg>`;
+            
+            // Update text below button
+            const conversationText = conversationModeBtn.parentElement.querySelector('.text-lg');
+            if (conversationText) conversationText.textContent = '🔇 Stop Conversation';
+            
+            if (statusText) statusText.textContent = '🎯 Conversation active - Speaking naturally!';
+            if (conversationModeStatus) conversationModeStatus.classList.remove('hidden');
+            
+            const selectedLanguageCode = document.getElementById('languageSelect')?.value || 'en-US';
+            const activationMessages = {
+                'en-US': '🎯 Conversation mode activated! I\'m now listening. Please tell me how you\'re feeling or what\'s on your mind.',
+                'en-GB': '🎯 Conversation mode activated! I\'m now listening. Please tell me how you\'re feeling or what\'s on your mind.',
+                'hi-IN': '🎯 वार्तालाप मोड सक्रिय! मैं अब सुन रहा हूं। कृपया बताएं कि आप कैसा महसूस कर रहे हैं या आपके मन में क्या है।',
+                'te-IN': '🎯 సంభాషణ మోడ్ సక్రియం! నేను ఇప్పుడు వింటున్నాను. దయచేసి మీరు ఎలా అనిపిస్తున్నారో లేదా మీ మనసులో ఏమి ఉందో చెప్పండి.',
+                'kn-IN': '🎯 ಸಂಭಾಷಣೆ ಮೋಡ್ ಸಕ್ರಿಯ! ನಾನು ಈಗ ಕೇಳುತ್ತಿದ್ದೇನೆ. ದಯವಿಟ್ಟು ನೀವು ಹೇಗೆ ಅನಿಸುತ್ತಿದೆ ಅಥವಾ ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ ಎಂದು ಹೇಳಿ.'
+            };
+            this.showMessage('ai', activationMessages[selectedLanguageCode] || activationMessages['en-US']);
+            
+            // Speak the activation message and start listening
+            const activationMessage = activationMessages[selectedLanguageCode] || activationMessages['en-US'];
+            this.speakResponse(activationMessage, () => {
+                // After speaking activation, just start listening - no automatic questions
+                setTimeout(() => {
+                    if (this.conversationMode && !this.isRecording) {
+                        console.log('🎤 Activation complete - starting to listen for user input');
+                        this.startRecording();
+                        this.startSilenceDetection();
+                    }
+                }, 1000);
+            });
+            
+            // Note: Listening will start after the activation message is spoken
+            
+        } else {
+            // Disable conversation mode - restore original button
+            conversationModeBtn.classList.remove('from-red-500', 'to-red-600', 'hover:from-red-600', 'hover:to-red-700');
+            conversationModeBtn.classList.add('from-green-500', 'to-blue-600', 'hover:from-green-600', 'hover:to-blue-700');
+            
+            // Restore microphone icon
+            conversationModeBtn.innerHTML = `
+                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>`;
+            
+            // Update text below button
+            const conversationText = conversationModeBtn.parentElement.querySelector('.text-lg');
+            if (conversationText) conversationText.textContent = '🎯 Conversation Mode';
+            
+            if (statusText) statusText.textContent = 'Start natural conversation above';
+            if (conversationModeStatus) conversationModeStatus.classList.add('hidden');
+            
+            const selectedLanguageCode = document.getElementById('languageSelect')?.value || 'en-US';
+            const deactivationMessages = {
+                'en-US': '⏹️ Real-time conversation mode disabled. Use the manual options below to record manually.',
+                'en-GB': '⏹️ Real-time conversation mode disabled. Use the manual options below to record manually.',
+                'hi-IN': '⏹️ रियल-टाइम वार्तालाप मोड निष्क्रिय किया गया। मैन्युअल रिकॉर्डिंग के लिए नीचे मैन्युअल विकल्प का उपयोग करें।',
+                'te-IN': '⏹️ రియల్-టైమ్ సంభాషణ మోడ్ నిష్క్రియం చేయబడింది. మాన్యువల్ రికార్డింగ్ కోసం దిగువ మాన్యువల్ ఎంపికలను ఉపయోగించండి।',
+                'kn-IN': '⏹️ ನೈಜ-ಸಮಯ ಸಂಭಾಷಣೆ ಮೋಡ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಹಸ್ತಚಾಲಿತ ರೆಕಾರ್ಡಿಂಗ್‌ಗಾಗಿ ಕೆಳಗಿನ ಹಸ್ತಚಾಲಿತ ಆಯ್ಕೆಗಳನ್ನು ಬಳಸಿ।'
+            };
+            this.showMessage('ai', deactivationMessages[selectedLanguageCode] || deactivationMessages['en-US']);
+            
+            // Stop any ongoing recording and clear silence detection
+            if (this.isRecording) {
+                this.stopRecording();
+            }
+            this.clearSilenceTimer();
+            this.isWaitingForSpeech = false;
+        }
+    }
+    
+    toggleManualControls() {
+        const manualControls = document.getElementById('manualControls');
+        const toggleCheckbox = document.getElementById('toggleManualControls');
+        const toggleStatus = document.getElementById('toggleStatus');
+        
+        if (toggleCheckbox.checked) {
+            manualControls.classList.remove('hidden');
+            toggleStatus.textContent = 'ON';
+            toggleStatus.classList.remove('text-gray-400');
+            toggleStatus.classList.add('text-green-400');
+        } else {
+            manualControls.classList.add('hidden');
+            toggleStatus.textContent = 'OFF';
+            toggleStatus.classList.remove('text-green-400');
+            toggleStatus.classList.add('text-gray-400');
+        }
+    }
+    
+    toggleRecording() {
+        if (!this.recognition) {
+            this.showMessage('ai', 'Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.');
+            return;
+        }
+        
+        if (this.isRecording) {
+            this.stopRecording();
+        } else {
+            this.startRecording();
+        }
+    }
+    
+    startRecording() {
+        if (!this.recognition) {
+            this.showMessage('ai', 'Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.');
+            return;
+        }
+        
+        if (this.isRecording) {
+            console.log('🎤 Already recording, skipping start request');
+            return;
+        }
+        
+        try {
+            console.log(`🎤 Starting recording - Conversation mode: ${this.conversationMode}`);
+            console.log(`🎤 Recognition state - continuous: ${this.recognition.continuous}, interimResults: ${this.recognition.interimResults}`);
+            console.log(`🎤 Recognition language: ${this.recognition.lang}`);
+            
+            // Force update UI to show that we're trying to start
+            if (this.conversationMode) {
+                const statusText = document.getElementById('statusText');
+                if (statusText) statusText.textContent = '🎤 Starting conversation mode...';
+            }
+            
+            this.recognition.start();
+            console.log('🎤 Recognition.start() called successfully');
+            
+            // Add timeout to detect if recognition doesn't start
+            if (this.conversationMode) {
+                setTimeout(() => {
+                    if (!this.isRecording && this.conversationMode) {
+                        console.log('⚠️ Recognition did not start within 3 seconds, trying again...');
+                        this.showMessage('ai', '🔄 Retrying microphone activation...');
+                        setTimeout(() => this.startRecording(), 500);
+                    }
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Error starting recognition:', error);
+            if (error.name === 'InvalidStateError') {
+                console.log('🔄 Recognition already running, continuing...');
+                // In conversation mode, try to restart after a brief pause
+                if (this.conversationMode) {
+                    setTimeout(() => {
+                        if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                            console.log('🔄 Attempting to restart recognition in conversation mode');
+                            try {
+                                this.recognition.stop();
+                                setTimeout(() => this.startRecording(), 500);
+                            } catch (e) {
+                                console.error('Error restarting recognition:', e);
+                            }
+                        }
+                    }, 1000);
+                } else {
+                    this.showMessage('ai', 'Voice recognition is already active.');
+                }
+            } else {
+                this.showMessage('ai', 'Could not start voice recording. Please check your microphone permissions.');
+            }
+        }
+    }
+    
+    stopRecording() {
+        try {
+            if (this.recognition && this.isRecording) {
+                console.log(`🛑 Stopping recording - Conversation mode: ${this.conversationMode}`);
+                this.recognition.stop();
+            }
+        } catch (error) {
+            console.error('Error stopping recognition:', error);
+        }
+        this.isRecording = false;
+        this.updateRecordingUI(false);
+    }
+    
+    onRecordingStart() {
+        console.log('🎤 onRecordingStart called - setting isRecording to true');
+        this.isRecording = true;
+        this.updateRecordingUI(true);
+        this.startRecordingTimer();
+    }
+    
+    updateRecordingUI(isRecording) {
+        const recordBtn = document.getElementById('recordBtn');
+        const statusText = document.getElementById('statusText');
+        const audioVisualizer = document.getElementById('audioVisualizer');
+        const recordingProgress = document.getElementById('recordingProgress');
+        
+        // In conversation mode, keep UI more subtle
+        if (this.conversationMode) {
+            // Don't show recording animation in conversation mode - too distracting
+            recordBtn.classList.remove('recording-animation');
+            recordBtn.innerHTML = `
+                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            `;
+            recordBtn.title = 'Microphone (Conversation mode active)';
+            recordBtn.disabled = true; // Disable manual control in conversation mode
+            
+            // Hide visual indicators in conversation mode
+            if (audioVisualizer) audioVisualizer.classList.add('hidden');
+            if (recordingProgress) recordingProgress.classList.add('hidden');
+            
+            if (isRecording) {
+                if (statusText) statusText.textContent = '🎤 Listening... Speak naturally';
+            } else {
+                if (statusText) statusText.textContent = '🎯 Conversation mode - Ready to listen';
+            }
+        } else {
+            // Normal mode - show full recording UI
+            recordBtn.disabled = false;
+            
+            if (isRecording) {
+                recordBtn.classList.add('recording-animation');
+                recordBtn.innerHTML = `
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12" rx="2"/>
+                    </svg>
+                `;
+                recordBtn.title = 'Click to stop recording';
+                
+                if (statusText) statusText.textContent = 'Listening... Speak now';
+                if (audioVisualizer) audioVisualizer.classList.remove('hidden');
+                if (recordingProgress) recordingProgress.classList.remove('hidden');
+            } else {
+                recordBtn.classList.remove('recording-animation');
+                recordBtn.innerHTML = `
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                `;
+                recordBtn.title = 'Click to start recording';
+                
+                if (statusText) statusText.textContent = 'Click to start recording';
+                if (audioVisualizer) audioVisualizer.classList.add('hidden');
+                if (recordingProgress) recordingProgress.classList.add('hidden');
+            }
+        }
+    }
+    
+    onRecordingEnd() {
+        this.isRecording = false;
+        this.updateRecordingUI(false);
+        if (this.recordingTimer) {
+            clearInterval(this.recordingTimer);
+            this.recordingTimer = null;
+        }
+        
+        // In conversation mode, automatically restart recording after processing
+        if (this.conversationMode && !this.isSpeaking) {
+            console.log('🔄 Conversation mode: Auto-restarting recording after speech ends');
+            setTimeout(() => {
+                if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                    this.startRecording();
+                }
+            }, 1000); // Give 1 second for processing to start
+        }
+    }
+    
+    onSpeechResult(event) {
+        let finalTranscript = '';
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript;
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        
+        // Track speech activity for pause detection in conversation mode
+        if ((finalTranscript.trim() || interimTranscript.trim()) && this.conversationMode) {
+            this.lastSpeechTime = Date.now();
+            this.clearSilenceTimer();
+            this.isWaitingForSpeech = false;
+        }
+        
+        // Show interim results only in non-conversation mode for efficiency
+        if (interimTranscript && !this.conversationMode) {
+            const statusText = document.getElementById('statusText');
+            if (statusText) {
+                statusText.textContent = `Listening: "${interimTranscript}"`;
+            }
+        }
+        
+        if (finalTranscript.trim()) {
+            const selectedLanguage = document.getElementById('languageSelect')?.value || 'en-US';
+            console.log('🎤 Voice input detected:', finalTranscript);
+            console.log('🎯 Current language setting:', selectedLanguage);
+            console.log('🎯 Current conversation mode:', this.conversationMode);
+            console.log('🎯 Current recording state:', this.isRecording);
+            console.log('🎯 Current speaking state:', this.isSpeaking);
+            
+            // In conversation mode, keep listening while processing
+            if (this.conversationMode) {
+                // Stop current recording to process the message
+                this.stopRecording();
+                console.log('🎯 Conversation mode: Processing message and will restart listening after response');
+                // Process immediately for real-time conversation
+                this.processUserMessage(finalTranscript.trim(), true);
+            } else {
+                this.processUserMessage(finalTranscript.trim(), false);
+                this.stopRecording();
+            }
+        }
+    }
+    
+    onRecordingError(event) {
+        console.error('Speech recognition error:', event.error);
+        
+        // In conversation mode, handle errors more gracefully
+        if (this.conversationMode && event.error === 'no-speech') {
+            // No-speech error is expected in conversation mode during pauses
+            console.log('🎯 Conversation mode: No-speech detected, continuing to listen...');
+            setTimeout(() => {
+                if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                    this.startRecording();
+                }
+            }, 500);
+            return;
+        }
+        
+        this.onRecordingEnd();
+        
+        let errorMessage = 'Speech recognition issue: ';
+        let suggestion = '';
+        
+        switch(event.error) {
+            case 'no-speech':
+                errorMessage += 'No speech was detected.';
+                suggestion = 'Please speak clearly and try again. Make sure you\'re close to your microphone.';
+                break;
+            case 'audio-capture':
+                errorMessage += 'Microphone access is not available.';
+                suggestion = 'Please check your microphone connection and browser permissions.';
+                break;
+            case 'not-allowed':
+                errorMessage += 'Microphone permission was denied.';
+                suggestion = 'Please allow microphone access in your browser settings to use voice features.';
+                break;
+            case 'network':
+                errorMessage += 'Network connection issue.';
+                suggestion = 'Please check your internet connection and try again.';
+                break;
+            default:
+                errorMessage += event.error;
+                suggestion = 'Please try again or refresh the page if the problem persists.';
+        }
+        
+        this.showMessage('ai', `${errorMessage} ${suggestion}`);
+    }
+    
+    async processUserMessage(text, autoSpeak = false) {
+        console.log('🚀 processUserMessage called with:', text, 'autoSpeak:', autoSpeak);
+        
+        // Clear silence timer since user is actively speaking
+        if (this.conversationMode) {
+            this.clearSilenceTimer();
+            this.isWaitingForSpeech = false;
+        }
+        
+        // Show user message
+        this.showMessage('user', text);
+        console.log('✅ User message displayed');
+        
+        // Update status for real-time feedback
+        const statusText = document.getElementById('statusText');
+        if (statusText) statusText.textContent = 'Processing your message...';
+        
+        // Analyze speech and get AI response
+        try {
+            console.log('📡 Making API call to /api/voice-chat/analyze');
+            const selectedLanguage = document.getElementById('languageSelect')?.value || 'en-US';
+            console.log('📡 API Request data:', { message: text, language: selectedLanguage });
+            const response = await fetch('/api/voice-chat/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: text,
+                    timestamp: new Date().toISOString(),
+                    language: selectedLanguage
+                })
+            });
+            
+            console.log('📡 API Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('📊 API Response data:', data);
+            
+            // Update analysis display
+            this.updateAnalysisDisplay(data.analysis);
+            console.log('📊 Analysis display updated');
+            
+            // Show AI response
+            console.log('🤖 AI Response to display:', data.response);
+            this.showMessage('ai', data.response);
+            console.log('✅ AI message displayed');
+            
+            // Store response for TTS
+            this.lastAIResponse = data.response;
+            
+            // Enable speak button
+            const speakBtn = document.getElementById('speakBtn');
+            if (speakBtn) {
+                speakBtn.disabled = false;
+                speakBtn.textContent = '🔊 Speak Response';
+            }
+            
+            // Auto-speak response for real-time conversation
+            if ((autoSpeak || this.conversationMode) && data.response && this.synthesis) {
+                console.log('🔊 Auto-speaking response for conversation mode');
+                if (statusText) statusText.textContent = 'Speaking response...';
+                
+                // Immediate response for better conversation flow
+                this.speakResponse(data.response, () => {
+                    // After speaking, just wait for user to respond
+                    if (this.conversationMode) {
+                        console.log('🎤 Waiting for user response - restarting listening');
+                        if (statusText) statusText.textContent = '🎤 Listening... Speak when ready';
+                        
+                        // Enhanced auto-restart for real-time conversation
+                        const selectedLanguage = document.getElementById('languageSelect')?.value || 'en-US';
+                        const isIndianLanguage = selectedLanguage.includes('-IN');
+                        const restartDelay = isIndianLanguage ? 1500 : 1000; // Slightly longer delay for Indian languages
+                        
+                        setTimeout(() => {
+                            if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                                console.log(`🔄 Auto-restarting recording for user response (${selectedLanguage})`);
+                                if (isIndianLanguage) {
+                                    console.log('🎯 Enhanced settings for Indian language conversation');
+                                }
+                                this.startRecording();
+                                this.startSilenceDetection();
+                            }
+                        }, restartDelay);
+                    } else {
+                        if (statusText) statusText.textContent = 'Ready - Click microphone to speak';
+                    }
+                });
+            } else {
+                if (statusText) statusText.textContent = this.conversationMode ? '🎯 Conversation mode ready' : 'Ready - Click microphone to speak';
+                
+                // If conversation mode is active but not speaking, ensure we're listening
+                if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                    setTimeout(() => {
+                        if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                            console.log('🔄 Ensuring conversation mode is listening');
+                            this.startRecording();
+                            this.startSilenceDetection();
+                        }
+                    }, 1000);
+                }
+            }
+            console.log('🔊 Processing complete');
+            
+        } catch (error) {
+            console.error('❌ Error processing message:', error);
+            this.showMessage('ai', 'I apologize, but I encountered an error processing your message. Please try again.');
+            if (statusText) statusText.textContent = 'Error - Click microphone to try again';
+        }
+    }
+    
+    showMessage(sender, text) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        messageDiv.className = `${sender}-message message-bubble rounded-xl p-4 max-w-[80%] ${sender === 'user' ? 'ml-auto' : ''}`;
+        
+        messageDiv.innerHTML = `
+            <div class="flex items-start space-x-3 ${sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}">
+                <div class="w-8 h-8 ${sender === 'ai' ? 'bg-green-500' : 'bg-purple-500'} rounded-full flex items-center justify-center text-white font-semibold">
+                    ${sender === 'ai' ? 'AI' : 'YOU'}
+                </div>
+                <div class="${sender === 'user' ? 'text-right' : ''}">
+                    <p class="text-white">${text}</p>
+                    <span class="text-xs text-gray-400 mt-2 block">${timestamp}</span>
+                </div>
+            </div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        this.messages.push({sender, text, timestamp});
+        this.updateSessionStats();
+    }
+    
+    updateAnalysisDisplay(analysis) {
+        // Update sentiment
+        const sentimentDisplay = document.getElementById('sentimentDisplay');
+        const sentiment = analysis.sentiment || 'neutral';
+        sentimentDisplay.textContent = sentiment.charAt(0).toUpperCase() + sentiment.slice(1);
+        sentimentDisplay.className = sentiment === 'positive' ? 'text-lg font-semibold sentiment-positive' : 
+                                   sentiment === 'negative' ? 'text-lg font-semibold sentiment-negative' : 
+                                   'text-lg font-semibold sentiment-neutral';
+        
+        // Update confidence
+        const confidenceBar = document.getElementById('confidenceBar');
+        const confidenceText = document.getElementById('confidenceText');
+        const confidence = Math.round((analysis.confidence || 0) * 100);
+        confidenceBar.style.width = confidence + '%';
+        confidenceText.textContent = confidence + '%';
+        
+        // Update emotion
+        document.getElementById('emotionDisplay').textContent = analysis.emotion || 'Neutral';
+        
+        // Update keywords
+        const keywordsDisplay = document.getElementById('keywordsDisplay');
+        keywordsDisplay.innerHTML = '';
+        if (analysis.keywords && analysis.keywords.length > 0) {
+            analysis.keywords.forEach(keyword => {
+                const keywordSpan = document.createElement('span');
+                keywordSpan.className = 'px-2 py-1 bg-purple-600 text-white text-xs rounded-full';
+                keywordSpan.textContent = keyword;
+                keywordsDisplay.appendChild(keywordSpan);
+            });
+        }
+        
+        // Update average sentiment
+        this.totalSentiment += analysis.sentiment_score || 0;
+        this.sentimentCount++;
+        const avgSentiment = this.totalSentiment / this.sentimentCount;
+        document.getElementById('avgSentiment').textContent = 
+            avgSentiment > 0.1 ? 'Positive' : avgSentiment < -0.1 ? 'Negative' : 'Neutral';
+    }
+    
+    updateSessionStats() {
+        document.getElementById('messageCount').textContent = this.messages.filter(m => m.sender === 'user').length;
+        
+        const duration = Math.floor((Date.now() - this.sessionStart) / 1000);
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        document.getElementById('sessionDuration').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    speakResponse(text, onComplete = null) {
+        if (!text || !this.synthesis) {
+            console.log('❌ TTS not available:', { text: !!text, synthesis: !!this.synthesis });
+            if (onComplete) onComplete();
+            return;
+        }
+        
+        // Cancel any ongoing speech
+        this.synthesis.cancel();
+        
+        try {
+            // Force voices to load if not already loaded
+            const voices = this.synthesis.getVoices();
+            if (voices.length === 0) {
+                console.log('⚠️ No voices loaded yet, waiting for voices...');
+                // Wait for voices to load
+                this.synthesis.addEventListener('voiceschanged', () => {
+                    console.log('🔊 Voices loaded, retrying TTS');
+                    this.speakResponse(text, onComplete);
+                }, { once: true });
+                return;
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            // Optimize speech rate for conversation mode
+            utterance.rate = this.conversationMode ? 1.0 : 0.9; // Normal rate for better Telugu pronunciation
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0; // Full volume
+            
+            // Get current language selection
+            const selectedLanguage = document.getElementById('languageSelect')?.value || 'en-US';
+            console.log('🔊 TTS Request - Language:', selectedLanguage, 'Text length:', text.length);
+            
+            // Set language and find appropriate voice
+            this.configureVoiceForLanguage(utterance, selectedLanguage);
+            
+            // Add event listeners with enhanced debugging
+            utterance.onstart = () => {
+                this.isSpeaking = true;
+                console.log('🔊 ✅ TTS STARTED - Voice:', utterance.voice?.name || 'System default', 'Lang:', utterance.lang);
+            };
+            
+            utterance.onend = () => {
+                this.isSpeaking = false;
+                console.log('🔊 ✅ TTS COMPLETED SUCCESSFULLY');
+                if (onComplete) onComplete();
+            };
+            
+            utterance.onerror = (event) => {
+                console.error('🔊 ❌ TTS ERROR:', event.error, event);
+                console.error('🔊 Error details:', {
+                    error: event.error,
+                    text: utterance.text?.substring(0, 50) + '...',
+                    voice: utterance.voice?.name,
+                    lang: utterance.lang
+                });
+                this.isSpeaking = false;
+                if (onComplete) onComplete();
+            };
+            
+            // Final TTS configuration check before speaking
+            console.log('🔊 === FINAL TTS CONFIGURATION ===');
+            console.log('🔊 Text to speak:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
+            console.log('🔊 Selected voice:', utterance.voice?.name || 'System default');
+            console.log('🔊 Language:', utterance.lang);
+            console.log('🔊 Rate:', utterance.rate, 'Pitch:', utterance.pitch, 'Volume:', utterance.volume);
+            
+            // Speak the utterance
+            console.log('🔊 🎤 ATTEMPTING TO SPEAK...');
+            this.synthesis.speak(utterance);
+            
+        } catch (error) {
+            console.error('Error in TTS:', error);
+            this.isSpeaking = false;
+            if (onComplete) onComplete();
+        }
+    }
+    
+    configureVoiceForLanguage(utterance, selectedLanguage) {
+        const voices = this.synthesis.getVoices();
+        let preferredVoice = null;
+        
+        console.log('🔊 Configuring voice for language:', selectedLanguage);
+        
+        // Language-specific voice selection
+        if (selectedLanguage.startsWith('hi-')) {
+            preferredVoice = voices.find(voice => 
+                voice.lang.toLowerCase().includes('hi-in') || 
+                voice.lang.toLowerCase().includes('hi_in') ||
+                voice.name.toLowerCase().includes('hindi') ||
+                voice.name.toLowerCase().includes('hemant') ||
+                voice.name.toLowerCase().includes('kalpana')
+            );
+            utterance.lang = 'hi-IN';
+        } else if (selectedLanguage.startsWith('te-')) {
+            console.log('🔊 === TELUGU TTS CONFIGURATION ===');
+            console.log('🔊 Total available voices:', voices.length);
+            console.log('🔊 Available voices:', voices.map(v => `${v.name} (${v.lang}) [${v.localService ? 'Local' : 'Remote'}]`));
+            
+            // Enhanced Telugu voice search with multiple fallback strategies
+            const teluguPatterns = [
+                // Primary Telugu language matches
+                { name: 'Exact te-IN', test: voice => voice.lang === 'te-IN' },
+                { name: 'Exact te_IN', test: voice => voice.lang === 'te_IN' },
+                { name: 'Lang starts te-', test: voice => voice.lang.toLowerCase().startsWith('te-') },
+                { name: 'Lang starts te_', test: voice => voice.lang.toLowerCase().startsWith('te_') },
+                { name: 'Lang equals te', test: voice => voice.lang.toLowerCase() === 'te' },
+                
+                // Voice name patterns
+                { name: 'Name contains telugu', test: voice => voice.name.toLowerCase().includes('telugu') },
+                { name: 'Name contains heera', test: voice => voice.name.toLowerCase().includes('heera') },
+                { name: 'Name contains chitra', test: voice => voice.name.toLowerCase().includes('chitra') },
+                
+                // Microsoft voices
+                { name: 'Microsoft + te lang', test: voice => voice.name.toLowerCase().includes('microsoft') && voice.lang.toLowerCase().includes('te') },
+                { name: 'Microsoft Telugu', test: voice => voice.name.toLowerCase().includes('microsoft') && voice.name.toLowerCase().includes('telugu') },
+                
+                // Fallback patterns
+                { name: 'Any te in lang', test: voice => voice.lang.toLowerCase().includes('te') },
+                { name: 'Indian voices', test: voice => voice.lang.includes('-IN') || voice.name.toLowerCase().includes('indian') }
+            ];
+            
+            // Try each pattern until we find a voice
+            for (const pattern of teluguPatterns) {
+                preferredVoice = voices.find(pattern.test);
+                if (preferredVoice) {
+                    console.log(`🔊 ✅ Telugu voice found using "${pattern.name}":`, preferredVoice.name, '(', preferredVoice.lang, ')');
+                    break;
+                } else {
+                    console.log(`🔊 ❌ No voice found for pattern: ${pattern.name}`);
+                }
+            }
+            
+            utterance.lang = 'te-IN';
+            
+            if (preferredVoice) {
+                console.log('🔊 ✅ SELECTED TELUGU VOICE:', preferredVoice.name, '(', preferredVoice.lang, ')');
+                console.log('🔊 Voice details:', {
+                    name: preferredVoice.name,
+                    lang: preferredVoice.lang,
+                    localService: preferredVoice.localService,
+                    default: preferredVoice.default,
+                    voiceURI: preferredVoice.voiceURI
+                });
+            } else {
+                console.log('🔊 ⚠️ NO TELUGU VOICE FOUND - Using system default');
+                console.log('🔊 Recommendation: Install Telugu language pack or use Edge/Chrome browser');
+                console.log('🔊 Will attempt TTS with system default voice and te-IN language setting');
+            }
+        } else if (selectedLanguage.startsWith('kn-')) {
+            preferredVoice = voices.find(voice => 
+                voice.lang.toLowerCase().includes('kn-in') || 
+                voice.lang.toLowerCase().includes('kn_in') ||
+                voice.name.toLowerCase().includes('kannada') ||
+                voice.name.toLowerCase().includes('shankar')
+            );
+            utterance.lang = 'kn-IN';
+        } else {
+            // English voices
+            preferredVoice = voices.find(voice => voice.lang.includes('en'));
+            utterance.lang = selectedLanguage;
+        }
+        
+        // Fallback for Telugu if specific voice not found
+        if (!preferredVoice && selectedLanguage.startsWith('te-')) {
+            preferredVoice = voices.find(voice => 
+                voice.lang.includes('te') || voice.lang.includes('TE')
+            );
+        }
+        
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+            console.log('🔊 Using voice:', preferredVoice.name, preferredVoice.lang);
+        }
+    }
+
+    speakLastResponse() {
+        if (!this.lastAIResponse) {
+            this.showMessage('ai', 'No response available to speak. Please have a conversation first.');
+            return;
+        }
+        
+        const speakBtn = document.getElementById('speakBtn');
+        
+        // Check if we're currently speaking
+        if (this.isSpeaking) {
+            this.synthesis.cancel();
+            this.isSpeaking = false;
+            speakBtn.textContent = '🔊 Speak Response';
+            speakBtn.disabled = false;
+            return;
+        }
+        
+        speakBtn.textContent = '🔇 Stop Speaking';
+        this.speakResponse(this.lastAIResponse, () => {
+            speakBtn.textContent = '🔊 Speak Response';
+        });
+    }
+    
+    clearChat() {
+        document.getElementById('chatMessages').innerHTML = `
+            <div class="ai-message message-bubble rounded-xl p-4 max-w-[80%]">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        AI
+                    </div>
+                    <div>
+                        <p class="text-white">Hello! I'm your AI voice mentor. Click the microphone to start speaking, and I'll analyze your speech and provide helpful guidance. How are you feeling today?</p>
+                        <span class="text-xs text-gray-400 mt-2 block">Just now</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        this.messages = [];
+        this.sessionStart = Date.now();
+        this.totalSentiment = 0;
+        this.sentimentCount = 0;
+        this.lastAIResponse = null;
+        this.isSpeaking = false;
+        
+        // Reset TTS button
+        const speakBtn = document.getElementById('speakBtn');
+        if (speakBtn) {
+            speakBtn.disabled = true;
+            speakBtn.textContent = '🔊 Speak Response';
+        }
+        
+        // Cancel any ongoing speech
+        if (this.synthesis) {
+            this.synthesis.cancel();
+        }
+        
+        // Reset analysis display
+        document.getElementById('sentimentDisplay').textContent = 'Neutral';
+        document.getElementById('sentimentDisplay').className = 'text-lg font-semibold sentiment-neutral';
+        document.getElementById('confidenceBar').style.width = '0%';
+        document.getElementById('confidenceText').textContent = '0%';
+        document.getElementById('emotionDisplay').textContent = '-';
+        document.getElementById('keywordsDisplay').innerHTML = '';
+        document.getElementById('avgSentiment').textContent = 'Neutral';
+        
+        this.updateSessionStats();
+    }
+    
+    async testMicrophone() {
+        console.log('🎤 Testing microphone...');
+        this.showMessage('ai', '🎤 Testing microphone... Please say "Hello" when I start listening.');
+        
+        if (!this.recognition) {
+            this.showMessage('ai', '❌ Speech recognition not available in your browser.');
+            return;
+        }
+        
+        try {
+            // Check microphone permissions first
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('✅ Microphone access granted');
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Test speech recognition
+            console.log('🎤 Starting speech recognition test...');
+            this.showMessage('ai', '🎤 Microphone test started! Say "Hello" now...');
+            
+            const testRecognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+            testRecognition.continuous = false;
+            testRecognition.interimResults = false;
+            testRecognition.lang = 'en-US';
+            
+            testRecognition.onstart = () => {
+                console.log('✅ Test recognition started successfully');
+                this.showMessage('ai', '🎤 Test listening active - say "Hello" now!');
+            };
+            
+            testRecognition.onresult = (event) => {
+                const result = event.results[0][0].transcript;
+                console.log('✅ Speech recognition test result:', result);
+                this.showMessage('ai', `✅ Microphone test successful! I heard: "${result}"`);
+            };
+            
+            testRecognition.onerror = (event) => {
+                console.error('❌ Speech recognition test error:', event.error);
+                this.showMessage('ai', `❌ Microphone test failed: ${event.error}. Please check your microphone permissions and try again.`);
+            };
+            
+            testRecognition.onend = () => {
+                console.log('🎤 Speech recognition test ended');
+            };
+            
+            testRecognition.start();
+            
+        } catch (error) {
+            console.error('❌ Microphone test error:', error);
+            this.showMessage('ai', `❌ Microphone test failed: ${error.message}. Please allow microphone access and refresh the page.`);
+        }
+    }
+    
+    startRecordingTimer() {
+        let seconds = 0;
+        this.recordingTimer = setInterval(() => {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('recordingTime').textContent = 
+                `${minutes}:${secs.toString().padStart(2, '0')}`;
+            
+            // Update progress bar (max 60 seconds)
+            const progress = Math.min((seconds / 60) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+        }, 1000);
+    }
+    
+    // DISABLED: No automatic conversation starters
+    startConversationWithQuestion(languageCode) {
+        console.log('🚫 Automatic conversation questions DISABLED - waiting for user to speak first');
+        return; // Don't ask opening questions automatically
+        
+        /*
+        console.log('🎯 Starting conversation with opening question in:', languageCode);
+        
+        const openingQuestions = {
+            'en-US': "Hello! I'm excited to chat with you today. How are you feeling right now? What's on your mind?",
+            'en-GB': "Hello! I'm excited to chat with you today. How are you feeling right now? What's on your mind?",
+            'hi-IN': "नमस्ते! मैं आज आपसे बात करने के लिए उत्साहित हूं। आप अभी कैसा महसूस कर रहे हैं? आपके दिमाग में क्या है?",
+            'te-IN': "నమస్కారం! ఈరోజు మీతో చాట్ చేయడానికి నేను చాలా ఉత్సాహంగా ఉన్నాను. మీరు ఇప్పుడు ఎలా అనిపిస్తున్నారు? మీ మనసులో ఏమి ఉంది?",
+            'kn-IN': "ನಮಸ್ಕಾರ! ಇಂದು ನಿಮ್ಮೊಂದಿಗೆ ಚಾಟ್ ಮಾಡಲು ನಾನು ಉತ್ಸಾಹದಿಂದಿದ್ದೇನೆ. ನೀವು ಇದೀಗ ಹೇಗೆ ಅನಿಸುತ್ತಿದೆ? ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ?"
+        };
+        
+        const question = openingQuestions[languageCode] || openingQuestions['en-US'];
+        
+        setTimeout(() => {
+            if (this.conversationMode) {
+                console.log('🤖 Asking opening question:', question);
+                this.showMessage('ai', question);
+                this.speakResponse(question, () => {
+                    // After asking question, ensure we're listening
+                    if (this.conversationMode && !this.isRecording) {
+                        setTimeout(() => this.startRecording(), 500);
+                    }
+                });
+            }
+        }, 1000);
+        */
+    }
+    
+    askFollowUpQuestion() {
+        // DISABLED: No automatic follow-up questions
+        console.log('🚫 Follow-up questions DISABLED - waiting for user to continue conversation');
+        return;
+        
+        /*
+        if (!this.conversationMode) return;
+        
+        const selectedLanguage = document.getElementById('languageSelect')?.value || 'en-US';
+        
+        const followUpQuestions = {
+            'en-US': [
+                "Tell me more about that. How does it make you feel?",
+                "That's interesting. What else would you like to share?",
+                "I'd love to hear more. What's been on your mind lately?",
+                "How has your day been so far?",
+                "What would you like to talk about next?"
+            ],
+            'en-GB': [
+                "Tell me more about that. How does it make you feel?",
+                "That's interesting. What else would you like to share?",
+                "I'd love to hear more. What's been on your mind lately?",
+                "How has your day been so far?",
+                "What would you like to talk about next?"
+            ],
+            'hi-IN': [
+                "इसके बारे में और बताइए। आपको कैसा लगता है?",
+                "यह दिलचस्प है। आप और क्या साझा करना चाहेंगे?",
+                "मैं और सुनना चाहूंगा। हाल ही में आपके मन में क्या है?",
+                "आज तक आपका दिन कैसा रहा?",
+                "आप आगे किस बारे में बात करना चाहेंगे?"
+            ],
+            'te-IN': [
+                "దాని గురించి మరింత చెప్పండి. అది మీకు ఎలా అనిపిస్తుంది?",
+                "అది ఆసక్తికరంగా ఉంది. మీరు ఇంకా ఏమి పంచుకోవాలనుకుంటున్నారు?",
+                "నేను మరింత వినాలనుకుంటున్నాను. ఇటీవల మీ మనసులో ఏమి ఉంది?",
+                "ఇప్పటివరకు మీ రోజు ఎలా ఉంది?",
+                "మీరు తర్వాత ఏ విషయం గురించి మాట్లాడాలనుకుంటున్నారు?"
+            ],
+            'kn-IN': [
+                "ಅದರ ಬಗ್ಗೆ ಇನ್ನಷ್ಟು ಹೇಳಿ. ಅದು ನಿಮಗೆ ಹೇಗೆ ಅನಿಸುತ್ತದೆ?",
+                "ಅದು ಕುತೂಹಲಕಾರಿಯಾಗಿದೆ. ನೀವು ಇನ್ನೇನು ಹಂಚಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೀರಿ?",
+                "ನಾನು ಇನ್ನಷ್ಟು ಕೇಳಲು ಇಷ್ಟಪಡುತ್ತೇನೆ. ಇತ್ತೀಚೆಗೆ ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ?",
+                "ಇಲ್ಲಿಯವರೆಗೆ ನಿಮ್ಮ ದಿನ ಹೇಗಿತ್ತು?",
+                "ನೀವು ಮುಂದೆ ಯಾವ ವಿಷಯದ ಬಗ್ಗೆ ಮಾತನಾಡಲು ಬಯಸುತ್ತೀರಿ?"
+            ]
+        };
+        
+        const questions = followUpQuestions[selectedLanguage] || followUpQuestions['en-US'];
+        const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+        
+        setTimeout(() => {
+            if (this.conversationMode) {
+                console.log('🤖 Asking follow-up question:', randomQuestion);
+                this.showMessage('ai', randomQuestion);
+                this.speakResponse(randomQuestion);
+            }
+        }, 2000); // Give user time to process the previous response
+        */
+    }
+    
+    startSilenceDetection() {
+        if (!this.conversationMode) return;
+        
+        this.clearSilenceTimer();
+        this.lastSpeechTime = Date.now();
+        this.isWaitingForSpeech = true;
+        
+        // DISABLED: No automatic prompts - wait for user to speak
+        console.log('🤫 Silence detection active - waiting for user input (no auto-prompts)');
+        
+        // Keep the timer but don't trigger automatic prompts
+        this.silenceTimer = setTimeout(() => {
+            if (this.conversationMode && this.isWaitingForSpeech && !this.isSpeaking) {
+                console.log('🤔 Long silence detected, but NOT providing automatic prompt (user-initiated only)');
+                // Just log but don't call provideAutomaticPrompt()
+            }
+        }, this.silenceThreshold);
+    }
+    
+    clearSilenceTimer() {
+        if (this.silenceTimer) {
+            clearTimeout(this.silenceTimer);
+            this.silenceTimer = null;
+        }
+    }
+    
+    async provideAutomaticPrompt() {
+        // DISABLED: No automatic prompts - this ensures real-time conversation waits for user
+        console.log('🚫 Automatic prompt DISABLED - waiting for user to initiate conversation');
+        return;
+        
+        // Old automatic prompt code is disabled to prevent automatic responses
+        /*
+        const selectedLanguage = document.getElementById('languageSelect')?.value || 'en-US';
+        
+        try {
+            // Get contextual prompt from server
+            const response = await fetch('/api/voice-chat/auto-prompt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    language: selectedLanguage,
+                    context: this.determineConversationContext()
+                })
+            });
+            
+            const data = await response.json();
+            const automaticPrompt = data.success ? data.prompt : this.getAutomaticPrompts(selectedLanguage)[0];
+            
+            console.log('🤖 Providing automatic prompt:', automaticPrompt);
+            this.showMessage('ai', automaticPrompt);
+            
+            // Speak the prompt automatically
+            if (this.synthesis) {
+                this.speakResponse(automaticPrompt, () => {
+                    // After speaking prompt, continue listening
+                    if (this.conversationMode) {
+                        setTimeout(() => {
+                            if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                                this.startRecording();
+                            }
+                        }, 500);
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error getting automatic prompt:', error);
+            // Fallback to local prompts
+            const prompts = this.getAutomaticPrompts(selectedLanguage);
+            const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+            
+            console.log('🤖 Providing fallback automatic prompt:', randomPrompt);
+            this.showMessage('ai', randomPrompt);
+            
+            if (this.synthesis) {
+                this.speakResponse(randomPrompt, () => {
+                    if (this.conversationMode) {
+                        setTimeout(() => {
+                            if (this.conversationMode && !this.isRecording && !this.isSpeaking) {
+                                this.startRecording();
+                            }
+                        }, 500);
+                    }
+                });
+            }
+        }
+        */
+    }
+    
+    determineConversationContext() {
+        // Analyze recent messages to determine context
+        const recentMessages = this.messages.slice(-3); // Look at last 3 messages
+        let context = 'general';
+        
+        if (recentMessages.length > 0) {
+            const messageText = recentMessages.map(m => m.text).join(' ').toLowerCase();
+            
+            if (messageText.includes('study') || messageText.includes('exam') || messageText.includes('college') || 
+                messageText.includes('చదువు') || messageText.includes('పరీక्षा') || messageText.includes('अध्ययन')) {
+                context = 'study';
+            } else if (messageText.includes('wellness') || messageText.includes('mental') || messageText.includes('health') ||
+                       messageText.includes('stress') || messageText.includes('మానసిక') || messageText.includes('स्वास्थ्य')) {
+                context = 'wellness';
+            }
+        }
+        
+        console.log('📊 Determined conversation context:', context);
+        return context;
+    }
+    
+    getAutomaticPrompts(language) {
+        const prompts = {
+            'en-US': [
+                "Is there anything else on your mind?",
+                "How are you feeling about what we just discussed?",
+                "Would you like to share more about your thoughts?",
+                "I'm here to listen. What would you like to talk about?",
+                "Feel free to continue sharing whenever you're ready.",
+                "Is there something specific you'd like to explore further?"
+            ],
+            'en-GB': [
+                "Is there anything else on your mind?",
+                "How are you feeling about what we just discussed?",
+                "Would you like to share more about your thoughts?",
+                "I'm here to listen. What would you like to talk about?",
+                "Feel free to continue sharing whenever you're ready.",
+                "Is there something specific you'd like to explore further?"
+            ],
+            'hi-IN': [
+                "क्या आपके मन में कुछ और है?",
+                "आप कैसा महसूस कर रहे हैं?",
+                "क्या आप अपने विचार साझा करना चाहते हैं?",
+                "मैं यहाँ सुनने के लिए हूँ। आप क्या बात करना चाहते हैं?",
+                "जब आप तैयार हों तो बेझिझक साझा करें।",
+                "क्या कुछ खास है जिसे आप और जानना चाहते हैं?"
+            ],
+            'te-IN': [
+                "మీ మనసులో ఇంకా ఏదైనా ఉందా?",
+                "మనం ఇప్పుడు మాట్లాడిన దాని గురించి మీకు ఎలా అనిపిస్తుంది?",
+                "మీ ఆలోచనలను మరింత పంచుకోవాలని అనిపిస్తుందా?",
+                "నేను వినడానికి ఇక్కడ ఉన్నాను. మీరు ఏమి మాట్లాడాలని అనుకుంటున్నారు?",
+                "మీరు సిద్ధంగా ఉన్నప్పుడు స్వేచ్ఛగా పంచుకోండి।",
+                "మీరు మరింత తెలుసుకోవాలని అనుకునే ఏదైనా ప్రత్యేకమైనది ఉందా?"
+            ],
+            'kn-IN': [
+                "ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಇನ್ನೇನಾದರೂ ಇದೆಯೇ?",
+                "ನಾವು ಈಗ ಮಾತಾಡಿದ ಬಗ್ಗೆ ನಿಮಗೆ ಹೇಗೆ ಅನಿಸುತ್ತಿದೆ?",
+                "ನಿಮ್ಮ ಆಲೋಚನೆಗಳನ್ನು ಹೆಚ್ಚು ಹಂಚಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೀರಾ?",
+                "ನಾನು ಕೇಳಲು ಇಲ್ಲಿದ್ದೇನೆ. ನೀವು ಏನು ಮಾತಾಡಲು ಬಯಸುತ್ತೀರಿ?",
+                "ನೀವು ಸಿದ್ಧವಾದಾಗ ಮುಕ್ತವಾಗಿ ಹಂಚಿಕೊಳ್ಳಿ।",
+                "ನೀವು ಮತ್ತಷ್ಟು ಅನ್ವೇಷಿಸಲು ಬಯಸುವ ಏನಾದರೂ ನಿರ್ದಿಷ್ಟವಾದುದು ಇದೆಯೇ?"
+            ]
+        };
+        
+        return prompts[language] || prompts['en-US'];
+    }
+}
+
+// Quick action functions
+function askQuestion(question) {
+    console.log('🎯 askQuestion called with:', question);
+    if (window.voiceChat) {
+        console.log('✅ voiceChat instance found, calling processUserMessage');
+        window.voiceChat.processUserMessage(question);
+    } else {
+        console.error('❌ voiceChat instance not found!');
+    }
+}
+
+function requestAdvice() {
+    console.log('💡 requestAdvice called');
+    if (window.voiceChat) {
+        console.log('✅ voiceChat instance found, requesting advice');
+        window.voiceChat.processUserMessage("Can you give me some advice based on our conversation?");
+    } else {
+        console.error('❌ voiceChat instance not found!');
+    }
+}
+
+// Initialize voice chat when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.voiceChat = new VoiceAIChat();
+});
+</script>
+{% endblock %}

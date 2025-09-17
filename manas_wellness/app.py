@@ -959,6 +959,360 @@ def get_user_streak_data(user_id, conn):
         logger.error(f"Streak data error: {e}")
         return {'current_streak': 0, 'longest_streak': 0, 'total_entries': 0}
 
+# ==================== VOICE AI CHAT ROUTES ====================
+
+@app.route('/voice-ai-chat')
+def voice_ai_chat_page():
+    """Voice AI Chat interface with STT/TTS capabilities"""
+    return render_template('voice_ai_chat.html')
+
+@app.route('/api/voice-chat/analyze', methods=['POST'])
+def analyze_voice_chat():
+    """Analyze user speech and generate AI response"""
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+        timestamp = data.get('timestamp', datetime.now().isoformat())
+        
+        if not user_message:
+            return jsonify({
+                'success': False,
+                'message': 'No message provided'
+            })
+        
+        # Generate user ID if not exists
+        user_id = session.get('user_id')
+        if not user_id:
+            user_id = str(uuid.uuid4())
+            session['user_id'] = user_id
+        
+        # Enhanced analysis using Google GenAI with better error handling
+        try:
+            # Configure GenAI with provided API key
+            import google.generativeai as genai
+            api_key = "AIzaSyBEGmWmBVurFFQxMjVSue8Zreu_nMSX_WU"
+            genai.configure(api_key=api_key)
+            
+            # Create model instance
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            # Enhanced analysis prompt
+            analysis_prompt = f"""
+            As an AI mental wellness mentor for students, analyze this message and provide insights:
+            
+            Student says: "{user_message}"
+            
+            Analyze and respond with:
+            1. Sentiment (positive/negative/neutral)
+            2. Emotional state (happy, sad, anxious, stressed, excited, calm, worried, confident, etc.)
+            3. Key emotional keywords found
+            4. Supportive response (2-3 encouraging sentences)
+            
+            Respond in this exact JSON format:
+            {{
+                "sentiment": "positive/negative/neutral",
+                "confidence": 0.8,
+                "emotion": "emotional_state",
+                "keywords": ["keyword1", "keyword2"],
+                "response": "Your supportive response here"
+            }}
+            
+            Keep responses warm, understanding, and professionally supportive for students.
+            """
+            
+            # Generate AI response
+            ai_response = model.generate_content(analysis_prompt)
+            
+            # Parse JSON response
+            response_text = ai_response.text.strip()
+            
+            # Extract JSON from response
+            import re
+            json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', response_text, re.DOTALL)
+            
+            if json_match:
+                try:
+                    analysis_data = json.loads(json_match.group())
+                    # Validate required fields
+                    if not all(key in analysis_data for key in ['sentiment', 'emotion', 'response']):
+                        raise ValueError("Missing required fields")
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.error(f"JSON parsing error: {e}")
+                    analysis_data = perform_fallback_analysis(user_message)
+            else:
+                logger.warning("No JSON found in AI response, using fallback")
+                analysis_data = perform_fallback_analysis(user_message)
+                
+        except Exception as e:
+            logger.error(f"Google GenAI error: {e}")
+            # Use enhanced fallback analysis
+            analysis_data = perform_fallback_analysis(user_message)
+        
+        # Use AI response from analysis or generate enhanced response
+        ai_response_text = analysis_data.get('response', '')
+        
+        # If no response in analysis, generate one
+        if not ai_response_text or len(ai_response_text.strip()) < 10:
+            try:
+                response_prompt = f"""
+                As a supportive AI mental wellness mentor for students, respond to: "{user_message}"
+                
+                Detected sentiment: {analysis_data.get('sentiment', 'neutral')}
+                Emotional state: {analysis_data.get('emotion', 'neutral')}
+                
+                Provide a warm, empathetic response (2-3 sentences) that:
+                - Acknowledges their feelings
+                - Offers encouragement or practical advice
+                - Is supportive and age-appropriate for students
+                
+                Response:
+                """
+                
+                # Generate response using configured GenAI
+                response_result = model.generate_content(response_prompt)
+                ai_response_text = response_result.text.strip()
+                
+                # Clean up response (remove quotes, extra formatting)
+                ai_response_text = re.sub(r'^["\']|["\']$', '', ai_response_text)
+                ai_response_text = ai_response_text.replace('Response:', '').strip()
+                
+            except Exception as e:
+                logger.error(f"Response generation error: {e}")
+                ai_response_text = generate_fallback_response(user_message, analysis_data.get('sentiment', 'neutral'))
+        
+        # Ensure we have a valid response
+        if not ai_response_text or len(ai_response_text.strip()) < 5:
+            ai_response_text = generate_fallback_response(user_message, analysis_data.get('sentiment', 'neutral'))
+        
+        # Save conversation to database
+        save_voice_conversation(user_id, user_message, ai_response_text, analysis_data)
+        
+        # Prepare response
+        return jsonify({
+            'success': True,
+            'analysis': {
+                'sentiment': analysis_data.get('sentiment', 'neutral'),
+                'confidence': analysis_data.get('confidence', 0.7),
+                'emotion': analysis_data.get('emotion', 'Neutral'),
+                'keywords': analysis_data.get('keywords', []),
+                'sentiment_score': sentiment_to_score(analysis_data.get('sentiment', 'neutral'))
+            },
+            'response': ai_response_text
+        })
+        
+    except Exception as e:
+        logger.error(f"Voice chat analysis error: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Error analyzing speech. Please try again.',
+            'analysis': {
+                'sentiment': 'neutral',
+                'confidence': 0.5,
+                'emotion': 'Neutral',
+                'keywords': [],
+                'sentiment_score': 0.5
+            },
+            'response': 'I apologize, but I encountered an error. Please try speaking again, and I\'ll do my best to help you.'
+        })
+
+def perform_fallback_analysis(message):
+    """Enhanced fallback analysis when AI is unavailable"""
+    message_lower = message.lower()
+    
+    # Expanded emotional vocabulary
+    positive_words = [
+        'happy', 'good', 'great', 'wonderful', 'amazing', 'love', 'joy', 'excited', 
+        'grateful', 'blessed', 'peaceful', 'content', 'confident', 'motivated', 'proud',
+        'optimistic', 'hopeful', 'cheerful', 'delighted', 'thrilled', 'satisfied', 'calm',
+        'relaxed', 'comfortable', 'successful', 'accomplished', 'energetic', 'positive'
+    ]
+    
+    negative_words = [
+        'sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'frustrated', 'stressed', 
+        'anxious', 'worried', 'depressed', 'lonely', 'confused', 'overwhelmed', 'tired',
+        'upset', 'disappointed', 'scared', 'nervous', 'concerned', 'troubled', 'hurt',
+        'irritated', 'exhausted', 'hopeless', 'discouraged', 'insecure', 'uncertain'
+    ]
+    
+    # Academic/study related words
+    study_words = ['exam', 'test', 'study', 'homework', 'assignment', 'grade', 'class', 'school', 'college', 'university', 'learning']
+    stress_words = ['pressure', 'deadline', 'busy', 'overloaded', 'difficult', 'hard', 'struggling', 'challenge']
+    
+    positive_count = sum(1 for word in positive_words if word in message_lower)
+    negative_count = sum(1 for word in negative_words if word in message_lower)
+    study_count = sum(1 for word in study_words if word in message_lower)
+    stress_count = sum(1 for word in stress_words if word in message_lower)
+    
+    # Determine sentiment and emotion
+    if positive_count > negative_count:
+        sentiment = "positive"
+        confidence = min(0.7 + positive_count * 0.05, 0.95)
+        if 'excited' in message_lower or 'thrilled' in message_lower:
+            emotion = "Excited"
+        elif 'calm' in message_lower or 'peaceful' in message_lower:
+            emotion = "Calm"
+        elif 'confident' in message_lower or 'proud' in message_lower:
+            emotion = "Confident"
+        else:
+            emotion = "Happy"
+    elif negative_count > positive_count or stress_count > 0:
+        sentiment = "negative"
+        confidence = min(0.7 + negative_count * 0.05, 0.95)
+        if 'anxious' in message_lower or 'nervous' in message_lower:
+            emotion = "Anxious"
+        elif 'stressed' in message_lower or stress_count > 0:
+            emotion = "Stressed"
+        elif 'sad' in message_lower or 'depressed' in message_lower:
+            emotion = "Sad"
+        elif 'overwhelmed' in message_lower:
+            emotion = "Overwhelmed"
+        else:
+            emotion = "Concerned"
+    else:
+        sentiment = "neutral"
+        confidence = 0.75
+        if study_count > 0:
+            emotion = "Focused"
+        else:
+            emotion = "Thoughtful"
+    
+    # Extract relevant keywords
+    keywords = []
+    all_emotional_words = positive_words + negative_words + study_words + stress_words
+    for word in all_emotional_words:
+        if word in message_lower:
+            keywords.append(word.capitalize())
+    
+    # Generate contextual response
+    response = generate_contextual_response(message_lower, sentiment, emotion, study_count > 0, stress_count > 0)
+    
+    return {
+        "sentiment": sentiment,
+        "confidence": confidence,
+        "emotion": emotion,
+        "keywords": keywords[:5],  # Limit to 5 keywords
+        "wellness_assessment": f"Student expressed {sentiment} sentiment with {emotion.lower()} emotional state.",
+        "response": response
+    }
+
+def generate_contextual_response(message_lower, sentiment, emotion, is_study_related, is_stress_related):
+    """Generate contextual response based on message analysis"""
+    
+    if sentiment == "positive":
+        responses = [
+            "I'm so glad to hear you're feeling positive! That energy is wonderful and I encourage you to keep nurturing it.",
+            "Your positive attitude really shines through. Remember to celebrate these good moments and share that positivity with others.",
+            "It's beautiful to hear such optimism from you. Keep building on these positive feelings through self-care and mindfulness."
+        ]
+    elif sentiment == "negative":
+        if is_study_related or is_stress_related:
+            responses = [
+                "I understand that academic pressures can feel overwhelming. Remember that it's okay to take breaks and ask for help when you need it.",
+                "Study stress is very common, and you're not alone in feeling this way. Consider breaking tasks into smaller steps and practicing some relaxation techniques.",
+                "Academic challenges can be tough, but they're temporary. Try some deep breathing exercises and remember that your worth isn't defined by grades alone."
+            ]
+        elif emotion == "Anxious":
+            responses = [
+                "I hear that you're feeling anxious, and that's completely valid. Try focusing on your breathing - breathe in for 4 counts, hold for 4, and breathe out for 6.",
+                "Anxiety can feel overwhelming, but remember that these feelings will pass. Consider grounding yourself by naming 5 things you can see around you right now.",
+                "Thank you for sharing your anxious feelings with me. Remember that you're stronger than you think, and it's okay to reach out for support."
+            ]
+        else:
+            responses = [
+                "I hear that you're going through a difficult time right now. These feelings are valid, and it's important to be gentle with yourself.",
+                "Thank you for trusting me with your feelings. Remember that tough times don't last, but resilient people like you do.",
+                "It takes courage to express difficult emotions. Consider talking to a trusted friend or counselor about what you're experiencing."
+            ]
+    else:  # neutral
+        if is_study_related:
+            responses = [
+                "It sounds like you're focused on your studies. Remember to balance your academic work with self-care and rest.",
+                "I appreciate you sharing your thoughts about your academic journey. How can I best support your learning and well-being today?",
+                "Your dedication to your studies is admirable. Don't forget to take breaks and check in with how you're feeling along the way."
+            ]
+        else:
+            responses = [
+                "Thank you for sharing your thoughts with me. I'm here to listen and support you in whatever way would be most helpful.",
+                "I appreciate you taking the time to communicate with me. What would you like to focus on for your well-being today?",
+                "Your willingness to engage shows great self-awareness. How can I best support your mental wellness journey right now?"
+            ]
+    
+    import random
+    return random.choice(responses)
+
+def generate_fallback_response(message, sentiment):
+    """Generate supportive response when AI is unavailable"""
+    responses = {
+        'positive': [
+            "I'm glad to hear you're feeling positive! Keep nurturing those good feelings through self-care and mindfulness.",
+            "Your positive energy is wonderful to hear. Remember to celebrate these moments and share them with others.",
+            "It's great that you're in a good space. Consider keeping a gratitude journal to maintain this positive mindset."
+        ],
+        'negative': [
+            "I hear that you're going through a difficult time. Remember that it's okay to feel this way, and these feelings will pass.",
+            "Thank you for trusting me with your feelings. Consider talking to a counselor or trusted friend about what you're experiencing.",
+            "Your feelings are valid and important. Try some deep breathing exercises or gentle movement to help process these emotions."
+        ],
+        'neutral': [
+            "Thank you for sharing your thoughts with me. I'm here to listen and support you in your mental wellness journey.",
+            "I appreciate you taking the time to communicate. How would you like to focus on your well-being today?",
+            "Your willingness to engage in conversation shows your commitment to self-care. What would be most helpful for you right now?"
+        ]
+    }
+    
+    import random
+    return random.choice(responses.get(sentiment, responses['neutral']))
+
+def sentiment_to_score(sentiment):
+    """Convert sentiment string to numerical score"""
+    scores = {
+        'positive': 0.8,
+        'negative': 0.2,
+        'neutral': 0.5
+    }
+    return scores.get(sentiment, 0.5)
+
+def save_voice_conversation(user_id, user_message, ai_response, analysis_data):
+    """Save voice conversation to database"""
+    try:
+        conn = get_db_connection()
+        
+        # Create voice_conversations table if not exists
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS voice_conversations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                user_message TEXT NOT NULL,
+                ai_response TEXT NOT NULL,
+                sentiment TEXT,
+                confidence REAL,
+                emotion TEXT,
+                keywords TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Insert conversation
+        conn.execute('''
+            INSERT INTO voice_conversations (
+                user_id, user_message, ai_response, sentiment, confidence, emotion, keywords
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            user_id,
+            user_message,
+            ai_response,
+            analysis_data.get('sentiment', 'neutral'),
+            analysis_data.get('confidence', 0.7),
+            analysis_data.get('emotion', 'Neutral'),
+            json.dumps(analysis_data.get('keywords', []))
+        ))
+        
+        conn.commit()
+        conn.close()
+        
+    except Exception as e:
+        logger.error(f"Error saving voice conversation: {e}")
+
 # ==================== FAVICON ROUTE ====================
 
 @app.route('/favicon.ico')

@@ -1,4 +1,4 @@
-# Exclude everything except manas_wellness folder
+    # Exclude everything except manas_wellness folder
 /*
 !/manas_wellness/
 !/.gitignore
@@ -12,6 +12,14 @@ manas_wellness/*.sqlite3
 manas_wellness/manas_env/
 manas_wellness/__pycache__/
 manas_wellness/logs/
+
+# Sensitive files and credentials
+*.json
+*credentials*
+*-key.json
+service-account*.json
+manas_wellness/*credentials*.json
+manas_wellness/fluted-elf-*.json
 
 # Python
 __pycache__/
