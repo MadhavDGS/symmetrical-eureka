@@ -134,6 +134,45 @@ def init_db():
         )
     ''')
     
+    # Journal entries table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS journal_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            content TEXT NOT NULL,
+            content_encrypted TEXT,
+            mood TEXT,
+            energy_level TEXT,
+            sleep_quality TEXT,
+            tags TEXT,
+            sentiment_score REAL,
+            emotion_detected TEXT,
+            voice_file_path TEXT,
+            voice_transcript TEXT,
+            images TEXT,
+            streak_count INTEGER DEFAULT 0,
+            word_count INTEGER DEFAULT 0,
+            ai_insights TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (user_id)
+        )
+    ''')
+    
+    # User streak tracking table
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS user_streaks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            current_streak INTEGER DEFAULT 0,
+            longest_streak INTEGER DEFAULT 0,
+            total_entries INTEGER DEFAULT 0,
+            last_entry_date DATE,
+            streak_milestones TEXT,
+            FOREIGN KEY (user_id) REFERENCES users (user_id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -595,6 +634,330 @@ def analytics_page():
         return render_template('auth.html')
     
     return render_template('analytics.html')
+
+@app.route('/journal', methods=['GET', 'POST'])
+def journal_page():
+    """Enhanced AI-powered journal interface with rich features"""
+    if request.method == 'POST':
+        try:
+            # Get form data
+            journal_entry = request.form.get('journal_entry', '').strip()
+            text_content = request.form.get('text_content', journal_entry).strip()
+            mood = request.form.get('mood', '')
+            energy_level = request.form.get('energy_level', '')
+            sleep_quality = request.form.get('sleep_quality', '')
+            tags = request.form.get('tags', '')
+            word_count = int(request.form.get('word_count', 0))
+            
+            if not text_content:
+                return jsonify({'success': False, 'message': 'Journal entry is required'})
+            
+            # Generate user ID if not exists
+            user_id = session.get('user_id')
+            if not user_id:
+                user_id = str(uuid.uuid4())
+                session['user_id'] = user_id
+            
+            # Simple mood emoji mapping
+            mood_emojis = {
+                'very_happy': '😄',
+                'happy': '😊',
+                'neutral': '😐',
+                'sad': '😔',
+                'anxious': '😰'
+            }
+            
+            mood_emoji = mood_emojis.get(mood, '😐')
+            
+            # Analyze journal entry with Google GenAI
+            analysis_prompt = f"""
+            Analyze this journal entry for comprehensive mental wellness insights:
+            
+            Entry: {text_content}
+            Mood: {mood}
+            Energy Level: {energy_level}
+            Sleep Quality: {sleep_quality}
+            Tags: {tags}
+            
+            Provide detailed analysis including:
+            1. Emotional patterns and sentiment analysis
+            2. Mental wellness recommendations
+            3. Positive affirmations and encouragement
+            4. Suggested mindfulness activities
+            5. Sleep and energy optimization tips
+            
+            Keep response supportive, encouraging, and culturally sensitive.
+            Limit response to 400 words.
+            """
+            
+            # Get AI insights
+            ai_insights = gemini_text(analysis_prompt)
+            
+            if not ai_insights:
+                ai_insights = "Thank you for sharing your thoughts today. Your commitment to mental wellness through journaling is commendable. Regular self-reflection helps build emotional intelligence and resilience."
+            
+            # Simple sentiment analysis
+            emotion_detected = "Neutral"
+            sentiment_score = 0.5
+            
+            try:
+                positive_words = ['happy', 'good', 'great', 'wonderful', 'amazing', 'love', 'joy', 'excited', 'grateful', 'blessed', 'peaceful', 'content']
+                negative_words = ['sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'frustrated', 'stressed', 'anxious', 'worried', 'depressed', 'lonely']
+                
+                text_lower = text_content.lower()
+                positive_count = sum(1 for word in positive_words if word in text_lower)
+                negative_count = sum(1 for word in negative_words if word in text_lower)
+                
+                if positive_count > negative_count:
+                    sentiment_score = 0.7 + min(positive_count * 0.05, 0.3)
+                    emotion_detected = "Positive"
+                elif negative_count > positive_count:
+                    sentiment_score = max(0.3 - negative_count * 0.05, 0.0)
+                    emotion_detected = "Negative"
+                else:
+                    sentiment_score = 0.5
+                    emotion_detected = "Neutral"
+                    
+            except Exception as e:
+                logger.error(f"Sentiment analysis error: {e}")
+            
+            # Save to database
+            conn = get_db_connection()
+            
+            # Ensure enhanced journal_entries table exists
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS journal_entries (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    mood TEXT,
+                    mood_emoji TEXT,
+                    energy_level TEXT,
+                    sleep_quality TEXT,
+                    ai_insights TEXT,
+                    content_encrypted BOOLEAN DEFAULT FALSE,
+                    tags TEXT,
+                    sentiment_score REAL,
+                    emotion_detected TEXT,
+                    voice_file_path TEXT,
+                    voice_transcript TEXT,
+                    images TEXT,
+                    streak_count INTEGER DEFAULT 0,
+                    word_count INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Calculate current streak
+            current_streak = get_current_streak(user_id, conn)
+            
+            # Insert enhanced journal entry
+            conn.execute('''
+                INSERT INTO journal_entries (
+                    user_id, content, mood, mood_emoji, energy_level, sleep_quality, ai_insights,
+                    content_encrypted, tags, sentiment_score, emotion_detected,
+                    voice_file_path, voice_transcript, images, streak_count, word_count
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user_id, journal_entry, mood, mood_emoji, energy_level, sleep_quality, ai_insights,
+                False, tags, sentiment_score, emotion_detected,
+                None, None, None, current_streak, word_count
+            ))
+            
+            # Update streak data
+            update_user_streak(user_id, conn)
+            
+            conn.commit()
+            conn.close()
+            
+            # Parse AI insights for frontend
+            insights = {
+                'mood_analysis': f"Your emotional state shows {emotion_detected.lower()} sentiment with a score of {sentiment_score:.2f}. " + (ai_insights[:150] if ai_insights else ''),
+                'recommendations': ai_insights[150:] if len(ai_insights) > 150 else 'Continue your excellent mental wellness journey with regular journaling and mindfulness practices.'
+            }
+            
+            return jsonify({
+                'success': True,
+                'message': 'Enhanced journal entry saved successfully!',
+                'insights': insights,
+                'sentiment_score': sentiment_score,
+                'emotion_detected': emotion_detected,
+                'current_streak': current_streak
+            })
+            
+        except Exception as e:
+            logger.error(f"Enhanced journal error: {e}")
+            return jsonify({'success': False, 'message': 'Error processing journal entry. Please try again.'})
+    
+    # GET request - show enhanced journal page with previous entries
+    try:
+        user_id = session.get('user_id')
+        journal_entries = []
+        streak_data = {'current_streak': 0, 'longest_streak': 0, 'total_entries': 0}
+        
+        if user_id:
+            conn = get_db_connection()
+            
+            # Ensure table exists
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS journal_entries (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    mood TEXT,
+                    mood_emoji TEXT,
+                    energy_level TEXT,
+                    sleep_quality TEXT,
+                    ai_insights TEXT,
+                    content_encrypted BOOLEAN DEFAULT FALSE,
+                    tags TEXT,
+                    sentiment_score REAL,
+                    emotion_detected TEXT,
+                    voice_file_path TEXT,
+                    voice_transcript TEXT,
+                    images TEXT,
+                    streak_count INTEGER DEFAULT 0,
+                    word_count INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Get recent journal entries
+            entries = conn.execute('''
+                SELECT * FROM journal_entries 
+                WHERE user_id = ? 
+                ORDER BY created_at DESC 
+                LIMIT 20
+            ''', (user_id,)).fetchall()
+            
+            # Convert to list of dicts
+            journal_entries = []
+            for entry in entries:
+                entry_dict = dict(entry)
+                try:
+                    entry_dict['created_at'] = datetime.fromisoformat(entry['created_at'])
+                except:
+                    entry_dict['created_at'] = datetime.now()
+                journal_entries.append(entry_dict)
+            
+            # Get streak data
+            streak_data = get_user_streak_data(user_id, conn)
+            
+            conn.close()
+    
+        return render_template('journal_enhanced.html', 
+                             journal_entries=journal_entries,
+                             streak_data=streak_data)
+        
+    except Exception as e:
+        logger.error(f"Journal page error: {e}")
+        return render_template('journal_enhanced.html', 
+                             journal_entries=[],
+                             streak_data={'current_streak': 0, 'longest_streak': 0, 'total_entries': 0})
+
+def get_current_streak(user_id, conn):
+    """Calculate current journaling streak for user"""
+    try:
+        # Count consecutive days with journal entries
+        entries = conn.execute('''
+            SELECT DATE(created_at) as entry_date 
+            FROM journal_entries 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC
+        ''', (user_id,)).fetchall()
+        
+        if not entries:
+            return 0
+        
+        today = datetime.now().date()
+        current_streak = 0
+        
+        # Check if there's an entry today or yesterday (to account for late night entries)
+        for i, entry in enumerate(entries):
+            entry_date = datetime.fromisoformat(entry['entry_date']).date()
+            days_diff = (today - entry_date).days
+            
+            if i == 0 and days_diff <= 1:  # First entry should be today or yesterday
+                current_streak = 1
+            elif days_diff == current_streak:  # Consecutive day
+                current_streak += 1
+            else:
+                break
+        
+        return current_streak
+        
+    except Exception as e:
+        logger.error(f"Streak calculation error: {e}")
+        return 0
+
+def update_user_streak(user_id, conn):
+    """Update user streak data in database"""
+    try:
+        # Create user_streaks table if not exists
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS user_streaks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT UNIQUE NOT NULL,
+                current_streak INTEGER DEFAULT 0,
+                longest_streak INTEGER DEFAULT 0,
+                total_entries INTEGER DEFAULT 0,
+                last_entry_date DATE,
+                streak_milestones TEXT,  -- JSON array of achieved milestones
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Get current values
+        current_streak = get_current_streak(user_id, conn)
+        
+        # Get total entries
+        total_entries = conn.execute('''
+            SELECT COUNT(*) as count 
+            FROM journal_entries 
+            WHERE user_id = ?
+        ''', (user_id,)).fetchone()['count']
+        
+        # Get or create user streak record
+        existing = conn.execute('''
+            SELECT * FROM user_streaks WHERE user_id = ?
+        ''', (user_id,)).fetchone()
+        
+        if existing:
+            longest_streak = max(existing['longest_streak'], current_streak)
+            conn.execute('''
+                UPDATE user_streaks 
+                SET current_streak = ?, longest_streak = ?, total_entries = ?, 
+                    last_entry_date = DATE('now'), updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = ?
+            ''', (current_streak, longest_streak, total_entries, user_id))
+        else:
+            conn.execute('''
+                INSERT INTO user_streaks (user_id, current_streak, longest_streak, total_entries, last_entry_date)
+                VALUES (?, ?, ?, ?, DATE('now'))
+            ''', (user_id, current_streak, current_streak, total_entries))
+        
+    except Exception as e:
+        logger.error(f"Streak update error: {e}")
+
+def get_user_streak_data(user_id, conn):
+    """Get comprehensive streak data for user"""
+    try:
+        streak_record = conn.execute('''
+            SELECT * FROM user_streaks WHERE user_id = ?
+        ''', (user_id,)).fetchone()
+        
+        if streak_record:
+            return {
+                'current_streak': streak_record['current_streak'],
+                'longest_streak': streak_record['longest_streak'],
+                'total_entries': streak_record['total_entries']
+            }
+        else:
+            return {'current_streak': 0, 'longest_streak': 0, 'total_entries': 0}
+            
+    except Exception as e:
+        logger.error(f"Streak data error: {e}")
+        return {'current_streak': 0, 'longest_streak': 0, 'total_entries': 0}
 
 # ==================== FAVICON ROUTE ====================
 
