@@ -203,11 +203,32 @@ def gemini_analyze_emotion(text: str, context: Dict[str, Any] = None) -> Dict[st
     """
     modality = context.get('modality', 'text') if context else 'text'
     user_age = context.get('age', 18) if context else 18
+    detected_emotion = context.get('detected_emotion') if context else None
+    
+    # Create context-specific prompt based on modality
+    if modality == 'voice' and detected_emotion:
+        analysis_input = f"Voice Analysis Context: {text}\n\nPre-detected vocal emotion: {detected_emotion}\nVoice characteristics: {context.get('voice_characteristics', 'vocal_expression')}"
+        modality_instruction = f"""
+        IMPORTANT: This is a VOICE analysis. The user recorded their voice to express emotions. 
+        A preliminary voice pattern analysis detected the emotion as '{detected_emotion}'.
+        Please provide a comprehensive psychological assessment that considers:
+        - The detected vocal emotion: {detected_emotion}
+        - The fact that the user chose to express themselves through voice
+        - Vocal expression often indicates willingness to communicate and engage
+        - Voice recording suggests active participation in emotional wellness
+        
+        Give this voice-detected emotion significant weight in your analysis, while considering the full context.
+        """
+    else:
+        analysis_input = f"Text Input: '{text}'"
+        modality_instruction = f"This is a {modality} input analysis."
     
     prompt = f"""
     You are an expert clinical psychologist specializing in youth mental health in India. Analyze the following {modality} input for emotional state and mental wellness indicators.
 
-    {f"Text Input: '{text}'" if modality == 'text' else f"Analysis Context: {text}"}
+    {analysis_input}
+    
+    {modality_instruction}
     
     {"Additional Context: " + json.dumps(context) if context else ""}
 
@@ -320,63 +341,114 @@ def _fallback_emotion_analysis(text: str, context: Dict[str, Any] = None, error:
         Fallback emotion analysis result
     """
     try:
-        # Simple keyword-based emotion detection as fallback
-        text_lower = text.lower()
+        # Check if this is voice analysis with detected emotion
+        modality = context.get('modality', 'text') if context else 'text'
+        detected_emotion = context.get('detected_emotion') if context else None
         
-        # Emotion keywords
-        emotion_keywords = {
-            'happy': ['happy', 'joy', 'excited', 'great', 'awesome', 'amazing', 'wonderful', 'fantastic', 'good'],
-            'sad': ['sad', 'depressed', 'down', 'crying', 'tears', 'unhappy', 'miserable', 'heartbroken'],
-            'anxious': ['anxious', 'worried', 'nervous', 'stress', 'panic', 'overwhelmed', 'scared', 'afraid'],
-            'angry': ['angry', 'mad', 'furious', 'hate', 'annoyed', 'frustrated', 'irritated', 'rage'],
-            'confused': ['confused', 'lost', 'uncertain', 'unsure', 'dont know', "don't know", 'puzzled'],
-            'hopeless': ['hopeless', 'worthless', 'useless', 'pointless', 'give up', 'cant do', "can't do"]
-        }
+        if modality == 'voice' and detected_emotion:
+            # Use the detected emotion from voice processing
+            primary_emotion = detected_emotion
+            
+            # Map emotions to appropriate intensities and sentiments
+            emotion_mappings = {
+                'happy': {'intensity': 7, 'sentiment': 0.8, 'risk': 0.1},
+                'excited': {'intensity': 8, 'sentiment': 0.9, 'risk': 0.0},
+                'calm': {'intensity': 4, 'sentiment': 0.5, 'risk': 0.2},
+                'energetic': {'intensity': 7, 'sentiment': 0.7, 'risk': 0.1},
+                'content': {'intensity': 6, 'sentiment': 0.6, 'risk': 0.1},
+                'positive': {'intensity': 6, 'sentiment': 0.7, 'risk': 0.1},
+                'neutral': {'intensity': 3, 'sentiment': 0.0, 'risk': 0.3},
+                'thoughtful': {'intensity': 4, 'sentiment': 0.2, 'risk': 0.2}
+            }
+            
+            mapping = emotion_mappings.get(primary_emotion, {'intensity': 5, 'sentiment': 0.0, 'risk': 0.3})
+            intensity = mapping['intensity']
+            sentiment_score = mapping['sentiment']
+            risk_level = mapping['risk']
+            confidence = 0.7  # Higher confidence for voice-detected emotions
+            
+        else:
+            # Original text-based analysis
+            text_lower = text.lower()
+            
+            # Emotion keywords
+            emotion_keywords = {
+                'happy': ['happy', 'joy', 'excited', 'great', 'awesome', 'amazing', 'wonderful', 'fantastic', 'good'],
+                'sad': ['sad', 'depressed', 'down', 'crying', 'tears', 'unhappy', 'miserable', 'heartbroken'],
+                'anxious': ['anxious', 'worried', 'nervous', 'stress', 'panic', 'overwhelmed', 'scared', 'afraid'],
+                'angry': ['angry', 'mad', 'furious', 'hate', 'annoyed', 'frustrated', 'irritated', 'rage'],
+                'confused': ['confused', 'lost', 'uncertain', 'unsure', 'dont know', "don't know", 'puzzled'],
+                'hopeless': ['hopeless', 'worthless', 'useless', 'pointless', 'give up', 'cant do', "can't do"]
+            }
+            
+            # Risk keywords
+            high_risk_keywords = ['suicide', 'kill myself', 'end it all', 'no point living', 'want to die', 'self harm']
+            moderate_risk_keywords = ['depressed', 'hopeless', 'alone', 'no one cares', 'cant take it', "can't take it"]
+            
+            # Analyze emotions
+            emotion_scores = {}
+            for emotion, keywords in emotion_keywords.items():
+                score = sum(1 for keyword in keywords if keyword in text_lower)
+                emotion_scores[emotion] = score
+            
+            # Determine primary emotion
+            if sum(emotion_scores.values()) == 0:
+                primary_emotion = 'neutral'
+                intensity = 3
+                confidence = 0.3
+                sentiment_score = 0.0
+            else:
+                primary_emotion = max(emotion_scores, key=emotion_scores.get)
+                intensity = min(8, max(3, emotion_scores[primary_emotion] * 2))
+                confidence = min(0.7, max(0.4, emotion_scores[primary_emotion] / 5))
+                sentiment_score = -0.5 if primary_emotion in ['sad', 'angry', 'anxious', 'hopeless'] else 0.0 if primary_emotion == 'neutral' else 0.3
         
-        # Risk keywords
+        # Risk assessment
+        text_lower = text.lower() if 'text_lower' not in locals() else text_lower
         high_risk_keywords = ['suicide', 'kill myself', 'end it all', 'no point living', 'want to die', 'self harm']
         moderate_risk_keywords = ['depressed', 'hopeless', 'alone', 'no one cares', 'cant take it', "can't take it"]
         
-        # Analyze emotions
-        emotion_scores = {}
-        for emotion, keywords in emotion_keywords.items():
-            score = sum(1 for keyword in keywords if keyword in text_lower)
-            emotion_scores[emotion] = score
-        
-        # Determine primary emotion
-        if sum(emotion_scores.values()) == 0:
-            primary_emotion = 'neutral'
-            intensity = 3
-            confidence = 0.3
+        if modality == 'voice' and detected_emotion:
+            # Use the risk level from voice emotion mapping
+            pass  # risk_level already set above
         else:
-            primary_emotion = max(emotion_scores, key=emotion_scores.get)
-            intensity = min(8, max(3, emotion_scores[primary_emotion] * 2))
-            confidence = min(0.7, max(0.4, emotion_scores[primary_emotion] / 5))
-        
-        # Risk assessment
-        risk_level = 0.0
-        if any(keyword in text_lower for keyword in high_risk_keywords):
-            risk_level = 0.9
-        elif any(keyword in text_lower for keyword in moderate_risk_keywords):
-            risk_level = 0.6
-        elif primary_emotion in ['sad', 'hopeless', 'anxious']:
-            risk_level = 0.3
+            # Text-based risk assessment
+            if any(keyword in text_lower for keyword in high_risk_keywords):
+                risk_level = 0.9
+            elif any(keyword in text_lower for keyword in moderate_risk_keywords):
+                risk_level = 0.6
+            elif primary_emotion in ['sad', 'hopeless', 'anxious']:
+                risk_level = 0.3
+            else:
+                risk_level = 0.1
         
         # Generate recommendations
-        recommendations_map = {
-            'happy': "Continue what you're doing! Consider sharing your positive energy with others.",
-            'sad': "It's okay to feel sad. Try talking to someone you trust or practicing mindfulness.",
-            'anxious': "Practice deep breathing exercises. Consider breaking down overwhelming tasks into smaller steps.",
-            'angry': "Try physical exercise or journaling to process these feelings constructively.",
-            'confused': "Take time to reflect. Consider talking to a mentor or counselor for clarity.",
-            'hopeless': "These feelings are temporary. Please reach out to a trusted adult or counselor.",
-            'neutral': "Maintain your emotional balance with regular self-care activities."
-        }
+        if modality == 'voice' and detected_emotion:
+            recommendations_map = {
+                'happy': "Your voice shows genuine happiness! Continue expressing yourself and share this positive energy with others.",
+                'excited': "Your excitement is wonderful to hear! Channel this energy into productive activities you're passionate about.",
+                'calm': "Your calm voice suggests inner peace. This is a great foundation for handling life's challenges.",
+                'energetic': "Your energetic tone is inspiring! Use this momentum for activities that matter to you.",
+                'content': "Your contentment comes through in your voice. This emotional stability is very positive.",
+                'positive': "The positivity in your voice is uplifting! Keep nurturing this optimistic mindset.",
+                'neutral': "Your voice shows emotional balance. Consider exploring activities that might bring more joy.",
+                'thoughtful': "Your thoughtful tone suggests deep reflection. This introspection can lead to valuable insights."
+            }
+        else:
+            recommendations_map = {
+                'happy': "Continue what you're doing! Consider sharing your positive energy with others.",
+                'sad': "It's okay to feel sad. Try talking to someone you trust or practicing mindfulness.",
+                'anxious': "Practice deep breathing exercises. Consider breaking down overwhelming tasks into smaller steps.",
+                'angry': "Try physical exercise or journaling to process these feelings constructively.",
+                'confused': "Take time to reflect. Consider talking to a mentor or counselor for clarity.",
+                'hopeless': "These feelings are temporary. Please reach out to a trusted adult or counselor.",
+                'neutral': "Maintain your emotional balance with regular self-care activities."
+            }
         
         return {
             "primary_emotion": primary_emotion,
             "emotion_intensity": intensity,
-            "sentiment_score": -0.5 if primary_emotion in ['sad', 'angry', 'anxious', 'hopeless'] else 0.0 if primary_emotion == 'neutral' else 0.3,
+            "sentiment_score": sentiment_score,
             "mental_health_indicators": [primary_emotion] if primary_emotion != 'neutral' else [],
             "risk_level": risk_level,
             "confidence": confidence,
@@ -387,8 +459,10 @@ def _fallback_emotion_analysis(text: str, context: Dict[str, Any] = None, error:
             "follow_up_timeline": "immediately" if risk_level > 0.7 else "daily" if risk_level > 0.5 else "weekly",
             "analysis_timestamp": datetime.now().isoformat(),
             "model_used": "fallback_keyword_analysis",
-            "analysis_version": "fallback_1.0",
-            "fallback_reason": error if error else "Gemini API unavailable"
+            "analysis_version": "fallback_2.0",
+            "fallback_reason": error if error else "Gemini API unavailable",
+            "modality": modality,
+            "detected_emotion_source": "voice_pattern_analysis" if modality == 'voice' and detected_emotion else "text_keyword_analysis"
         }
         
     except Exception as fallback_error:

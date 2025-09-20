@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+
+{% block title %}Story Generator - Aarohan{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12 fade-in">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mb-6 breathing-card">
+                <svg class="svg-icon-2xl text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">
+                AI Story Generator
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Create personalized therapeutic stories using AI. Generate narratives that help process emotions, 
+                build resilience, and explore mental wellness themes in a safe, creative space.
+            </p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Story Generation Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-dark-800 rounded-xl p-8 shadow-xl breathing-card">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <svg class="svg-icon-lg mr-3 text-purple-500" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                        </svg>
+                        Create Your Story
+                    </h2>
+
+                    <form id="storyForm" class="space-y-6">
+                        <!-- Story Theme Selection -->
+                        <div>
+                            <label for="storyTheme" class="block text-sm font-semibold mb-3">
+                                Story Theme
+                            </label>
+                            <select id="storyTheme" name="theme" class="w-full" required>
+                                <option value="">Select a therapeutic theme...</option>
+                                <option value="overcoming_anxiety">Overcoming Anxiety</option>
+                                <option value="building_confidence">Building Self-Confidence</option>
+                                <option value="managing_stress">Stress Management</option>
+                                <option value="friendship_support">Friendship & Support</option>
+                                <option value="family_relationships">Family Relationships</option>
+                                <option value="school_challenges">Academic Challenges</option>
+                                <option value="self_discovery">Self-Discovery Journey</option>
+                                <option value="resilience_growth">Building Resilience</option>
+                                <option value="emotional_healing">Emotional Healing</option>
+                                <option value="goal_achievement">Achieving Dreams</option>
+                            </select>
+                        </div>
+
+                        <!-- Main Character Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="characterName" class="block text-sm font-semibold mb-3">
+                                    Main Character Name
+                                </label>
+                                <input type="text" id="characterName" name="character_name" 
+                                       placeholder="e.g., Arjun, Priya, Alex..." class="w-full">
+                            </div>
+                            <div>
+                                <label for="characterAge" class="block text-sm font-semibold mb-3">
+                                    Character Age
+                                </label>
+                                <select id="characterAge" name="character_age" class="w-full">
+                                    <option value="">Select age...</option>
+                                    <option value="13-15">13-15 years (Early Teen)</option>
+                                    <option value="16-18">16-18 years (Late Teen)</option>
+                                    <option value="19-22">19-22 years (Young Adult)</option>
+                                    <option value="23-25">23-25 years (Young Professional)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Story Setting -->
+                        <div>
+                            <label for="storySetting" class="block text-sm font-semibold mb-3">
+                                Story Setting
+                            </label>
+                            <select id="storySetting" name="setting" class="w-full">
+                                <option value="">Choose a setting...</option>
+                                <option value="school_college">School/College Campus</option>
+                                <option value="home_family">Home & Family</option>
+                                <option value="workplace">Workplace/Internship</option>
+                                <option value="community">Local Community</option>
+                                <option value="nature_outdoors">Nature & Outdoors</option>
+                                <option value="city_urban">Urban Environment</option>
+                                <option value="virtual_online">Virtual/Online Space</option>
+                                <option value="cultural_traditional">Cultural/Traditional Setting</option>
+                            </select>
+                        </div>
+
+                        <!-- Specific Challenge or Goal -->
+                        <div>
+                            <label for="storyChallenge" class="block text-sm font-semibold mb-3">
+                                Specific Challenge or Goal (Optional)
+                            </label>
+                            <textarea id="storyChallenge" name="challenge" rows="3" 
+                                      placeholder="Describe a specific situation, challenge, or goal you'd like the story to address..."
+                                      class="w-full"></textarea>
+                        </div>
+
+                        <!-- Story Length -->
+                        <div>
+                            <label for="storyLength" class="block text-sm font-semibold mb-3">
+                                Story Length
+                            </label>
+                            <select id="storyLength" name="length" class="w-full">
+                                <option value="short">Short (2-3 minutes read)</option>
+                                <option value="medium" selected>Medium (5-7 minutes read)</option>
+                                <option value="long">Long (10-12 minutes read)</option>
+                            </select>
+                        </div>
+
+                        <!-- Generate Button -->
+                        <div class="text-center pt-4">
+                            <button type="submit" id="generateBtn" 
+                                    class="btn-primary bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <svg class="svg-icon inline mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                                </svg>
+                                Generate My Story
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden text-center py-12">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full mb-4">
+                            <svg class="animate-spin svg-icon-lg text-purple-600" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"></circle>
+                                <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Creating Your Story...</h3>
+                        <p class="text-gray-600 dark:text-gray-400">AI is crafting a personalized narrative just for you</p>
+                    </div>
+
+                    <!-- Generated Story Display -->
+                    <div id="storyResult" class="hidden mt-8 p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-purple-800 dark:text-purple-200">Your Personalized Story</h3>
+                            <div class="flex space-x-2">
+                                <button id="copyStoryBtn" class="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-100 dark:hover:bg-purple-800 rounded-lg transition-colors">
+                                    <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                    </svg>
+                                </button>
+                                <button id="shareStoryBtn" class="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-100 dark:hover:bg-purple-800 rounded-lg transition-colors">
+                                    <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="storyContent" class="prose prose-purple max-w-none text-gray-800 dark:text-gray-200 leading-relaxed">
+                            <!-- Generated story will appear here -->
+                        </div>
+                        <div class="mt-6 p-4 bg-white dark:bg-dark-700 rounded-lg border-l-4 border-purple-400">
+                            <h4 class="font-semibold text-purple-800 dark:text-purple-200 mb-2">Reflection Questions:</h4>
+                            <div id="reflectionQuestions" class="text-sm text-gray-700 dark:text-gray-300">
+                                <!-- Reflection questions will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar - Tips and Benefits -->
+            <div class="lg:col-span-1">
+                <div class="space-y-6">
+                    <!-- Benefits Card -->
+                    <div class="bg-white dark:bg-dark-800 rounded-xl p-6 shadow-xl">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <svg class="svg-icon-lg mr-3 text-green-500" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z" />
+                            </svg>
+                            Benefits of Story Therapy
+                        </h3>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex items-start">
+                                <svg class="svg-icon-sm mr-2 mt-0.5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Process emotions safely through narrative
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="svg-icon-sm mr-2 mt-0.5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Build resilience and coping strategies
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="svg-icon-sm mr-2 mt-0.5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Explore different perspectives
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="svg-icon-sm mr-2 mt-0.5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Enhance self-understanding
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="svg-icon-sm mr-2 mt-0.5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                </svg>
+                                Practice problem-solving skills
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Tips Card -->
+                    <div class="bg-white dark:bg-dark-800 rounded-xl p-6 shadow-xl">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <svg class="svg-icon-lg mr-3 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+                            </svg>
+                            Tips for Better Stories
+                        </h3>
+                        <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                            <li class="flex items-start">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                                Be specific about challenges you're facing
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                                Choose themes that resonate with your current situation
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                                Read your story multiple times for deeper insights
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                                Reflect on the character's journey and growth
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                                Save meaningful stories for future reference
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Recent Stories -->
+                    <div class="bg-white dark:bg-dark-800 rounded-xl p-6 shadow-xl">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <svg class="svg-icon-lg mr-3 text-purple-500" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" />
+                            </svg>
+                            Your Story History
+                        </h3>
+                        <div id="storyHistory" class="text-sm text-gray-600 dark:text-gray-400">
+                            <p class="text-center py-4">
+                                Your generated stories will appear here
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const storyForm = document.getElementById('storyForm');
+    const generateBtn = document.getElementById('generateBtn');
+    const loadingState = document.getElementById('loadingState');
+    const storyResult = document.getElementById('storyResult');
+    const storyContent = document.getElementById('storyContent');
+    const reflectionQuestions = document.getElementById('reflectionQuestions');
+    const copyStoryBtn = document.getElementById('copyStoryBtn');
+    const shareStoryBtn = document.getElementById('shareStoryBtn');
+    const storyHistory = document.getElementById('storyHistory');
+
+    // Load story history from localStorage
+    function loadStoryHistory() {
+        const history = JSON.parse(localStorage.getItem('storyHistory') || '[]');
+        if (history.length === 0) {
+            storyHistory.innerHTML = '<p class="text-center py-4">Your generated stories will appear here</p>';
+            return;
+        }
+
+        storyHistory.innerHTML = history.slice(-5).reverse().map((story, index) => `
+            <div class="border-b border-gray-200 dark:border-gray-600 pb-3 mb-3 last:border-b-0 last:mb-0">
+                <h4 class="font-medium text-sm">${story.theme}</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">${new Date(story.timestamp).toLocaleDateString()}</p>
+                <button onclick="loadPreviousStory(${history.length - 1 - index})" class="text-xs text-purple-600 hover:text-purple-800 mt-1">
+                    View Story
+                </button>
+            </div>
+        `).join('');
+    }
+
+    // Save story to history
+    function saveStoryToHistory(formData, generatedStory, reflections) {
+        const history = JSON.parse(localStorage.getItem('storyHistory') || '[]');
+        history.push({
+            timestamp: new Date().toISOString(),
+            theme: formData.theme,
+            characterName: formData.character_name,
+            story: generatedStory,
+            reflections: reflections
+        });
+        localStorage.setItem('storyHistory', JSON.stringify(history));
+        loadStoryHistory();
+    }
+
+    // Load previous story
+    window.loadPreviousStory = function(index) {
+        const history = JSON.parse(localStorage.getItem('storyHistory') || '[]');
+        const story = history[index];
+        if (story) {
+            storyContent.innerHTML = story.story;
+            reflectionQuestions.innerHTML = story.reflections;
+            storyResult.classList.remove('hidden');
+            storyResult.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    // Form submission
+    storyForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(storyForm);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Validation
+        if (!data.theme) {
+            alert('Please select a story theme.');
+            return;
+        }
+
+        // Show loading state
+        storyForm.classList.add('hidden');
+        loadingState.classList.remove('hidden');
+        
+        try {
+            const response = await fetch('/generate-story', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to generate story');
+            }
+            
+            const result = await response.json();
+            
+            // Display the generated story
+            storyContent.innerHTML = result.story;
+            reflectionQuestions.innerHTML = result.reflections;
+            
+            // Save to history
+            saveStoryToHistory(data, result.story, result.reflections);
+            
+            // Show result
+            loadingState.classList.add('hidden');
+            storyResult.classList.remove('hidden');
+            storyResult.scrollIntoView({ behavior: 'smooth' });
+            
+        } catch (error) {
+            console.error('Error generating story:', error);
+            loadingState.classList.add('hidden');
+            storyForm.classList.remove('hidden');
+            alert('Sorry, there was an error generating your story. Please try again.');
+        }
+    });
+
+    // Copy story functionality
+    copyStoryBtn.addEventListener('click', function() {
+        const storyText = storyContent.innerText;
+        const reflectionText = reflectionQuestions.innerText;
+        const fullText = `${storyText}\n\n${reflectionText}`;
+        
+        navigator.clipboard.writeText(fullText).then(function() {
+            copyStoryBtn.innerHTML = '<svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>';
+            setTimeout(() => {
+                copyStoryBtn.innerHTML = '<svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" /></svg>';
+            }, 2000);
+        });
+    });
+
+    // Share story functionality
+    shareStoryBtn.addEventListener('click', function() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'My Therapeutic Story',
+                text: storyContent.innerText
+            });
+        } else {
+            // Fallback to copy
+            copyStoryBtn.click();
+        }
+    });
+
+    // Reset form button
+    function resetForm() {
+        storyForm.reset();
+        storyForm.classList.remove('hidden');
+        loadingState.classList.add('hidden');
+        storyResult.classList.add('hidden');
+    }
+
+    // Add reset button after story is generated
+    function addResetButton() {
+        if (!document.getElementById('resetBtn')) {
+            const resetBtn = document.createElement('button');
+            resetBtn.id = 'resetBtn';
+            resetBtn.type = 'button';
+            resetBtn.className = 'mt-4 px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors';
+            resetBtn.innerHTML = 'Generate Another Story';
+            resetBtn.onclick = resetForm;
+            storyResult.appendChild(resetBtn);
+        }
+    }
+
+    // Initialize
+    loadStoryHistory();
+});
+</script>
+{% endblock %}

@@ -33,11 +33,52 @@
                             </button>
                         </div>
                     {% else %}
-                        <p class="text-gray-400">Complete emotion analysis to get personalized therapy</p>
-                        <button onclick="startEmotionAnalysis()" 
-                                class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                            Analyze My Emotions
-                        </button>
+                        <p class="text-gray-400 mb-4">Let's understand your current emotional state to provide personalized therapy</p>
+                        <div class="space-y-3">
+                            <div class="text-sm text-gray-500 mb-3">Choose how you'd like to share your emotions:</div>
+                            
+                            <!-- Quick emotion selection -->
+                            <div class="grid grid-cols-3 gap-2 mb-4">
+                                <button onclick="selectQuickEmotion('happy')" 
+                                        class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                    <span class="text-2xl block">😊</span>
+                                    <span class="text-sm text-gray-300">Happy</span>
+                                </button>
+                                <button onclick="selectQuickEmotion('sad')" 
+                                        class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                    <span class="text-2xl block">😢</span>
+                                    <span class="text-sm text-gray-300">Sad</span>
+                                </button>
+                                <button onclick="selectQuickEmotion('anxious')" 
+                                        class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                    <span class="text-2xl block">😰</span>
+                                    <span class="text-sm text-gray-300">Anxious</span>
+                                </button>
+                                <button onclick="selectQuickEmotion('angry')" 
+                                        class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                    <span class="text-2xl block">😠</span>
+                                    <span class="text-sm text-gray-300">Angry</span>
+                                </button>
+                                <button onclick="selectQuickEmotion('stressed')" 
+                                        class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                    <span class="text-2xl block">😫</span>
+                                    <span class="text-sm text-gray-300">Stressed</span>
+                                </button>
+                                <button onclick="selectQuickEmotion('neutral')" 
+                                        class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                    <span class="text-2xl block">😐</span>
+                                    <span class="text-sm text-gray-300">Neutral</span>
+                                </button>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="text-xs text-gray-500 mb-3">or</div>
+                                <button onclick="startDetailedEmotionAnalysis()" 
+                                        class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    Detailed Emotion Analysis
+                                </button>
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
             </div>
@@ -245,9 +286,51 @@
 let currentSessionId = null;
 let currentEmotion = null;
 
-// Start emotion analysis
-async function startEmotionAnalysis() {
+// Quick emotion selection for immediate therapy
+function selectQuickEmotion(emotion) {
+    console.log('Quick emotion selected:', emotion);
+    
+    // Update display
+    const emotionDisplay = document.getElementById('emotion-display');
+    const emotionEmojis = {
+        'happy': '😊',
+        'sad': '😢', 
+        'anxious': '😰',
+        'angry': '😠',
+        'stressed': '😫',
+        'neutral': '😐'
+    };
+    
+    emotionDisplay.innerHTML = `
+        <div class="text-center">
+            <span class="text-4xl mb-2 block">${emotionEmojis[emotion] || '😐'}</span>
+            <h3 class="text-2xl font-bold text-white mb-2 capitalize">${emotion}</h3>
+            <p class="text-gray-400 mb-4">Quick emotion selection</p>
+            <button onclick="generateTherapyFromEmotion('${emotion}')" 
+                    class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                Generate Therapy Session
+            </button>
+            <button onclick="resetEmotionSelection()" 
+                    class="ml-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                Change
+            </button>
+        </div>
+    `;
+}
+
+// Reset emotion selection
+function resetEmotionSelection() {
+    location.reload(); // Simple reset - reload the page
+}
+
+// Detailed emotion analysis (redirects to analysis page)
+function startDetailedEmotionAnalysis() {
     window.location.href = '/emotion-analysis?return=therapy';
+}
+
+// Legacy function name for compatibility
+async function startEmotionAnalysis() {
+    startDetailedEmotionAnalysis();
 }
 
 // Generate therapy from known emotion (avoiding circular navigation)

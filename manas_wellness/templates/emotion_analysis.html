@@ -397,7 +397,18 @@
     
     async function startRecording() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Check if browser supports audio recording
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('Audio recording is not supported in this browser');
+            }
+            
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    sampleRate: 44100
+                } 
+            });
             
             mediaRecorder = new MediaRecorder(stream);
             recordedChunks = [];
@@ -422,7 +433,7 @@
             
             // Update UI
             document.getElementById('record-button').innerHTML = '<svg class="w-6 h-6 inline mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> ⏹️ Stop Recording';
-            document.getElementById('recording-status').textContent = 'Recording in progress...';
+            document.getElementById('recording-status').textContent = 'Recording in progress... Speak clearly about your feelings';
             document.getElementById('recording-timer').classList.remove('hidden');
             
             // Start timer
@@ -431,7 +442,20 @@
             
         } catch (error) {
             console.error('Error starting recording:', error);
-            alert('Unable to access microphone. Please check permissions and try again.');
+            let errorMessage = 'Unable to start recording. ';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMessage += 'Please allow microphone access in your browser settings and try again.';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage += 'No microphone found. Please check if a microphone is connected.';
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage += 'Audio recording is not supported in this browser.';
+            } else {
+                errorMessage += error.message || 'Please check permissions and try again.';
+            }
+            
+            document.getElementById('recording-status').textContent = errorMessage;
+            alert(errorMessage);
         }
     }
     
@@ -504,6 +528,13 @@
     
     async function startCamera() {
         try {
+            // Check if browser supports getUserMedia
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('Camera access is not supported in this browser');
+            }
+            
+            document.getElementById('camera-status').textContent = 'Requesting camera access...';
+            
             cameraStream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     width: { ideal: 640 }, 
@@ -524,11 +555,24 @@
             // Update UI
             document.getElementById('camera-button').innerHTML = '<svg class="w-6 h-6 inline mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> ⏹️ Stop Camera';
             document.getElementById('capture-button').classList.remove('hidden');
-            document.getElementById('camera-status').textContent = 'Camera active - position your face in the frame';
+            document.getElementById('camera-status').textContent = 'Camera active - position your face in the frame and click Capture & Analyze';
             
         } catch (error) {
             console.error('Error accessing camera:', error);
-            alert('Unable to access camera. Please check permissions and try again.');
+            let errorMessage = 'Unable to access camera. ';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMessage += 'Please allow camera access in your browser settings and try again.';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage += 'No camera found. Please check if a camera is connected.';
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage += 'Camera is not supported in this browser.';
+            } else {
+                errorMessage += error.message || 'Please check permissions and try again.';
+            }
+            
+            document.getElementById('camera-status').textContent = errorMessage;
+            alert(errorMessage);
         }
     }
     

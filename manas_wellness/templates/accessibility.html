@@ -287,10 +287,27 @@ async function toggleEyeTracking() {
     const status = document.getElementById('eye-tracking-status');
     const controls = document.getElementById('eye-tracking-controls');
     
+    console.log('Eye tracking toggle clicked, current state:', eyeTrackingActive);
+    
     if (!eyeTrackingActive) {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('eye-tracking-video').srcObject = stream;
+            console.log('Requesting camera access...');
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    width: 640, 
+                    height: 480 
+                } 
+            });
+            
+            const video = document.getElementById('eye-tracking-video');
+            if (!video) {
+                console.error('Eye tracking video element not found');
+                alert('Eye tracking video element not found. Please refresh the page.');
+                return;
+            }
+            
+            video.srcObject = stream;
+            console.log('Camera stream started successfully');
             
             eyeTrackingActive = true;
             toggle.textContent = 'Stop';
@@ -303,12 +320,18 @@ async function toggleEyeTracking() {
             
             startEyeTracking();
         } catch (error) {
-            alert('Camera access required for eye tracking. Please allow camera access and try again.');
+            console.error('Camera access error:', error);
+            alert('Camera access required for eye tracking. Please allow camera access and try again.\n\nError: ' + error.message);
         }
     } else {
-        const stream = document.getElementById('eye-tracking-video').srcObject;
+        console.log('Stopping eye tracking...');
+        const video = document.getElementById('eye-tracking-video');
+        const stream = video ? video.srcObject : null;
         if (stream) {
-            stream.getTracks().forEach(track => track.stop());
+            stream.getTracks().forEach(track => {
+                console.log('Stopping track:', track.kind);
+                track.stop();
+            });
         }
         
         eyeTrackingActive = false;
@@ -319,26 +342,80 @@ async function toggleEyeTracking() {
         status.classList.remove('bg-green-200', 'text-green-700');
         status.classList.add('bg-gray-200', 'text-gray-700');
         controls.classList.add('hidden');
+        
+        // Hide gaze cursor
+        const gazeCursor = document.getElementById('gaze-cursor');
+        if (gazeCursor) {
+            gazeCursor.classList.add('hidden');
+        }
     }
 }
 
 function startEyeTracking() {
-    // Simulate eye tracking (in real implementation, this would use MediaPipe)
+    console.log('Starting eye tracking simulation...');
     const gazeCursor = document.getElementById('gaze-cursor');
-    gazeCursor.classList.remove('hidden');
+    const video = document.getElementById('eye-tracking-video');
     
-    // Simulate gaze movement
-    setInterval(() => {
-        if (eyeTrackingActive) {
-            const video = document.getElementById('eye-tracking-video');
-            const rect = video.getBoundingClientRect();
-            const x = Math.random() * rect.width;
-            const y = Math.random() * rect.height;
-            
-            gazeCursor.style.left = x + 'px';
-            gazeCursor.style.top = y + 'px';
+    if (!gazeCursor) {
+        console.error('Gaze cursor element not found');
+        return;
+    }
+    
+    if (!video) {
+        console.error('Eye tracking video element not found');
+        return;
+    }
+    
+    gazeCursor.classList.remove('hidden');
+    console.log('Gaze cursor made visible');
+    
+    // Simulate eye tracking with more realistic movement
+    let eyeTrackingInterval;
+    
+    const updateGazePosition = () => {
+        if (!eyeTrackingActive) {
+            if (eyeTrackingInterval) {
+                clearInterval(eyeTrackingInterval);
+            }
+            return;
         }
-    }, 100);
+        
+        const rect = video.getBoundingClientRect();
+        // Simulate more natural eye movement patterns
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const time = Date.now() / 1000;
+        
+        // Add some sine wave movement for more natural looking tracking
+        const x = centerX + Math.sin(time * 0.5) * 100 + (Math.random() - 0.5) * 20;
+        const y = centerY + Math.cos(time * 0.3) * 60 + (Math.random() - 0.5) * 15;
+        
+        // Ensure gaze stays within video bounds
+        const clampedX = Math.max(0, Math.min(rect.width - 16, x));
+        const clampedY = Math.max(0, Math.min(rect.height - 16, y));
+        
+        gazeCursor.style.left = clampedX + 'px';
+        gazeCursor.style.top = clampedY + 'px';
+        
+        // Add visual feedback for "looking" at UI elements
+        const elements = document.elementsFromPoint(
+            rect.left + clampedX + 8, 
+            rect.top + clampedY + 8
+        );
+        
+        // Highlight elements being "looked at"
+        elements.forEach(el => {
+            if (el.tagName === 'BUTTON' || el.classList.contains('clickable')) {
+                el.style.boxShadow = '0 0 10px rgba(59, 130, 246, 0.5)';
+                setTimeout(() => {
+                    el.style.boxShadow = '';
+                }, 200);
+            }
+        });
+    };
+    
+    // Update gaze position every 50ms for smooth movement
+    eyeTrackingInterval = setInterval(updateGazePosition, 50);
 }
 
 // Voice control toggle
