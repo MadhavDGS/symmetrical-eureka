@@ -1,0 +1,1985 @@
+{% extends "base.html" %}
+
+{% block title %}Art & Music Therapy - Aarohan{% endblock %}
+
+{% block head %}
+<style>
+    /* Custom styles for Art & Music Therapy */
+    .therapy-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .dark .therapy-card {
+        background: rgba(30, 41, 59, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .therapy-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Drawing Canvas Styles */
+    #drawingCanvas {
+        border: 3px solid #10b981;
+        border-radius: 12px;
+        cursor: crosshair;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tool-button {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .tool-button:hover,
+    .tool-button.active {
+        border-color: #10b981;
+        background: #f0fdf4;
+        transform: scale(1.05);
+    }
+    
+    .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .color-option:hover,
+    .color-option.selected {
+        transform: scale(1.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Music Player Styles */
+    .playlist-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 20px;
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .playlist-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+    }
+    
+    .mood-selector {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 12px 20px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    
+    .mood-selector:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Voice Recording Styles */
+    .voice-recorder {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        color: white;
+    }
+    
+    .record-button {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 3px solid white;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    
+    .record-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+    
+    .record-button.recording {
+        animation: pulse-record 2s infinite;
+        background: #ff4757;
+    }
+    
+    @keyframes pulse-record {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Wave animation for audio visualization */
+    .wave {
+        width: 4px;
+        height: 20px;
+        background: #10b981;
+        margin: 0 2px;
+        border-radius: 2px;
+        animation: wave 1s infinite ease-in-out;
+        display: inline-block;
+    }
+    
+    .wave:nth-child(2) { animation-delay: 0.1s; }
+    .wave:nth-child(3) { animation-delay: 0.2s; }
+    .wave:nth-child(4) { animation-delay: 0.3s; }
+    .wave:nth-child(5) { animation-delay: 0.4s; }
+    
+    @keyframes wave {
+        0%, 40%, 100% { transform: scaleY(0.4); }
+        20% { transform: scaleY(1); }
+    }
+    
+    /* Therapy session styles */
+    .session-summary {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .emotion-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: 4px;
+    }
+    
+    .emotion-happy { background: #d4edda; color: #155724; }
+    .emotion-sad { background: #d1ecf1; color: #0c5460; }
+    .emotion-angry { background: #f8d7da; color: #721c24; }
+    .emotion-anxious { background: #fff3cd; color: #856404; }
+    .emotion-calm { background: #d4edda; color: #155724; }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .tool-button { width: 40px; height: 40px; }
+        .color-option { width: 30px; height: 30px; }
+        .record-button { width: 60px; height: 60px; font-size: 18px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                🎨 Art & Music Therapy
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Express yourself through creative arts, discover healing through music, and journal your thoughts with AI-powered emotional insights.
+            </p>
+        </div>
+
+        <!-- Main Therapy Sections -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
+            
+            <!-- Digital Art Therapy -->
+            <div class="therapy-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                        🎨 Digital Art Therapy
+                        <span class="ml-2 text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">Express Yourself</span>
+                    </h2>
+                    <div class="flex space-x-2">
+                        <button id="saveArt" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            💾 Save
+                        </button>
+                        <button id="clearCanvas" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Drawing Tools -->
+                <div class="mb-4 flex flex-wrap items-center gap-4">
+                    <!-- Brush Tools -->
+                    <div class="flex space-x-2">
+                        <button class="tool-button active" data-tool="brush" title="Brush">
+                            ✏️
+                        </button>
+                        <button class="tool-button" data-tool="eraser" title="Eraser">
+                            🧽
+                        </button>
+                    </div>
+
+                    <!-- Brush Sizes -->
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Size:</span>
+                        <input type="range" id="brushSize" min="1" max="50" value="5" class="w-24">
+                        <span id="sizeDisplay" class="text-sm text-gray-600 dark:text-gray-400">5px</span>
+                    </div>
+
+                    <!-- Color Palette -->
+                    <div class="flex space-x-2">
+                        <div class="color-option selected" data-color="#000000" style="background-color: #000000" title="Black"></div>
+                        <div class="color-option" data-color="#ff4757" style="background-color: #ff4757" title="Red"></div>
+                        <div class="color-option" data-color="#2ed573" style="background-color: #2ed573" title="Green"></div>
+                        <div class="color-option" data-color="#1e90ff" style="background-color: #1e90ff" title="Blue"></div>
+                        <div class="color-option" data-color="#ffa502" style="background-color: #ffa502" title="Orange"></div>
+                        <div class="color-option" data-color="#8e44ad" style="background-color: #8e44ad" title="Purple"></div>
+                        <div class="color-option" data-color="#f8b500" style="background-color: #f8b500" title="Yellow"></div>
+                    </div>
+                </div>
+
+                <!-- Drawing Canvas -->
+                <div class="bg-white rounded-lg p-4">
+                    <canvas id="drawingCanvas" width="600" height="400" class="w-full h-auto max-w-full"></canvas>
+                </div>
+
+                <!-- Art Therapy Prompts -->
+                <div class="mt-6 grid grid-cols-1 gap-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">💭 Emotion Mapping</h4>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">Draw how you're feeling right now using colors and shapes.</p>
+                    </div>
+                    <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                        <h4 class="font-semibold text-purple-800 dark:text-purple-200 mb-2">🌟 Future Vision</h4>
+                        <p class="text-sm text-purple-700 dark:text-purple-300">Sketch your ideal self or future goals.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Music Therapy Section -->
+            <div class="therapy-card rounded-2xl p-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                        � Music Therapy Hub
+                        <span class="ml-2 text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full">Heal with Music</span>
+                    </h2>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Discover curated playlists designed to support your emotional wellness journey.
+                    </p>
+                </div>
+
+                <!-- Mood Selection -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 text-center">How are you feeling today?</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="mood-selector text-sm py-3 px-4" data-mood="happy">😊 Happy & Energetic</button>
+                        <button class="mood-selector text-sm py-3 px-4" data-mood="sad">😔 Sad & Reflective</button>
+                        <button class="mood-selector text-sm py-3 px-4" data-mood="anxious">😰 Anxious & Stressed</button>
+                        <button class="mood-selector text-sm py-3 px-4" data-mood="calm">😌 Need Calm & Peace</button>
+                        <button class="mood-selector text-sm py-3 px-4" data-mood="focused">🎯 Need Focus</button>
+                        <button class="mood-selector text-sm py-3 px-4" data-mood="motivated">💪 Need Motivation</button>
+                    </div>
+                </div>
+
+                <!-- Current Playing -->
+                <div class="mb-6 p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white text-center">
+                    <h4 class="font-semibold mb-2">🎶 Now Playing</h4>
+                    <p id="currentTrack" class="text-sm opacity-90">Select a mood to start your therapy session</p>
+                    <div class="mt-3">
+                        <button id="playPauseBtn" class="bg-white text-purple-600 px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors">
+                            ▶️ Start Music Therapy
+                        </button>
+                        <!-- Test Audio Button -->
+                        <button id="testAudioBtn" class="ml-2 bg-yellow-500 text-white px-3 py-2 rounded-full text-sm hover:bg-yellow-600 transition-colors" onclick="musicTherapy.testAudio()">
+                            🔊 Test Audio
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Playlist Recommendations -->
+                <div id="playlistContainer" class="space-y-3 max-h-64 overflow-y-auto">
+                    <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                        <p>🎵 Select your mood above to see personalized playlists</p>
+                    </div>
+                </div>
+
+                <!-- Embedded Music Player -->
+                <div id="musicPlayerContainer" class="hidden mt-6">
+                    <div class="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-xl p-6">
+                        <h4 class="font-semibold text-purple-800 dark:text-purple-200 mb-4">🎧 Bollywood Music Player</h4>
+                        
+                        <!-- Current Track Info -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div id="currentTrackName" class="font-bold text-gray-800 dark:text-gray-200">
+                                        No track selected
+                                    </div>
+                                    <div id="currentTrackArtist" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        Select a playlist to start
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button id="prevBtn" class="bg-gray-500 text-white px-3 py-2 rounded-full hover:bg-gray-600 transition-colors" onclick="musicTherapy.previousTrack()">
+                                        ⏮️
+                                    </button>
+                                    <button id="playPauseMainBtn" class="bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-purple-600 transition-colors" onclick="musicTherapy.toggleMainPlayer()">
+                                        ▶️ Play
+                                    </button>
+                                    <button id="nextTrackBtn" class="bg-gray-500 text-white px-3 py-2 rounded-full hover:bg-gray-600 transition-colors" onclick="musicTherapy.nextTrack()">
+                                        ⏭️
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="mt-4">
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span id="currentTime">0:00</span>
+                                    <span id="totalTime">3:30</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 cursor-pointer" onclick="musicTherapy.seekTo(event)">
+                                    <div id="progressBar" class="bg-purple-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Volume and Controls -->
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm">🔊</span>
+                                    <input type="range" id="volumeSlider" min="0" max="100" value="70" class="w-20" 
+                                           onchange="musicTherapy.setVolume(this.value)">
+                                    <span id="volumeValue" class="text-xs text-gray-500">70%</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                                    <span>🔄 Loop:</span>
+                                    <button id="loopBtn" class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs" onclick="musicTherapy.toggleLoop()">
+                                        Off
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Embedded Player (Spotify/YouTube) -->
+                        <div id="embeddedPlayer" class="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                            <!-- External player embeds will appear here -->
+                        </div>
+                        
+                        <!-- Audio Element for Local Playback -->
+                        <audio id="localAudioPlayer" class="w-full mt-4" controls 
+                               ontimeupdate="musicTherapy.updateProgress()" 
+                               onloadedmetadata="musicTherapy.updateDuration()"
+                               onended="musicTherapy.trackEnded()"
+                               onplay="musicTherapy.onAudioPlay()"
+                               onpause="musicTherapy.onAudioPause()"
+                               onerror="musicTherapy.onAudioError()">
+                            <source id="audioSource" src="" type="audio/mpeg">
+                            <source id="audioSource2" src="" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        
+                        <!-- Playlist Queue -->
+                        <div class="mt-4">
+                            <h5 class="font-semibold text-purple-800 dark:text-purple-200 mb-2">🎵 Current Playlist</h5>
+                            <div id="playlistQueue" class="space-y-2 max-h-40 overflow-y-auto">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">No playlist loaded</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Therapy Benefits -->
+                <div class="mt-6 grid grid-cols-1 gap-4">
+                    <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 dark:text-green-200 mb-2">🎵 Music Benefits</h4>
+                        <p class="text-sm text-green-700 dark:text-green-300">Music therapy reduces stress hormones and boosts mood-enhancing chemicals.</p>
+                    </div>
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4">
+                        <h4 class="font-semibold text-indigo-800 dark:text-indigo-200 mb-2">🧠 Brain Waves</h4>
+                        <p class="text-sm text-indigo-700 dark:text-indigo-300">Different frequencies can synchronize brainwaves for relaxation or focus.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Journaling Section -->
+        <div class="therapy-card rounded-2xl p-6 mb-8">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    � Voice Journal & AI Analysis
+                    <span class="ml-2 text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">AI Powered</span>
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300">
+                    Express your thoughts through voice and receive AI-powered emotional insights.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Voice Recording Interface -->
+                <div class="voice-recorder">
+                    <button id="recordButton" class="record-button mb-4">
+                        🎤
+                    </button>
+                    <p id="recordingStatus" class="text-lg font-medium mb-4">Press to start recording</p>
+                    
+                    <!-- Audio Visualization -->
+                    <div id="audioVisualizer" class="hidden mb-4">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                    
+                    <div id="recordingTimer" class="text-sm opacity-75 hidden">00:00</div>
+                </div>
+
+                <!-- Voice Analysis Results -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-4">🧠 AI Emotional Analysis</h4>
+                    
+                    <div id="voiceAnalysis" class="hidden">
+                        <div id="emotionResults" class="space-y-2 mb-4"></div>
+                        <div id="therapyInsights" class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg mb-4">
+                            <p class="text-sm text-green-800 dark:text-green-200"></p>
+                        </div>
+                        <div id="recommendedActions" class="space-y-2">
+                            <!-- Populated with music and art recommendations -->
+                        </div>
+                    </div>
+
+                    <!-- Previous Recordings -->
+                    <div>
+                        <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">📚 Recent Entries</h5>
+                        <div id="recentRecordings" class="space-y-2 max-h-32 overflow-y-auto">
+                            <p class="text-sm text-gray-500">No recordings yet - start by sharing your thoughts!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Therapy Session Summary -->
+        <div class="session-summary">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">📊 Today's Creative Therapy Session</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600" id="artTimeSpent">0</div>
+                    <div class="text-sm text-gray-600">Minutes Creating Art</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600" id="voiceEntriesCount">0</div>
+                    <div class="text-sm text-gray-600">Voice Journal Entries</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600" id="musicListenTime">0</div>
+                    <div class="text-sm text-gray-600">Minutes of Music Therapy</div>
+                </div>
+            </div>
+            
+            <div class="mt-6" id="emotionSummary">
+                <h4 class="font-semibold text-gray-700 mb-2">Detected Emotions Today:</h4>
+                <div id="emotionBadges">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Art Therapy Canvas Implementation
+    class ArtTherapyCanvas {
+        constructor() {
+            this.canvas = document.getElementById('drawingCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.isDrawing = false;
+            this.currentTool = 'brush';
+            this.currentColor = '#000000';
+            this.currentSize = 5;
+            this.artStartTime = Date.now();
+            
+            this.setupCanvas();
+            this.bindEvents();
+        }
+        
+        setupCanvas() {
+            // Set canvas size
+            const rect = this.canvas.getBoundingClientRect();
+            this.canvas.width = rect.width * 2;
+            this.canvas.height = rect.height * 2;
+            this.ctx.scale(2, 2);
+            
+            // Set default styles
+            this.ctx.lineCap = 'round';
+            this.ctx.lineJoin = 'round';
+            this.ctx.fillStyle = 'white';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+        
+        bindEvents() {
+            // Mouse events
+            this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+            this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+            this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+            this.canvas.addEventListener('mouseout', () => this.stopDrawing());
+            
+            // Touch events for mobile
+            this.canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.startDrawing(e.touches[0]);
+            });
+            this.canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                this.draw(e.touches[0]);
+            });
+            this.canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.stopDrawing();
+            });
+            
+            // Tool buttons
+            document.querySelectorAll('[data-tool]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    this.currentTool = btn.dataset.tool;
+                });
+            });
+            
+            // Color buttons
+            document.querySelectorAll('[data-color]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('[data-color]').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    this.currentColor = btn.dataset.color;
+                });
+            });
+            
+            // Brush size
+            const brushSize = document.getElementById('brushSize');
+            const sizeDisplay = document.getElementById('sizeDisplay');
+            brushSize.addEventListener('input', (e) => {
+                this.currentSize = e.target.value;
+                sizeDisplay.textContent = e.target.value + 'px';
+            });
+            
+            // Action buttons
+            document.getElementById('clearCanvas').addEventListener('click', () => this.clearCanvas());
+            document.getElementById('saveArt').addEventListener('click', () => this.saveArt());
+        }
+        
+        getMousePos(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+        
+        startDrawing(e) {
+            this.isDrawing = true;
+            const pos = this.getMousePos(e);
+            this.ctx.beginPath();
+            this.ctx.moveTo(pos.x, pos.y);
+        }
+        
+        draw(e) {
+            if (!this.isDrawing) return;
+            
+            const pos = this.getMousePos(e);
+            
+            if (this.currentTool === 'eraser') {
+                this.ctx.globalCompositeOperation = 'destination-out';
+                this.ctx.lineWidth = this.currentSize * 2;
+            } else {
+                this.ctx.globalCompositeOperation = 'source-over';
+                this.ctx.strokeStyle = this.currentColor;
+                this.ctx.lineWidth = this.currentSize;
+            }
+            
+            this.ctx.lineTo(pos.x, pos.y);
+            this.ctx.stroke();
+        }
+        
+        stopDrawing() {
+            this.isDrawing = false;
+        }
+        
+        clearCanvas() {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.fillStyle = 'white';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+        
+        saveArt() {
+            const dataURL = this.canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `art-therapy-${new Date().toISOString().slice(0, 10)}.png`;
+            link.href = dataURL;
+            link.click();
+            
+            // Update art time
+            const timeSpent = Math.floor((Date.now() - this.artStartTime) / 60000);
+            document.getElementById('artTimeSpent').textContent = timeSpent;
+            
+            // Save to local storage for session tracking
+            this.saveToStorage(dataURL, timeSpent);
+        }
+        
+        saveToStorage(dataURL, timeSpent) {
+            const artData = {
+                image: dataURL,
+                timeSpent: timeSpent,
+                timestamp: new Date().toISOString(),
+                emotions: this.getCurrentEmotions()
+            };
+            
+            let savedArt = JSON.parse(localStorage.getItem('artTherapySessions') || '[]');
+            savedArt.push(artData);
+            localStorage.setItem('artTherapySessions', JSON.stringify(savedArt));
+        }
+        
+        getCurrentEmotions() {
+            // This would integrate with your existing emotion analysis
+            return ['creative', 'expressive'];
+        }
+    }
+    
+    // Voice Journaling Implementation
+    class VoiceJournaling {
+        constructor() {
+            this.isRecording = false;
+            this.mediaRecorder = null;
+            this.audioChunks = [];
+            this.recordingStartTime = null;
+            this.timerInterval = null;
+            
+            this.bindEvents();
+            this.loadRecentRecordings();
+        }
+        
+        bindEvents() {
+            document.getElementById('recordButton').addEventListener('click', () => {
+                if (this.isRecording) {
+                    this.stopRecording();
+                } else {
+                    this.startRecording();
+                }
+            });
+        }
+        
+        async startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                this.mediaRecorder = new MediaRecorder(stream);
+                this.audioChunks = [];
+                
+                this.mediaRecorder.ondataavailable = (event) => {
+                    this.audioChunks.push(event.data);
+                };
+                
+                this.mediaRecorder.onstop = () => {
+                    this.processRecording();
+                };
+                
+                this.mediaRecorder.start();
+                this.isRecording = true;
+                this.recordingStartTime = Date.now();
+                
+                // Update UI
+                document.getElementById('recordButton').innerHTML = '⏹️';
+                document.getElementById('recordButton').classList.add('recording');
+                document.getElementById('recordingStatus').textContent = 'Recording... speak your thoughts';
+                document.getElementById('audioVisualizer').classList.remove('hidden');
+                document.getElementById('recordingTimer').classList.remove('hidden');
+                
+                // Start timer
+                this.startTimer();
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Unable to access microphone. Please check permissions.');
+            }
+        }
+        
+        stopRecording() {
+            if (this.mediaRecorder && this.isRecording) {
+                this.mediaRecorder.stop();
+                this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                this.isRecording = false;
+                
+                // Update UI
+                document.getElementById('recordButton').innerHTML = '🎤';
+                document.getElementById('recordButton').classList.remove('recording');
+                document.getElementById('recordingStatus').textContent = 'Processing your voice journal...';
+                document.getElementById('audioVisualizer').classList.add('hidden');
+                
+                // Stop timer
+                clearInterval(this.timerInterval);
+            }
+        }
+        
+        startTimer() {
+            this.timerInterval = setInterval(() => {
+                const elapsed = Date.now() - this.recordingStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('recordingTimer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        async processRecording() {
+            const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+            const duration = Math.floor((Date.now() - this.recordingStartTime) / 1000);
+            
+            // Convert to base64 for storage
+            const reader = new FileReader();
+            reader.onload = () => {
+                const audioData = reader.result;
+                this.saveRecording(audioData, duration);
+                this.analyzeEmotion(audioData);
+            };
+            reader.readAsDataURL(audioBlob);
+            
+            // Reset UI
+            document.getElementById('recordingStatus').textContent = 'Press to start recording';
+            document.getElementById('recordingTimer').classList.add('hidden');
+        }
+        
+        saveRecording(audioData, duration) {
+            const recording = {
+                audio: audioData,
+                duration: duration,
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleDateString()
+            };
+            
+            let recordings = JSON.parse(localStorage.getItem('voiceJournalRecordings') || '[]');
+            recordings.unshift(recording); // Add to beginning
+            recordings = recordings.slice(0, 10); // Keep only last 10
+            localStorage.setItem('voiceJournalRecordings', JSON.stringify(recordings));
+            
+            this.loadRecentRecordings();
+            
+            // Update session count
+            const currentCount = parseInt(document.getElementById('voiceEntriesCount').textContent);
+            document.getElementById('voiceEntriesCount').textContent = currentCount + 1;
+        }
+        
+        async analyzeEmotion(audioData) {
+            // Simulate AI emotion analysis (in real app, this would call your backend)
+            const emotions = ['happy', 'calm', 'anxious', 'reflective', 'hopeful'];
+            const detectedEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+            
+            // Show analysis results
+            document.getElementById('voiceAnalysis').classList.remove('hidden');
+            
+            const emotionResults = document.getElementById('emotionResults');
+            emotionResults.innerHTML = `
+                <div class="emotion-badge emotion-${detectedEmotion}">
+                    ${this.getEmotionEmoji(detectedEmotion)} ${detectedEmotion.charAt(0).toUpperCase() + detectedEmotion.slice(1)}
+                </div>
+            `;
+            
+            const insights = document.getElementById('therapyInsights').querySelector('p');
+            insights.textContent = this.getTherapyInsight(detectedEmotion);
+            
+            // Update emotion summary
+            this.updateEmotionSummary(detectedEmotion);
+        }
+        
+        getEmotionEmoji(emotion) {
+            const emojis = {
+                'happy': '😊',
+                'calm': '😌',
+                'anxious': '😰',
+                'reflective': '🤔',
+                'hopeful': '🌟'
+            };
+            return emojis[emotion] || '😐';
+        }
+        
+        getTherapyInsight(emotion) {
+            const insights = {
+                'happy': 'Your voice shows positive energy! Consider what brought you joy today and how to cultivate more of it.',
+                'calm': 'You sound peaceful and centered. This is a great state for reflection and self-awareness.',
+                'anxious': 'I detect some stress in your voice. Try some deep breathing exercises or listen to calming music.',
+                'reflective': 'You seem thoughtful today. Journaling can be a powerful tool for processing your thoughts.',
+                'hopeful': 'There\'s optimism in your voice! Channel this positive energy into your goals and dreams.'
+            };
+            return insights[emotion] || 'Thank you for sharing your thoughts. Regular voice journaling can improve emotional awareness.';
+        }
+        
+        updateEmotionSummary(emotion) {
+            const emotionBadges = document.getElementById('emotionBadges');
+            const existingEmotions = Array.from(emotionBadges.children).map(badge => 
+                badge.textContent.toLowerCase().slice(2)
+            );
+            
+            if (!existingEmotions.includes(emotion)) {
+                const badge = document.createElement('span');
+                badge.className = `emotion-badge emotion-${emotion}`;
+                badge.innerHTML = `${this.getEmotionEmoji(emotion)} ${emotion.charAt(0).toUpperCase() + emotion.slice(1)}`;
+                emotionBadges.appendChild(badge);
+            }
+        }
+        
+        loadRecentRecordings() {
+            const recordings = JSON.parse(localStorage.getItem('voiceJournalRecordings') || '[]');
+            const container = document.getElementById('recentRecordings');
+            
+            container.innerHTML = recordings.slice(0, 5).map(recording => `
+                <div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <span class="text-sm text-gray-600 dark:text-gray-300">${recording.date}</span>
+                    <span class="text-xs text-gray-500">${recording.duration}s</span>
+                </div>
+            `).join('') || '<p class="text-sm text-gray-500">No recordings yet</p>';
+        }
+    }
+    
+    // Music Therapy Implementation
+    class MusicTherapy {
+        constructor() {
+            this.currentMood = null;
+            this.isPlaying = false;
+            this.currentPlaylist = null;
+            this.currentTrackIndex = 0;
+            this.audioPlayer = null;
+            this.isLooping = false;
+            this.volume = 0.7;
+            this.currentTracks = [];
+            this.playbackMode = 'embedded'; // 'embedded', 'local', 'external'
+            
+            // Real Bollywood music integration with actual songs
+            this.localTracks = {
+                'happy': [
+                    { 
+                        name: 'Jai Ho', 
+                        artist: 'A.R. Rahman', 
+                        duration: '5:09', 
+                        url: 'https://www.youtube.com/embed/YR12Z8f1Dh8?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Nagada Sang Dhol', 
+                        artist: 'Sanjay Leela Bhansali', 
+                        duration: '4:25', 
+                        url: 'https://www.youtube.com/embed/4LDSu5_Sy3M?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Bhangra Paale', 
+                        artist: 'Vishal-Shekhar', 
+                        duration: '3:45', 
+                        url: 'https://www.youtube.com/embed/z9pkPaT4_c8?autoplay=1&controls=1',
+                        type: 'youtube'
+                    }
+                ],
+                'sad': [
+                    { 
+                        name: 'Tum Hi Ho', 
+                        artist: 'Mithoon', 
+                        duration: '4:22', 
+                        url: 'https://www.youtube.com/embed/IJq0yyWug1k?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Ae Dil Hai Mushkil', 
+                        artist: 'Pritam', 
+                        duration: '4:29', 
+                        url: 'https://www.youtube.com/embed/Z_PODraXg4E?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Channa Mereya', 
+                        artist: 'Pritam', 
+                        duration: '4:40', 
+                        url: 'https://www.youtube.com/embed/bzSTpdcs-EI?autoplay=1&controls=1',
+                        type: 'youtube'
+                    }
+                ],
+                'calm': [
+                    { 
+                        name: 'Kun Faya Kun', 
+                        artist: 'A.R. Rahman', 
+                        duration: '7:53', 
+                        url: 'https://www.youtube.com/embed/T94PHkuydcw?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Ik Onkar', 
+                        artist: 'Shankar-Ehsaan-Loy', 
+                        duration: '5:30', 
+                        url: 'https://www.youtube.com/embed/YzHbhKv6_yQ?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Raghupati Raghav', 
+                        artist: 'Shankar-Ehsaan-Loy', 
+                        duration: '4:18', 
+                        url: 'https://www.youtube.com/embed/kVlMdcvKE_w?autoplay=1&controls=1',
+                        type: 'youtube'
+                    }
+                ],
+                'motivated': [
+                    { 
+                        name: 'Dangal Title Track', 
+                        artist: 'Pritam', 
+                        duration: '4:10', 
+                        url: 'https://www.youtube.com/embed/x_y_-9yo71A?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Sultan Title Track', 
+                        artist: 'Vishal-Shekhar', 
+                        duration: '4:25', 
+                        url: 'https://www.youtube.com/embed/1M4FG1UXH5Y?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Zinda', 
+                        artist: 'Shankar-Ehsaan-Loy', 
+                        duration: '3:55', 
+                        url: 'https://www.youtube.com/embed/f_7JqPDWhfw?autoplay=1&controls=1',
+                        type: 'youtube'
+                    }
+                ],
+                'anxious': [
+                    { 
+                        name: 'Om Namah Shivay', 
+                        artist: 'Traditional', 
+                        duration: '6:30', 
+                        url: 'https://www.youtube.com/embed/31pjMWcvR1g?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Breathe', 
+                        artist: 'Shankar-Ehsaan-Loy', 
+                        duration: '4:45', 
+                        url: 'https://www.youtube.com/embed/7wNb0pHyGuI?autoplay=1&controls=1',
+                        type: 'youtube'
+                    }
+                ],
+                'focused': [
+                    { 
+                        name: 'Instrumental Raag Yaman', 
+                        artist: 'Classical', 
+                        duration: '8:20', 
+                        url: 'https://www.youtube.com/embed/hZNNEK8Z_-o?autoplay=1&controls=1',
+                        type: 'youtube'
+                    },
+                    { 
+                        name: 'Sitar Meditation', 
+                        artist: 'Ravi Shankar', 
+                        duration: '12:35', 
+                        url: 'https://www.youtube.com/embed/lk60ObnbIOk?autoplay=1&controls=1',
+                        type: 'youtube'
+                    }
+                ]
+            };
+            this.playlists = {
+                happy: [
+                    { name: 'Uplifting Vibes', artist: 'Various Artists', embed: 'spotify:playlist:37i9dQZF1DX0XUsuxWHRQd' },
+                    { name: 'Feel Good Hits', artist: 'Curated', embed: 'spotify:playlist:37i9dQZF1DX9XIFQuFvzM4' },
+                    { name: 'Happy Pop', artist: 'Various', embed: 'spotify:playlist:37i9dQZF1DXdPec7aLTmlC' }
+                ],
+                sad: [
+                    { name: 'Peaceful Reflection', artist: 'Ambient Collection', embed: 'spotify:playlist:37i9dQZF1DX3Ogo9pFvBkY' },
+                    { name: 'Healing Sounds', artist: 'Nature & Piano', embed: 'spotify:playlist:37i9dQZF1DX4PP3DA4J0N8' },
+                    { name: 'Emotional Release', artist: 'Therapeutic Music', embed: 'spotify:playlist:37i9dQZF1DWZeKCadgRdKQ' }
+                ],
+                anxious: [
+                    { name: 'Calm & Centered', artist: 'Meditation Music', embed: 'spotify:playlist:37i9dQZF1DWZqd5JICZI0u' },
+                    { name: 'Anxiety Relief', artist: 'Binaural Beats', embed: 'spotify:playlist:37i9dQZF1DX1s9knjP51Oa' },
+                    { name: 'Deep Breathing', artist: 'Relaxation Sounds', embed: 'spotify:playlist:37i9dQZF1DWXe9gFZP0gtP' }
+                ],
+                calm: [
+                    { name: 'Peaceful Piano', artist: 'Classical Selection', embed: 'spotify:playlist:37i9dQZF1DX4sWSpwAYIy1' },
+                    { name: 'Nature Sounds', artist: 'Environmental Audio', embed: 'spotify:playlist:37i9dQZF1DX6VdMW310YC7' },
+                    { name: 'Zen Garden', artist: 'Mindfulness Music', embed: 'spotify:playlist:37i9dQZF1DWVFeEut75IAL' }
+                ],
+                focused: [
+                    { name: 'Focus Flow', artist: 'Study Music', embed: 'spotify:playlist:37i9dQZF1DWZeKCadgRdKQ' },
+                    { name: 'Concentration', artist: 'Lo-fi Beats', embed: 'spotify:playlist:37i9dQZF1DWWQRwui0ExPn' },
+                    { name: 'Deep Work', artist: 'Instrumental', embed: 'spotify:playlist:37i9dQZF1DX8Uebhn9wzrS' }
+                ],
+                motivated: [
+                    { name: 'Power Up', artist: 'Motivational Mix', embed: 'spotify:playlist:37i9dQZF1DX76Wlfdnj7AP' },
+                    { name: 'Workout Energy', artist: 'High Energy', embed: 'spotify:playlist:37i9dQZF1DX32NsLKyzScr' },
+                    { name: 'Achievement Mode', artist: 'Success Sounds', embed: 'spotify:playlist:37i9dQZF1DX9oh43oAzkyx' }
+                ]
+            };
+            
+            this.bindEvents();
+        }
+        
+        bindEvents() {
+            document.querySelectorAll('.mood-selector').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.mood-selector').forEach(b => b.classList.remove('bg-white', 'text-gray-800'));
+                    btn.classList.add('bg-white', 'text-gray-800');
+                    
+                    this.currentMood = btn.dataset.mood;
+                    this.loadPlaylists(this.currentMood);
+                });
+            });
+        }
+        
+        loadPlaylists(mood) {
+            const container = document.getElementById('playlistContainer');
+            
+            // Update current track display
+            const currentTrack = document.getElementById('currentTrack');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            
+            currentTrack.textContent = `Loading ${mood} music therapy playlists...`;
+            playPauseBtn.innerHTML = '⏳ Loading...';
+            
+            // Get real playlists from backend
+            this.fetchRealPlaylists(mood).then(playlists => {
+                container.innerHTML = playlists.map((playlist, index) => `
+                    <div class="playlist-item p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-lg hover:shadow-lg transition-all cursor-pointer" 
+                         onclick="musicTherapy.selectPlaylist('${playlist.name}', '${mood}', '${playlist.url}', '${playlist.embed_url || ''}')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-purple-800 dark:text-purple-200">${playlist.name}</h4>
+                                <p class="text-sm text-purple-600 dark:text-purple-300">${playlist.description || 'Therapeutic music for ' + mood}</p>
+                                
+                                ${playlist.songs ? `
+                                    <div class="mt-3 space-y-1">
+                                        <p class="text-xs font-semibold text-purple-700 dark:text-purple-300">🎵 Featured Songs:</p>
+                                        <div class="flex flex-wrap gap-1">
+                                            ${playlist.songs.slice(0, 3).map(song => `
+                                                <span class="text-xs bg-purple-200 dark:bg-purple-700 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
+                                                    ${song.split(' -')[0]}
+                                                </span>
+                                            `).join('')}
+                                            ${playlist.songs.length > 3 ? '<span class="text-xs text-purple-600 dark:text-purple-400">+' + (playlist.songs.length - 3) + ' more</span>' : ''}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <span class="text-xs bg-purple-200 dark:bg-purple-700 text-purple-800 dark:text-purple-200 px-2 py-1 rounded">
+                                        ${playlist.source || 'Curated'}
+                                    </span>
+                                    ${playlist.tracks ? `<span class="text-xs text-purple-600 dark:text-purple-300">${playlist.tracks} tracks</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center space-y-2 ml-4">
+                                <button class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors">
+                                    ${playlist.embed_url ? '🎵 Play' : '🌐 Open'}
+                                </button>
+                                <span class="text-purple-600 dark:text-purple-300 text-xs">${Math.floor(Math.random() * 45) + 15} min</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                currentTrack.textContent = `${playlists.length} ${mood} playlists loaded`;
+                playPauseBtn.innerHTML = '▶️ Choose a Playlist to Start';
+                
+                // Show therapy benefits for this mood
+                this.showMoodBenefits(mood);
+            }).catch(error => {
+                console.error('Error loading playlists:', error);
+                this.loadFallbackPlaylists(mood);
+            });
+            
+            // Update music therapy time (simulation)
+            const currentTime = parseInt(document.getElementById('musicListenTime').textContent);
+            document.getElementById('musicListenTime').textContent = currentTime + 1;
+        }
+        
+        async fetchRealPlaylists(mood) {
+            try {
+                // Try to fetch from your backend API
+                const response = await fetch(`/api/music/playlists?mood=${mood}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.playlists || [];
+                }
+            } catch (error) {
+                console.log('Backend not available, using curated playlists');
+            }
+            
+            // Fallback to enhanced curated playlists with real URLs
+            return this.getEnhancedCuratedPlaylists(mood);
+        }
+        
+        getEnhancedCuratedPlaylists(mood) {
+            const realPlaylists = {
+                happy: [
+                    {
+                        name: 'Bollywood Happy Hits',
+                        description: 'Khushi Ke Gane - Feel-good Bollywood songs to boost your mood',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX0XiuGLJVUZl',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX0XiuGLJVUZl',
+                        source: 'Spotify Bollywood',
+                        tracks: 85,
+                        songs: ['Jai Ho', 'Nagada Sang Dhol', 'Dil Se Re', 'Bhangra Paale']
+                    },
+                    {
+                        name: 'Latest Bollywood Dance',
+                        description: 'Latest peppy Bollywood tracks for instant happiness',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX5YTtlHp8jrh',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX5YTtlHp8jrh',
+                        source: 'Spotify Bollywood',
+                        tracks: 120,
+                        songs: ['Kesariya', 'Raataan Lambiyan', 'Mann Mera', 'Sooraj Dooba Hain']
+                    },
+                    {
+                        name: 'Classic Bollywood Joy',
+                        description: 'Timeless happy songs from golden era of Bollywood',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX7jFE0xNlqvJ',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX7jFE0xNlqvJ',
+                        source: 'Spotify Bollywood',
+                        tracks: 60,
+                        songs: ['Yeh Jo Des Hai Tera', 'Mere Sapno Ki Rani', 'Aaj Phir Jeene Ki', 'Dekha Ek Khwab']
+                    }
+                ],
+                sad: [
+                    {
+                        name: 'Bollywood Sad Songs',
+                        description: 'Dukh Bhare Gane - Emotional Bollywood tracks for healing',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX59NCqCqJtoH',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX59NCqCqJtoH',
+                        source: 'Spotify Bollywood',
+                        tracks: 90,
+                        songs: ['Agar Tum Saath Ho', 'Ae Dil Hai Mushkil', 'Khairiyat', 'Tum Hi Ho']
+                    },
+                    {
+                        name: 'Bollywood Heartbreak',
+                        description: 'Judaai Ke Gane - Songs for processing difficult emotions',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX6mvEBvGmV60',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX6mvEBvGmV60',
+                        source: 'Spotify Bollywood',
+                        tracks: 75,
+                        songs: ['Dil Diyan Gallan', 'Hamari Adhuri Kahani', 'Tere Bina', 'Phir Mohabbat']
+                    },
+                    {
+                        name: 'Vintage Bollywood Melancholy',
+                        description: 'Classic emotional songs for deep reflection',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX7K31D69s4M1',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX7K31D69s4M1',
+                        source: 'Spotify Bollywood',
+                        tracks: 55,
+                        songs: ['Lag Ja Gale', 'Hothon Se Chu Lo Tum', 'Raina Beeti Jaye', 'Kahin Door Jab']
+                    }
+                ],
+                anxious: [
+                    {
+                        name: 'Bollywood Peaceful Songs',
+                        description: 'Shanti Ke Gane - Calming Bollywood tracks to reduce anxiety',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX2Nc3B70tvx0',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX2Nc3B70tvx0',
+                        source: 'Spotify Bollywood',
+                        tracks: 65,
+                        songs: ['Kun Faya Kun', 'Allah Ke Bande', 'Ishq Sufiyana', 'Tu Hi Re']
+                    },
+                    {
+                        name: 'Spiritual Bollywood',
+                        description: 'Devotional and spiritual songs for inner peace',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DWZqd5JICZI0u',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u',
+                        source: 'Spotify Bollywood',
+                        tracks: 40,
+                        songs: ['Shiv Tandav', 'Bhajan songs', 'Om Jai Jagdish', 'Allah Hoo']
+                    },
+                    {
+                        name: 'Sufi Bollywood Collection',
+                        description: 'Sufi songs for meditation and stress relief',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX4sIScvNAr1z',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sIScvNAr1z',
+                        source: 'Spotify Bollywood',
+                        tracks: 30,
+                        songs: ['Chaap Tilak', 'Ishq Sufiyana', 'Arziyan', 'Kun Faya Kun']
+                    }
+                ],
+                calm: [
+                    {
+                        name: 'Bollywood Romantic Slow',
+                        description: 'Pyaar Ke Gane - Soft romantic songs for tranquility',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX0bblH6Z2sZ7',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX0bblH6Z2sZ7',
+                        source: 'Spotify Bollywood',
+                        tracks: 100,
+                        songs: ['Tum Mile', 'Jeene Laga Hoon', 'Pehla Nasha', 'Tujh Mein Rab']
+                    },
+                    {
+                        name: 'Bollywood Instrumentals',
+                        description: 'Beautiful Bollywood instrumental music for peace',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX5trt9i14X7j',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX5trt9i14X7j',
+                        source: 'Spotify Bollywood',
+                        tracks: 50,
+                        songs: ['Background scores', 'Movie themes', 'Classical fusion']
+                    },
+                    {
+                        name: 'AR Rahman Peaceful',
+                        description: 'AR Rahman\'s calming compositions for meditation',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DWY7RSRVO2Q7U',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DWY7RSRVO2Q7U',
+                        source: 'Spotify Bollywood',
+                        tracks: 40,
+                        songs: ['Vande Mataram', 'Maa Tujhe Salaam', 'Kun Faya Kun', 'Noor-Un-Ala']
+                    }
+                ],
+                focused: [
+                    {
+                        name: 'Bollywood Study Music',
+                        description: 'Padhai Ke Gane - Instrumental Bollywood for concentration',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX3rxVfibe1L0',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX3rxVfibe1L0',
+                        source: 'Spotify Bollywood',
+                        tracks: 80,
+                        songs: ['Movie background scores', 'Classical Indian music', 'Instrumental versions']
+                    },
+                    {
+                        name: 'Indian Classical Focus',
+                        description: 'Traditional ragas and classical music for deep concentration',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX4bmKe1x8uP9',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4bmKe1x8uP9',
+                        source: 'Spotify Bollywood',
+                        tracks: 60,
+                        songs: ['Raga Yaman', 'Raga Bhairavi', 'Tabla & Sitar', 'Flute compositions']
+                    },
+                    {
+                        name: 'Bollywood Lo-Fi',
+                        description: 'Lofi remixes of popular Bollywood songs for studying',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DWWMOmoXKqHTD',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DWWMOmoXKqHTD',
+                        source: 'Spotify Bollywood',
+                        tracks: 45,
+                        songs: ['Lofi Bollywood', 'Chill remixes', 'Study beats']
+                    }
+                ],
+                motivated: [
+                    {
+                        name: 'Bollywood Workout',
+                        description: 'Josh Bhare Gane - High-energy Bollywood for motivation',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX0pH0SHskOcz',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX0pH0SHskOcz',
+                        source: 'Spotify Bollywood',
+                        tracks: 100,
+                        songs: ['Malhari', 'Seeti Maar', 'Jai Jai Shivshankar', 'Sher Aaya Sher']
+                    },
+                    {
+                        name: 'Bollywood Motivational',
+                        description: 'Hausla Badhane Wale - Songs to boost confidence and drive',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX4qjmGAFJXG2',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4qjmGAFJXG2',
+                        source: 'Spotify Bollywood',
+                        tracks: 75,
+                        songs: ['Dangal', 'Sultan', 'Chak De India', 'Zinda Hai Hum']
+                    },
+                    {
+                        name: 'Patriotic Bollywood',
+                        description: 'Deshbhakti Ke Gane - Patriotic songs for inspiration',
+                        url: 'https://open.spotify.com/playlist/37i9dQZF1DX1EBuotBhhgr',
+                        embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX1EBuotBhhgr',
+                        source: 'Spotify Bollywood',
+                        tracks: 50,
+                        songs: ['Vande Mataram', 'Ae Watan', 'Maa Tujhe Salaam', 'Bharat Mata']
+                    }
+                ]
+            };
+            
+            return realPlaylists[mood] || realPlaylists['calm'];
+        }
+        
+        loadFallbackPlaylists(mood) {
+            // Fallback method when API fails
+            const playlists = this.getEnhancedCuratedPlaylists(mood);
+            const container = document.getElementById('playlistContainer');
+            
+            container.innerHTML = playlists.map(playlist => `
+                <div class="playlist-item p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-200">${playlist.name}</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${playlist.description}</p>
+                    <button class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-sm" 
+                            onclick="window.open('${playlist.url}', '_blank')">
+                        🌐 Open in ${playlist.source}
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        selectPlaylist(playlistName, mood, playlistUrl, embedUrl) {
+            const currentTrack = document.getElementById('currentTrack');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const musicPlayerContainer = document.getElementById('musicPlayerContainer');
+            const embeddedPlayer = document.getElementById('embeddedPlayer');
+            
+            // Load local tracks for this mood
+            this.currentTracks = this.localTracks[mood] || this.localTracks['calm'];
+            this.currentMood = mood;
+            this.currentTrackIndex = 0;
+            
+            currentTrack.textContent = `🎵 Now Playing: ${playlistName}`;
+            playPauseBtn.innerHTML = '⏸️ Pause Music';
+            playPauseBtn.onclick = () => this.pauseMusic();
+            
+            // Show the enhanced music player
+            musicPlayerContainer.classList.remove('hidden');
+            
+            // Update the playlist queue
+            this.updatePlaylistQueue();
+            this.updateCurrentTrackDisplay();
+            
+            // Show embedded player if available
+            if (embedUrl && embedUrl.includes('spotify')) {
+                embeddedPlayer.innerHTML = `
+                    <iframe src="${embedUrl}" 
+                            width="100%" 
+                            height="352" 
+                            frameborder="0" 
+                            allowtransparency="true" 
+                            allow="encrypted-media">
+                    </iframe>
+                `;
+                this.showMusicNotification(`🎵 Embedded Spotify player loaded for ${playlistName}`);
+            } else {
+                embeddedPlayer.innerHTML = `
+                    <div class="text-center p-8">
+                        <h4 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2">🎵 ${playlistName}</h4>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Bollywood ${mood} therapy playlist</p>
+                        <button class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors"
+                                onclick="window.open('${playlistUrl}', '_blank')">
+                            🌐 Open in Spotify
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // Start playing the first track
+            this.playMusic();
+            
+            // Show therapy benefits for this mood
+            this.showMoodBenefits(mood);
+            
+            // Update listening time
+            setTimeout(() => {
+                this.showMusicNotification(`� Bollywood music therapy session in progress! Keep listening for emotional wellness.`);
+                const currentTime = parseInt(document.getElementById('musicListenTime').textContent);
+                document.getElementById('musicListenTime').textContent = currentTime + Math.floor(Math.random() * 10) + 5;
+            }, 3000);
+        }
+        
+        // Enhanced music player controls
+        toggleMainPlayer() {
+            const playBtn = document.getElementById('playPauseMainBtn');
+            
+            if (this.isPlaying) {
+                this.pauseMusic();
+                playBtn.innerHTML = '▶️ Play';
+            } else {
+                this.playMusic();
+                playBtn.innerHTML = '⏸️ Pause';
+            }
+        }
+        
+        playMusic() {
+            if (this.currentTracks.length > 0) {
+                const track = this.currentTracks[this.currentTrackIndex];
+                console.log(`Playing: ${track.name} - ${track.artist}`);
+                
+                // Check if it's a YouTube embed
+                if (track.type === 'youtube') {
+                    this.playYouTubeTrack(track);
+                } else {
+                    this.playAudioTrack(track);
+                }
+            } else {
+                this.showMusicNotification('Please select a mood and load tracks first!');
+            }
+        }
+        
+        playYouTubeTrack(track) {
+            const embeddedPlayer = document.getElementById('embeddedPlayer');
+            
+            if (embeddedPlayer) {
+                // Create YouTube iframe
+                embeddedPlayer.innerHTML = `
+                    <div class="bg-black rounded-lg overflow-hidden">
+                        <iframe 
+                            src="${track.url}" 
+                            width="100%" 
+                            height="315" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                        <div class="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                            <h4 class="font-bold text-lg">${track.name}</h4>
+                            <p class="text-purple-200">by ${track.artist}</p>
+                            <p class="text-purple-300 text-sm">Duration: ${track.duration}</p>
+                        </div>
+                    </div>
+                `;
+                
+                this.isPlaying = true;
+                this.updateCurrentTrackDisplay();
+                this.showMusicNotification(`🎵 Now Playing: ${track.name} by ${track.artist}`);
+                
+                // Update UI buttons
+                const playBtn = document.getElementById('playPauseMainBtn');
+                if (playBtn) playBtn.innerHTML = '⏸️ Pause';
+                
+                // Show the music player container
+                const musicPlayerContainer = document.getElementById('musicPlayerContainer');
+                if (musicPlayerContainer) musicPlayerContainer.classList.remove('hidden');
+                
+                console.log('YouTube track loaded successfully');
+            }
+        }
+        
+        playAudioTrack(track) {
+            const audioPlayer = document.getElementById('localAudioPlayer');
+            
+            if (audioPlayer) {
+                console.log(`Attempting to play audio: ${track.name} - URL: ${track.url}`);
+                
+                // Stop any currently playing audio
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                
+                // Set source and load
+                audioPlayer.src = track.url;
+                audioPlayer.volume = this.volume;
+                
+                // Add one-time event listeners for this track
+                const onCanPlay = () => {
+                    console.log('Audio can play, starting...');
+                    audioPlayer.removeEventListener('canplay', onCanPlay);
+                };
+                
+                const onError = (e) => {
+                    console.error('Audio error:', e, audioPlayer.error);
+                    audioPlayer.removeEventListener('error', onError);
+                    this.handleAudioError(track);
+                };
+                
+                audioPlayer.addEventListener('canplay', onCanPlay);
+                audioPlayer.addEventListener('error', onError);
+                
+                // Load the audio
+                audioPlayer.load();
+                
+                // Try to play with proper promise handling
+                const playPromise = audioPlayer.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        this.isPlaying = true;
+                        this.updateCurrentTrackDisplay();
+                        this.showMusicNotification(`🎵 Now Playing: ${track.name} by ${track.artist}`);
+                        
+                        // Update UI buttons
+                        const playBtn = document.getElementById('playPauseMainBtn');
+                        if (playBtn) playBtn.innerHTML = '⏸️ Pause';
+                        
+                        console.log('Audio started playing successfully');
+                    }).catch(error => {
+                        console.error('Audio playback failed:', error);
+                        this.handleAudioError(track);
+                    });
+                }
+            } else {
+                console.error('Audio player element not found');
+                this.createAlternativePlayer();
+            }
+        }
+        
+        handleAudioError(track) {
+            console.log(`Audio failed for ${track.name}, trying alternative...`);
+            this.showMusicNotification(`⚠️ Could not play ${track.name}. Trying alternative playback...`);
+            
+            // Try with a fallback audio approach
+            this.tryFallbackAudio(track);
+        }
+        
+        tryFallbackAudio(track) {
+            // Create a new audio element to test the URL
+            const testAudio = new Audio();
+            
+            testAudio.addEventListener('canplaythrough', () => {
+                console.log('Fallback audio can play');
+                testAudio.play().then(() => {
+                    this.isPlaying = true;
+                    this.audioPlayer = testAudio;
+                    this.showMusicNotification(`🎵 Playing: ${track.name} (fallback mode)`);
+                    
+                    // Update UI
+                    const playBtn = document.getElementById('playPauseMainBtn');
+                    if (playBtn) playBtn.innerHTML = '⏸️ Pause';
+                    
+                    // Auto-advance after track ends
+                    testAudio.addEventListener('ended', () => {
+                        this.nextTrack();
+                    });
+                }).catch(() => {
+                    this.useWebAudioFallback(track);
+                });
+            }, { once: true });
+            
+            testAudio.addEventListener('error', () => {
+                console.log('Fallback audio also failed, using Web Audio API');
+                this.useWebAudioFallback(track);
+            }, { once: true });
+            
+            testAudio.src = track.url;
+            testAudio.load();
+        }
+        
+        useWebAudioFallback(track) {
+            console.log('Using Web Audio API fallback for audio feedback');
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                // Create a simple melody to represent the track
+                oscillator.frequency.setValueAtTime(440, context.currentTime); // A4
+                oscillator.frequency.setValueAtTime(523, context.currentTime + 0.5); // C5
+                oscillator.frequency.setValueAtTime(659, context.currentTime + 1); // E5
+                
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 2);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 2);
+                
+                this.isPlaying = true;
+                this.showMusicNotification(`🎵 Playing: ${track.name} (Audio synthesis mode)`);
+                
+                // Update UI
+                const playBtn = document.getElementById('playPauseMainBtn');
+                if (playBtn) playBtn.innerHTML = '⏸️ Pause';
+                
+                // Simulate track progress
+                this.simulatePlayback();
+                
+                console.log('Web Audio API fallback successful');
+            } catch (e) {
+                console.error('All audio methods failed:', e);
+                this.showMusicNotification('❌ Audio not supported. Showing visual feedback only.');
+                this.simulatePlayback();
+            }
+        }
+        
+        createAlternativePlayer() {
+            console.log('Creating alternative audio player...');
+            const track = this.currentTracks[this.currentTrackIndex];
+            
+            // Create a simple audio element
+            const audioEl = document.createElement('audio');
+            audioEl.src = track.url;
+            audioEl.controls = true;
+            audioEl.style.width = '100%';
+            
+            // Add to the player container
+            const container = document.getElementById('embeddedPlayer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="p-4 bg-purple-50 dark:bg-purple-900 rounded-lg">
+                        <h4 class="font-bold text-purple-800 dark:text-purple-200 mb-2">🎵 ${track.name}</h4>
+                        <p class="text-sm text-purple-600 dark:text-purple-300 mb-3">by ${track.artist}</p>
+                    </div>
+                `;
+                container.appendChild(audioEl);
+                
+                this.showMusicNotification(`🎵 Alternative player loaded for: ${track.name}`);
+            }
+        }
+        
+        simulatePlayback() {
+            // Simulate music playback progress for demo
+            let progress = 0;
+            const interval = setInterval(() => {
+                if (!this.isPlaying) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                progress += 1;
+                const progressBar = document.getElementById('progressBar');
+                const currentTimeEl = document.getElementById('currentTime');
+                
+                if (progressBar) {
+                    progressBar.style.width = (progress % 100) + '%';
+                }
+                
+                if (currentTimeEl) {
+                    const minutes = Math.floor(progress / 60);
+                    const seconds = progress % 60;
+                    currentTimeEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+                
+                // Auto advance to next track after 30 seconds (for demo)
+                if (progress >= 30) {
+                    clearInterval(interval);
+                    this.nextTrack();
+                }
+            }, 1000);
+        }
+        
+        pauseMusic() {
+            const audioPlayer = document.getElementById('localAudioPlayer');
+            if (audioPlayer && !audioPlayer.paused) {
+                audioPlayer.pause();
+            }
+            
+            this.isPlaying = false;
+            this.showMusicNotification('⏸️ Music paused');
+            
+            // Update UI buttons
+            const playBtn = document.getElementById('playPauseMainBtn');
+            if (playBtn) playBtn.innerHTML = '▶️ Play';
+        }
+        
+        nextTrack() {
+            if (this.currentTracks.length > 0) {
+                this.currentTrackIndex = (this.currentTrackIndex + 1) % this.currentTracks.length;
+                this.playMusic();
+                this.updatePlaylistQueue();
+                
+                // Update tracks played counter
+                const tracksPlayed = document.getElementById('tracksPlayed');
+                if (tracksPlayed) {
+                    tracksPlayed.textContent = parseInt(tracksPlayed.textContent) + 1;
+                }
+            }
+        }
+        
+        previousTrack() {
+            if (this.currentTracks.length > 0) {
+                this.currentTrackIndex = this.currentTrackIndex > 0 ? this.currentTrackIndex - 1 : this.currentTracks.length - 1;
+                this.playMusic();
+                this.updatePlaylistQueue();
+            }
+        }
+        
+        setVolume(value) {
+            this.volume = value / 100;
+            const audioPlayer = document.getElementById('localAudioPlayer');
+            if (audioPlayer) {
+                audioPlayer.volume = this.volume;
+            }
+            
+            const volumeValueEl = document.getElementById('volumeValue');
+            if (volumeValueEl) {
+                volumeValueEl.textContent = value + '%';
+            }
+            
+            this.showMusicNotification(`🔊 Volume set to ${value}%`);
+        }
+        
+        toggleLoop() {
+            this.isLooping = !this.isLooping;
+            const loopBtn = document.getElementById('loopBtn');
+            loopBtn.textContent = this.isLooping ? 'On' : 'Off';
+            loopBtn.className = this.isLooping ? 
+                'bg-purple-500 text-white px-2 py-1 rounded text-xs' : 
+                'bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs';
+            this.showMusicNotification(`🔄 Loop ${this.isLooping ? 'enabled' : 'disabled'}`);
+        }
+        
+        updateCurrentTrackDisplay() {
+            if (this.currentTracks.length > 0) {
+                const track = this.currentTracks[this.currentTrackIndex];
+                const trackNameEl = document.getElementById('currentTrackName');
+                const trackArtistEl = document.getElementById('currentTrackArtist');
+                
+                if (trackNameEl) trackNameEl.textContent = track.name;
+                if (trackArtistEl) trackArtistEl.textContent = track.artist;
+            }
+        }
+        
+        updatePlaylistQueue() {
+            const queueContainer = document.getElementById('playlistQueue');
+            if (queueContainer && this.currentTracks.length > 0) {
+                queueContainer.innerHTML = this.currentTracks.map((track, index) => `
+                    <div class="flex items-center justify-between p-2 rounded ${index === this.currentTrackIndex ? 'bg-purple-100 dark:bg-purple-800' : 'bg-gray-50 dark:bg-gray-700'} cursor-pointer"
+                         onclick="musicTherapy.playTrackAtIndex(${index})">
+                        <div class="flex-1">
+                            <div class="font-medium text-sm ${index === this.currentTrackIndex ? 'text-purple-800 dark:text-purple-200' : 'text-gray-800 dark:text-gray-200'}">
+                                ${track.name}
+                            </div>
+                            <div class="text-xs text-gray-600 dark:text-gray-400">${track.artist}</div>
+                        </div>
+                        <div class="text-xs text-gray-500">${track.duration}</div>
+                        ${index === this.currentTrackIndex ? '<div class="text-purple-500">🎵</div>' : ''}
+                    </div>
+                `).join('');
+            }
+        }
+        
+        playTrackAtIndex(index) {
+            this.currentTrackIndex = index;
+            this.playMusic();
+            this.updatePlaylistQueue();
+        }
+        
+        // Audio event handlers
+        onAudioPlay() {
+            this.isPlaying = true;
+            const playBtn = document.getElementById('playPauseMainBtn');
+            if (playBtn) playBtn.innerHTML = '⏸️ Pause';
+        }
+        
+        onAudioPause() {
+            this.isPlaying = false;
+            const playBtn = document.getElementById('playPauseMainBtn');
+            if (playBtn) playBtn.innerHTML = '▶️ Play';
+        }
+        
+        onAudioError() {
+            console.error('Audio failed to load');
+            this.showMusicNotification('❌ Audio file could not be loaded. Using simulation mode.');
+            this.simulatePlayback();
+        }
+        
+        updateProgress() {
+            const audioPlayer = document.getElementById('localAudioPlayer');
+            if (audioPlayer && audioPlayer.duration) {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                const progressBar = document.getElementById('progressBar');
+                const currentTimeEl = document.getElementById('currentTime');
+                
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+                if (currentTimeEl) {
+                    currentTimeEl.textContent = this.formatTime(audioPlayer.currentTime);
+                }
+            }
+        }
+        
+        updateDuration() {
+            const audioPlayer = document.getElementById('localAudioPlayer');
+            if (audioPlayer && audioPlayer.duration) {
+                const totalTimeEl = document.getElementById('totalTime');
+                if (totalTimeEl) {
+                    totalTimeEl.textContent = this.formatTime(audioPlayer.duration);
+                }
+            }
+        }
+        
+        trackEnded() {
+            if (this.isLooping) {
+                this.playMusic(); // Replay current track
+            } else {
+                this.nextTrack(); // Move to next track
+            }
+        }
+        
+        formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        seekTo(event) {
+            const audioPlayer = document.getElementById('localAudioPlayer');
+            if (audioPlayer && audioPlayer.duration) {
+                const progressBar = event.currentTarget;
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (event.clientX - rect.left) / rect.width;
+                audioPlayer.currentTime = percent * audioPlayer.duration;
+            }
+        }
+        
+        pauseMusic() {
+            const currentTrack = document.getElementById('currentTrack');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            
+            currentTrack.textContent = '⏸️ Music paused - Take a moment to reflect';
+            playPauseBtn.innerHTML = '▶️ Resume Music';
+            playPauseBtn.onclick = () => this.resumeMusic();
+        }
+        
+        resumeMusic() {
+            const currentTrack = document.getElementById('currentTrack');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            
+            currentTrack.textContent = '🎵 Music resumed - Continue your therapy session';
+            playPauseBtn.innerHTML = '⏸️ Pause Music';
+            playPauseBtn.onclick = () => this.pauseMusic();
+        }
+        
+        showMoodBenefits(mood) {
+            const benefits = {
+                'happy': 'Uplifting music releases endorphins and dopamine, enhancing your natural joy!',
+                'sad': 'Gentle, reflective music helps process emotions and provides comfort during difficult times.',
+                'anxious': 'Calming rhythms and frequencies can lower cortisol levels and reduce anxiety symptoms.',
+                'calm': 'Peaceful melodies synchronize with your relaxed state, promoting deeper mindfulness.',
+                'focused': 'Instrumental music enhances concentration by providing optimal background stimulation.',
+                'motivated': 'Energetic beats increase adrenaline and motivation, perfect for achieving goals!'
+            };
+            
+            // Create or update benefits display
+            let benefitsDiv = document.getElementById('moodBenefits');
+            if (!benefitsDiv) {
+                benefitsDiv = document.createElement('div');
+                benefitsDiv.id = 'moodBenefits';
+                benefitsDiv.className = 'mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg';
+                document.getElementById('playlistContainer').parentNode.appendChild(benefitsDiv);
+            }
+            
+            benefitsDiv.innerHTML = `
+                <h5 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">🧠 Therapy Benefits for ${mood.charAt(0).toUpperCase() + mood.slice(1)} Mood:</h5>
+                <p class="text-sm text-blue-700 dark:text-blue-300">${benefits[mood] || 'Music therapy supports emotional wellness and mental health.'}</p>
+            `;
+        }
+        
+        showMusicNotification(message) {
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Hide notification
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        playPlaylist(embedId) {
+            // In a real implementation, this would integrate with Spotify Web API
+            // For now, we'll show an alert
+            alert('Playlist integration coming soon! This will connect to Spotify/YouTube for seamless music therapy.');
+        }
+        
+        testAudio() {
+            console.log('Testing audio functionality...');
+            this.showMusicNotification('🔊 Testing audio playback...');
+            
+            const audioPlayer = document.getElementById('localAudioPlayer');
+            if (!audioPlayer) {
+                this.showMusicNotification('❌ Audio player not found!');
+                return;
+            }
+            
+            // Test with a simple, reliable audio URL
+            const testUrl = 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav';
+            console.log('Testing with URL:', testUrl);
+            
+            audioPlayer.src = testUrl;
+            audioPlayer.load();
+            
+            audioPlayer.addEventListener('canplaythrough', () => {
+                console.log('Audio can play through');
+                this.showMusicNotification('✅ Audio test successful! Ready to play music.');
+            }, { once: true });
+            
+            audioPlayer.addEventListener('error', (e) => {
+                console.error('Audio test failed:', e, audioPlayer.error);
+                this.showMusicNotification('❌ Audio test failed. Trying alternative...');
+                this.fallbackAudioTest();
+            }, { once: true });
+            
+            // Try to play
+            const playPromise = audioPlayer.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('Test audio playing successfully');
+                    this.showMusicNotification('🎵 Test audio playing!');
+                    
+                    // Stop after 2 seconds
+                    setTimeout(() => {
+                        audioPlayer.pause();
+                        audioPlayer.currentTime = 0;
+                        this.showMusicNotification('✅ Audio test completed successfully!');
+                    }, 2000);
+                }).catch(error => {
+                    console.error('Audio test play failed:', error);
+                    this.fallbackAudioTest();
+                });
+            }
+        }
+        
+        fallbackAudioTest() {
+            console.log('Trying Web Audio API fallback...');
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                oscillator.frequency.setValueAtTime(440, context.currentTime); // A4 note
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 1);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 1);
+                
+                this.showMusicNotification('🔊 Alternative audio test: Generated tone playing!');
+                console.log('Web Audio API test successful');
+            } catch (e) {
+                console.error('All audio tests failed:', e);
+                this.showMusicNotification('❌ Audio not supported in this browser/environment');
+            }
+        }
+    }
+    
+    // Initialize all therapy modules
+    document.addEventListener('DOMContentLoaded', function() {
+        const artTherapy = new ArtTherapyCanvas();
+        const voiceJournal = new VoiceJournaling();
+        const musicTherapy = new MusicTherapy();
+        
+        // Load saved session data
+        const savedData = JSON.parse(localStorage.getItem('therapySessionData') || '{}');
+        if (savedData.artTime) document.getElementById('artTimeSpent').textContent = savedData.artTime;
+        if (savedData.voiceCount) document.getElementById('voiceEntriesCount').textContent = savedData.voiceCount;
+        if (savedData.musicTime) document.getElementById('musicListenTime').textContent = savedData.musicTime;
+        
+        // Save session data periodically
+        setInterval(() => {
+            const sessionData = {
+                artTime: document.getElementById('artTimeSpent').textContent,
+                voiceCount: document.getElementById('voiceEntriesCount').textContent,
+                musicTime: document.getElementById('musicListenTime').textContent,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('therapySessionData', JSON.stringify(sessionData));
+        }, 30000); // Save every 30 seconds
+    });
+</script>
+{% endblock %}

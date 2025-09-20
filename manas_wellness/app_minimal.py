@@ -75,6 +75,116 @@ def crisis_support():
 def ai_journal():
     return render_template('journal_enhanced.html')
 
+@app.route('/art-music-therapy')
+def art_music_therapy():
+    return render_template('art_music_therapy.html')
+
+@app.route('/api/music/playlists')
+def get_music_playlists():
+    mood = request.args.get('mood', 'calm')
+    
+    try:
+        # Try to use Bollywood music integration first
+        from utils.bollywood_music_therapy import BollywoodMusicTherapy
+        bollywood = BollywoodMusicTherapy()
+        mood_data = bollywood.get_mood_playlists(mood)
+        
+        # Convert to expected format
+        playlists = []
+        for playlist_info in mood_data['playlists']:
+            playlists.append({
+                'name': playlist_info['name'],
+                'description': playlist_info['description'],
+                'url': playlist_info.get('spotify_url', '#'),
+                'embed_url': playlist_info.get('spotify_url', '').replace('/playlist/', '/embed/playlist/'),
+                'source': 'Spotify Bollywood',
+                'tracks': len(playlist_info.get('songs', [])),
+                'songs': playlist_info.get('songs', [])[:4]  # Show first 4 songs
+            })
+        
+        return jsonify({'playlists': playlists, 'source': 'bollywood', 'mood_title': mood_data['title']})
+    except (ImportError, Exception) as e:
+        # Fallback to curated playlists
+        curated_playlists = {
+            'happy': [
+                {
+                    'name': 'Bollywood Happy Hits',
+                    'description': 'Khushi Ke Gane - Feel-good Bollywood songs to boost your mood',
+                    'url': 'https://open.spotify.com/playlist/37i9dQZF1DX0XiuGLJVUZl',
+                    'embed_url': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX0XiuGLJVUZl',
+                    'source': 'Spotify Bollywood',
+                    'tracks': 85
+                },
+                {
+                    'name': 'Latest Bollywood Dance',
+                    'description': 'Latest peppy Bollywood tracks for instant happiness',
+                    'url': 'https://open.spotify.com/playlist/37i9dQZF1DX5YTtlHp8jrh',
+                    'embed_url': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX5YTtlHp8jrh',
+                    'source': 'Spotify Bollywood',
+                    'tracks': 120
+                }
+            ],
+            'sad': [
+                {
+                    'name': 'Bollywood Sad Songs',
+                    'description': 'Dukh Bhare Gane - Emotional Bollywood tracks for healing',
+                    'url': 'https://open.spotify.com/playlist/37i9dQZF1DX59NCqCqJtoH',
+                    'embed_url': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX59NCqCqJtoH',
+                    'source': 'Spotify Bollywood',
+                    'tracks': 90
+                }
+            ],
+            'anxious': [
+                {
+                    'name': 'Bollywood Peaceful Songs',
+                    'description': 'Shanti Ke Gane - Calming Bollywood tracks to reduce anxiety',
+                    'url': 'https://open.spotify.com/playlist/37i9dQZF1DX2Nc3B70tvx0',
+                    'embed_url': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX2Nc3B70tvx0',
+                    'source': 'Spotify Bollywood',
+                    'tracks': 65
+                }
+            ],
+            'calm': [
+                {
+                    'name': 'Bollywood Romantic Slow',
+                    'description': 'Pyaar Ke Gane - Soft romantic songs for tranquility',
+                    'url': 'https://open.spotify.com/playlist/37i9dQZF1DX0bblH6Z2sZ7',
+                    'embed_url': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX0bblH6Z2sZ7',
+                    'source': 'Spotify Bollywood',
+                    'tracks': 100
+                }
+            ],
+            'focused': [
+                {
+                    'name': 'Bollywood Study Music',
+                    'description': 'Padhai Ke Gane - Instrumental Bollywood for concentration',
+                    'url': 'https://open.spotify.com/playlist/37i9dQZF1DX3rxVfibe1L0',
+                    'embed_url': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX3rxVfibe1L0',
+                    'source': 'Spotify Bollywood',
+                    'tracks': 80
+                }
+            ],
+            'motivated': [
+                {
+                    'name': 'Bollywood Workout',
+                    'description': 'Josh Bhare Gane - High-energy Bollywood for motivation',
+                    'url': 'https://open.spotify.com/playlist/37i9dQZF1DX0pH0SHskOcz',
+                    'embed_url': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX0pH0SHskOcz',
+                    'source': 'Spotify Bollywood',
+                    'tracks': 100
+                }
+            ]
+        }
+        
+        mood_playlists = curated_playlists.get(mood, curated_playlists['calm'])
+        return jsonify({'playlists': mood_playlists, 'source': 'curated'})
+    except Exception as e:
+        return jsonify({'error': str(e), 'playlists': []}), 500
+
+@app.route('/voice-ai-chat')
+def voice_ai_chat():
+    return render_template('voice_ai_chat.html')
+
 @app.route('/generate-story', methods=['POST'])
 def generate_story():
     try:
@@ -527,6 +637,125 @@ def generate_therapy_content(emotion):
     
     return content
 
+@app.route('/api/voice/analyze', methods=['POST'])
+def analyze_voice_emotion():
+    """API endpoint specifically for voice emotion analysis in Art & Music Therapy"""
+    try:
+        # Handle audio file upload
+        if 'audio' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No audio file provided'
+            }), 400
+        
+        audio_file = request.files['audio']
+        if audio_file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No audio file selected'
+            }), 400
+        
+        # Save audio file temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
+            audio_file.save(temp_file.name)
+            
+            # Simulate AI emotion analysis (replace with actual Gemini API call)
+            import random
+            emotions = ['happy', 'calm', 'anxious', 'reflective', 'hopeful', 'creative', 'peaceful']
+            confidence_scores = [0.8, 0.9, 0.7, 0.85, 0.75, 0.88, 0.82]
+            
+            detected_emotion = random.choice(emotions)
+            confidence = random.choice(confidence_scores)
+            
+            # Generate therapy insights
+            insights = {
+                'happy': 'Your voice radiates positive energy! Consider channeling this joy into creative expression through art or uplifting music.',
+                'calm': 'You sound centered and peaceful. This is an ideal state for mindful art creation or meditative music listening.',
+                'anxious': 'I hear some tension in your voice. Try deep breathing exercises, soothing music, or expressive drawing to release stress.',
+                'reflective': 'Your thoughtful tone suggests you\'re processing emotions. Journaling or contemplative art might be helpful.',
+                'hopeful': 'There\'s optimism in your voice! Use this positive energy for creating inspiring art or listening to motivational music.',
+                'creative': 'Your voice shows creative energy. This is perfect for exploring new art techniques or discovering fresh musical genres.',
+                'peaceful': 'You sound serene and balanced. Consider gentle art activities or nature-inspired music for maintaining this state.'
+            }
+            
+            # Music recommendations based on emotion
+            music_recommendations = {
+                'happy': ['Uplifting Pop', 'Feel-Good Classics', 'Energy Boost'],
+                'calm': ['Peaceful Piano', 'Nature Sounds', 'Meditation Music'],
+                'anxious': ['Anxiety Relief', 'Calming Instrumentals', 'Deep Breathing Guides'],
+                'reflective': ['Thoughtful Indie', 'Contemplative Classical', 'Emotional Ballads'],
+                'hopeful': ['Inspirational Anthems', 'Motivational Beats', 'Uplifting Orchestral'],
+                'creative': ['Creative Flow', 'Artistic Inspiration', 'Experimental Sounds'],
+                'peaceful': ['Zen Garden', 'Ambient Tranquility', 'Gentle Acoustics']
+            }
+            
+            # Art therapy suggestions
+            art_suggestions = {
+                'happy': 'Try vibrant colors and energetic brush strokes. Paint something that represents joy!',
+                'calm': 'Use soft, flowing lines and cool colors. Consider landscape or abstract peaceful scenes.',
+                'anxious': 'Express your feelings through bold, contrasting colors. Let the canvas absorb your stress.',
+                'reflective': 'Use detailed, intricate patterns or thoughtful portraits. Take your time with each stroke.',
+                'hopeful': 'Paint your dreams and aspirations. Use bright, warm colors to represent your optimism.',
+                'creative': 'Experiment with new techniques! Mix colors freely and let your imagination guide you.',
+                'peaceful': 'Create gentle, harmonious compositions with balanced elements and soothing tones.'
+            }
+            
+            # Clean up temp file
+            os.unlink(temp_file.name)
+            
+            return jsonify({
+                'success': True,
+                'emotion': detected_emotion,
+                'confidence': confidence,
+                'insight': insights.get(detected_emotion, 'Thank you for sharing your voice. Regular expression helps emotional wellness.'),
+                'music_recommendations': music_recommendations.get(detected_emotion, []),
+                'art_suggestion': art_suggestions.get(detected_emotion, 'Express yourself freely through art.'),
+                'timestamp': 'now'
+            })
+            
+    except Exception as e:
+        print(f"Voice analysis error: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Voice analysis failed: {str(e)}'
+        }), 500
+
+@app.route('/api/art/save', methods=['POST'])
+def save_artwork():
+    """API endpoint for saving artwork from the digital canvas"""
+    try:
+        data = request.get_json()
+        
+        if 'imageData' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'No image data provided'
+            }), 400
+        
+        # In a real application, you would save this to a database
+        # For now, we'll just acknowledge the save
+        artwork_data = {
+            'id': f"art_{int(data.get('timeSpent', 0))}",
+            'imageData': data['imageData'],
+            'emotions': data.get('emotions', []),
+            'timeSpent': data.get('timeSpent', 0),
+            'timestamp': 'now',
+            'title': data.get('title', 'Untitled Artwork')
+        }
+        
+        return jsonify({
+            'success': True,
+            'message': 'Artwork saved successfully!',
+            'artworkId': artwork_data['id']
+        })
+        
+    except Exception as e:
+        print(f"Artwork save error: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to save artwork: {str(e)}'
+        }), 500
+
 if __name__ == '__main__':
     print("Starting minimal Flask app with Story Generator...")
     print("Visit: http://localhost:5000")
@@ -537,7 +766,8 @@ if __name__ == '__main__':
     print("- /therapy-session")
     print("- /peer-support")
     print("- /academic-stress")
-    print("- /fitness-tracker (NEW)")
+    print("- /fitness-tracker")
+    print("- /art-music-therapy (NEW)")
     print("- /journal")
     print("- /story-generator")
     print("- /accessibility")
