@@ -345,73 +345,56 @@ if detect_unusual_pattern(user_data['activity_levels']):
 ### 🔄 **Comprehensive Platform Flow**
 
 #### **📊 Health Data Integration Flow**
-```
-[User Registration] 
-    ↓
-[Fitness App Authorization] 
-    ↓ (OAuth 2.0)
-[Real-Time Data Sync] 
-    ↓
-[Data Normalization & Validation] 
-    ↓
-[ML Processing & Pattern Recognition] 
-    ↓
-[Health Score Calculation] 
-    ↓
-[Personalized Insights Generation] 
-    ↓
-[User Dashboard Update] 
-    ↓
-[Intervention Triggers (if needed)]
+```mermaid
+flowchart TD
+    A[User Registration] --> B[Fitness App Authorization]
+    B -->|OAuth 2.0| C[Real-Time Data Sync]
+    C --> D[Data Normalization & Validation]
+    D --> E[ML Processing & Pattern Recognition]
+    E --> F[Health Score Calculation]
+    F --> G[Personalized Insights Generation]
+    G --> H[User Dashboard Update]
+    H --> I[Intervention Triggers (if needed)]
 ```
 
 #### **🤖 AI-Powered Wellness Flow**
-```
-[User Emotional Input] 
-    ↓ (Text/Voice/Image)
-[Multi-Modal Emotion Detection] 
-    ↓
-[Gemini AI Analysis] 
-    ↓
-[Cultural Context Processing] 
-    ↓
-[Personalized Content Generation] 
-    ↓ (Stories/Meditations/Exercises)
-[Therapeutic Intervention Delivery] 
-    ↓
-[Progress Tracking & Feedback] 
-    ↓
-[Adaptive Learning & Improvement]
+```mermaid
+flowchart TD
+    A[User Emotional Input (Text/Voice/Image)] --> B[Multi-Modal Emotion Detection]
+    B --> C[Gemini AI Analysis]
+    C --> D[Cultural Context Processing]
+    D --> E[Personalized Content Generation (Stories/Meditations/Exercises)]
+    E --> F[Therapeutic Intervention Delivery]
+    F --> G[Progress Tracking & Feedback]
+    G --> H[Adaptive Learning & Improvement]
 ```
 
 #### **🚨 Crisis Detection Flow**
-```
-[Continuous Health Monitoring] 
-    ↓
-[Anomaly Detection Algorithm] 
-    ↓
-[Risk Assessment Scoring] 
-    ↓
-[Threshold Evaluation] 
-    ↓ (High Risk Detected)
-[Immediate Alert System] 
-    ↓
-[Crisis Intervention Protocol] 
-    ↓
-[Professional Support Connection] 
-    ↓
-[Follow-up & Recovery Tracking]
+```mermaid
+flowchart TD
+    A[Continuous Health Monitoring] --> B[Anomaly Detection Algorithm]
+    B --> C[Risk Assessment Scoring]
+    C --> D[Threshold Evaluation]
+    D -->|High Risk Detected| E[Immediate Alert System]
+    E --> F[Crisis Intervention Protocol]
+    F --> G[Professional Support Connection]
+    G --> H[Follow-up & Recovery Tracking]
 ```
 
 #### **📱 User Journey Flow**
-```
-[App Launch] → [Health Apps Connection] → [Baseline Data Collection] 
-    ↓                    ↓                          ↓
-[Dashboard View] → [Real-Time Monitoring] → [Predictive Analytics] 
-    ↓                    ↓                          ↓
-[Wellness Activities] → [Progress Tracking] → [Goal Achievement] 
-    ↓                    ↓                          ↓
-[Community Engagement] → [Professional Referral] → [Long-term Wellness]
+```mermaid
+flowchart TD
+    A[App Launch] --> B[Health Apps Connection]
+    B --> C[Baseline Data Collection]
+    C --> D[Dashboard View]
+    D --> E[Real-Time Monitoring]
+    E --> F[Predictive Analytics]
+    F --> G[Wellness Activities]
+    G --> H[Progress Tracking]
+    H --> I[Goal Achievement]
+    I --> J[Community Engagement]
+    J --> K[Professional Referral]
+    K --> L[Long-term Wellness]
 ```
 
 ### 🔧 **Technical Process Flows**
@@ -420,29 +403,35 @@ if detect_unusual_pattern(user_data['activity_levels']):
 ```mermaid
 sequenceDiagram
     participant User
-    participant Manas App
-    participant Google Fit
-    participant Gemini AI
+    participant ManasApp as "Manas App"
+    participant GoogleFit as "Google Fit"
+    participant GeminiAI as "Gemini AI"
     participant Database
-    
-    User->>Manas App: Authorize Google Fit
-    Manas App->>Google Fit: OAuth Request
-    Google Fit->>Manas App: Access Token
-    Manas App->>Google Fit: Fetch Health Data
-    Google Fit->>Manas App: Biometric Data
-    Manas App->>Database: Store Processed Data
-    Manas App->>Gemini AI: Analyze Patterns
-    Gemini AI->>Manas App: Health Insights
-    Manas App->>User: Personalized Recommendations
+    User->>ManasApp: Authorize Google Fit
+    ManasApp->>GoogleFit: OAuth Request
+    GoogleFit->>ManasApp: Access Token
+    ManasApp->>GoogleFit: Fetch Health Data
+    GoogleFit->>ManasApp: Biometric Data
+    ManasApp->>Database: Store Processed Data
+    ManasApp->>GeminiAI: Analyze Patterns
+    GeminiAI->>ManasApp: Health Insights
+    ManasApp->>User: Personalized Recommendations
 ```
 
 #### **Real-Time Monitoring Process**
-```
-[Wearable Devices] → [Fitness Apps] → [API Gateway] → [Data Processor] 
-       ↓                  ↓              ↓              ↓
-[Continuous Sync] → [Real-Time Update] → [Pattern Analysis] → [Alert Generation]
-       ↓                  ↓              ↓              ↓
-[User Dashboard] ← [Notification System] ← [ML Models] ← [Health Scoring]
+```mermaid
+flowchart TD
+    A[Wearable Devices] --> B[Fitness Apps]
+    B --> C[API Gateway]
+    C --> D[Data Processor]
+    D --> E[Continuous Sync]
+    E --> F[Real-Time Update]
+    F --> G[Pattern Analysis]
+    G --> H[Alert Generation]
+    H --> I[User Dashboard]
+    I --> J[Notification System]
+    J --> K[ML Models]
+    K --> L[Health Scoring]
 ```
 
 ---
