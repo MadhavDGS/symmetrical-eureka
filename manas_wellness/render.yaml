@@ -1,0 +1,10 @@
+services:
+  manas-wellness:
+    type: web
+    name: manas-wellness
+    env: python
+    buildCommand: pip install -r manas_wellness/requirements.txt
+    startCommand: gunicorn app:app 
+    pythonVersion: 3.11.9
+    plan: free
+    autoDeploy: true
