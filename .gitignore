@@ -1,8 +1,13 @@
-    # Exclude everything except manas_wellness folder
+    # Exclude everything except manas_wellness folder and essential deployment files
 /*
 !/manas_wellness/
 !/.gitignore
 !README.md
+!app.py
+!requirements.txt
+!runtime.txt
+!render.yaml
+!.python-version
 
 # But exclude these within manas_wellness
 manas_wellness/uploads/
