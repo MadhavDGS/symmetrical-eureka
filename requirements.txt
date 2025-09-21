@@ -42,7 +42,7 @@ twilio>=8.10.0  # Crisis SMS alerts
 
 # ===== COMPUTER VISION & AI =====
 opencv-python>=4.9.0
-mediapipe>=0.10.21  # Eye tracking, gesture recognition
+mediapipe>=0.10.1,<0.11.0  # Eye tracking, gesture recognition (compatible with Python 3.11)
 Pillow>=10.2.0
 
 # ===== AUDIO PROCESSING =====
