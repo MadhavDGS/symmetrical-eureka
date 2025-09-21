@@ -39,14 +39,21 @@ class EmotionDetector:
         """Initialize emotion detection components"""
         # MediaPipe setup for facial emotion detection
         if MEDIAPIPE_AVAILABLE:
-            self.mp_face_mesh = mp.solutions.face_mesh
-            self.mp_drawing = mp.solutions.drawing_utils
-            self.face_mesh = self.mp_face_mesh.FaceMesh(
-                static_image_mode=True,
-                max_num_faces=1,
-                refine_landmarks=True,
-                min_detection_confidence=0.5
-            )
+            try:
+                self.mp_face_mesh = mp.solutions.face_mesh
+                self.mp_drawing = mp.solutions.drawing_utils
+                self.face_mesh = self.mp_face_mesh.FaceMesh(
+                    static_image_mode=True,
+                    max_num_faces=1,
+                    refine_landmarks=True,
+                    min_detection_confidence=0.5
+                )
+                logger.info("MediaPipe Face Mesh initialized successfully")
+            except Exception as e:
+                logger.error(f"MediaPipe initialization failed: {e}")
+                self.mp_face_mesh = None
+                self.mp_drawing = None
+                self.face_mesh = None
         else:
             self.mp_face_mesh = None
             self.mp_drawing = None
@@ -63,6 +70,102 @@ class EmotionDetector:
         
         logger.info("EmotionDetector initialized successfully")
     
+    def _gemini_only_facial_analysis(self, image_path: str) -> Dict[str, Any]:
+        """
+        Fallback facial analysis using only Gemini AI when MediaPipe fails
+        """
+        try:
+            # Enhanced Gemini AI analysis with better prompting
+            gemini_prompt = """
+            You are an expert clinical psychologist specializing in facial emotion analysis for youth mental health assessment.
+            
+            Analyze this facial image for emotional state with extreme precision.
+            
+            Provide a comprehensive psychological assessment in this EXACT JSON format:
+            
+            {
+                "facial_emotion_detected": "primary emotion (happy, sad, anxious, angry, neutral, surprised, confused, stressed, calm, excited)",
+                "emotion_intensity": integer from 1-10,
+                "confidence": decimal from 0.0-1.0,
+                "facial_features_analysis": {
+                    "eye_expression": "detailed description",
+                    "mouth_expression": "detailed analysis", 
+                    "eyebrow_position": "eyebrow analysis",
+                    "overall_facial_tension": "tension assessment",
+                    "micro_expressions": "subtle indicators"
+                },
+                "emotions_breakdown": {
+                    "happy": percentage 0-100,
+                    "sad": percentage 0-100,
+                    "angry": percentage 0-100,
+                    "surprised": percentage 0-100,
+                    "neutral": percentage 0-100,
+                    "anxious": percentage 0-100,
+                    "confused": percentage 0-100
+                },
+                "mental_wellness_indicators": ["list of indicators"],
+                "recommendations": "therapeutic recommendations",
+                "analysis_notes": "additional observations"
+            }
+            
+            Return ONLY the JSON object, no additional text.
+            """
+            
+            # Get Gemini analysis
+            from .gemini_api import gemini_multimodal
+            gemini_response = gemini_multimodal(image_path, gemini_prompt)
+            
+            # Try to parse JSON response
+            try:
+                import json
+                import re
+                
+                # Extract JSON from response
+                json_match = re.search(r'\{.*\}', gemini_response, re.DOTALL)
+                if json_match:
+                    gemini_data = json.loads(json_match.group())
+                    
+                    result = {
+                        'primary_emotion': gemini_data.get('facial_emotion_detected', 'neutral'),
+                        'emotion_intensity': gemini_data.get('emotion_intensity', 5),
+                        'confidence': gemini_data.get('confidence', 0.6),
+                        'facial_landmarks_detected': False,
+                        'analysis_method': 'gemini_ai_only',
+                        'facial_features_analysis': gemini_data.get('facial_features_analysis', {}),
+                        'emotions_breakdown': gemini_data.get('emotions_breakdown', {}),
+                        'mental_wellness_indicators': gemini_data.get('mental_wellness_indicators', []),
+                        'recommendations': gemini_data.get('recommendations', ''),
+                        'analysis_notes': gemini_data.get('analysis_notes', ''),
+                        'processing_timestamp': datetime.now().isoformat()
+                    }
+                    
+                    return result
+                    
+            except Exception as parse_error:
+                logger.warning(f"Could not parse Gemini JSON: {parse_error}")
+            
+            # Fallback to text analysis
+            return {
+                'primary_emotion': 'neutral',
+                'emotion_intensity': 5,
+                'confidence': 0.5,
+                'facial_landmarks_detected': False,
+                'analysis_method': 'gemini_text_fallback',
+                'gemini_raw_response': gemini_response[:500],
+                'processing_timestamp': datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Gemini-only facial analysis error: {e}")
+            return {
+                'primary_emotion': 'error',
+                'emotion_intensity': 0,
+                'confidence': 0.0,
+                'facial_landmarks_detected': False,
+                'analysis_method': 'error',
+                'error': str(e)
+            }
+    
     def analyze_facial_emotion(self, image_path: str) -> Dict[str, Any]:
         """
         Analyze facial emotion from image using enhanced MediaPipe and Gemini AI
@@ -74,6 +177,11 @@ class EmotionDetector:
             Dictionary containing comprehensive emotion analysis results
         """
         try:
+            # Check if MediaPipe is available and properly initialized
+            if not self.face_mesh:
+                logger.warning("MediaPipe not available, using Gemini-only analysis")
+                return self._gemini_only_facial_analysis(image_path)
+            
             # Load and validate image
             image = cv2.imread(image_path)
             if image is None:
@@ -90,20 +198,17 @@ class EmotionDetector:
             
             if not results.multi_face_landmarks:
                 # Fallback: try with simpler face detection
-                mp_face_detection = mp.solutions.face_detection
-                face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.3)
-                detection_results = face_detection.process(rgb_image)
-                
-                if not detection_results.detections:
-                    return {
-                        'primary_emotion': 'neutral',
-                        'emotion_intensity': 1,
-                        'confidence': 0.3,
-                        'facial_landmarks_detected': False,
-                        'analysis_method': 'fallback_no_face',
-                        'error': 'No face detected in image',
-                        'suggestions': 'Please ensure good lighting and face is clearly visible'
-                    }
+                try:
+                    mp_face_detection = mp.solutions.face_detection
+                    face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.3)
+                    detection_results = face_detection.process(rgb_image)
+                    
+                    if not detection_results.detections:
+                        logger.warning("No face detected, using Gemini-only analysis")
+                        return self._gemini_only_facial_analysis(image_path)
+                except Exception as fallback_error:
+                    logger.error(f"Face detection fallback failed: {fallback_error}")
+                    return self._gemini_only_facial_analysis(image_path)
             
             # Extract facial landmarks if available
             landmark_analysis = {}
