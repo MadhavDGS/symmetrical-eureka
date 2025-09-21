@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Aarohan{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 bg-indigo-100 rounded-full flex items-center justify-center">
+                <span class="text-2xl">🧠</span>
+            </div>
+            <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+                Welcome to Aarohan
+            </h2>
+            <p class="mt-2 text-sm text-gray-600">
+                Your AI-powered mental wellness companion
+            </p>
+        </div>
+
+        <div class="bg-white shadow-xl rounded-lg p-8 glass-effect text-center">
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Ready to begin?</h3>
+                <p class="text-gray-600">
+                    Start your wellness journey with personalized AI-powered support and mental health tools.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <a href="/dashboard" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                    Start Your Wellness Journey
+                </a>
+                
+                <div class="text-center">
+                    <p class="text-xs text-gray-500">
+                        🔒 Anonymous and secure - no personal information required
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Support -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <h3 class="text-sm font-medium text-red-800 mb-2">Need Immediate Help?</h3>
+            <div class="text-xs text-red-600 space-y-1">
+                <p>AASRA: <a href="tel:+912227546669" class="underline">91-22-27546669</a></p>
+                <p>Emergency: <a href="tel:112" class="underline">112</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// No form processing needed - direct navigation to dashboard
+</script>
+{% endblock %}

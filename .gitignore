@@ -8,6 +8,11 @@
 !runtime.txt
 !render.yaml
 !.python-version
+!utils/
+!integrations/
+!static/
+!templates/
+!FEATURES_VISUAL_PRESENTATION.md
 
 # But exclude these within manas_wellness
 manas_wellness/uploads/

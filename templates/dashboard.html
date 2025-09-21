@@ -1,0 +1,663 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Aarohan Mental Wellness{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 backdrop-blur-sm"> <div class="absolute inset-0 bg-gradient-to-r from-green-900/10 to-blue-900/10"></div> <div class="relative max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"> <!-- Page Header --> <div class="text-center mb-12"> <div class="mb-6"> <div class="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-2xl"> <svg class="w-10 h-10 text-green-400" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L19 5.5L17 7H14V9H17L19 7.5L21 9M7 18C7 16.9 7.9 16 9 16S11 16.9 11 18S10.1 20 9 20S7 19.1 7 18M14 20.6L15.5 22L21 16.5L19.5 15L14 20.6Z"/> </svg> </div> </div> <h1 class="text-4xl font-bold text-white mb-4"> Welcome to Your Wellness Journey </h1> <p class="text-xl text-gray-300 max-w-2xl mx-auto"> Your personalized mental health companion powered by AI. Track emotions, access therapy tools, and build healthier habits. </p> </div> <!-- Quick Stats --> <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"> <!-- Sessions Card --> <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20"> <div class="flex items-center justify-between mb-4"> <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center"> <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M4 4h4v12H4zm6-2h4v14h-4zm6 4h4v10h-4z"/> </svg> </div> <div class="text-right"> <p class="text-2xl font-bold text-white">{{ session_count or "12" }}</p> <p class="text-sm text-gray-300">Sessions</p> </div> </div> <div class="flex items-center text-sm text-green-400"> <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"> <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/> </svg> +15% from last week </div> </div> <!-- Current Mood Card --> <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20"> <div class="flex items-center justify-between mb-4"> <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center"> <span class="text-2xl">😊</span> </div> <div class="text-right"> <p class="text-2xl font-bold text-white">{{ current_mood or "Calm" }}</p> <p class="text-sm text-gray-300">Current Mood</p> </div> </div> <div class="flex items-center text-sm text-blue-400"> <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"> <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/> </svg> Stable today </div> </div> <!-- Wellness Score Card --> <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20"> <div class="flex items-center justify-between mb-4"> <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center"> <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/> </svg> </div> <div class="text-right"> <p class="text-2xl font-bold text-white">{{ wellness_score or "7.8" }}<span class="text-lg text-gray-400">/10</span></p> <p class="text-sm text-gray-300">Wellness Score</p> </div> </div> <div class="w-full bg-gray-700/50 rounded-full h-2"> <div class="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full" style="width: {{ (wellness_score or 7.8) * 10 }}%"></div> </div> </div> <!-- Streak Card --> <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20"> <div class="flex items-center justify-between mb-4"> <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center"> <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M12.5 2C8.9 2 6 4.9 6 8.5C6 10.1 6.6 11.5 7.5 12.6L12.5 22L17.5 12.6C18.4 11.5 19 10.1 19 8.5C19 4.9 16.1 2 12.5 2Z"/> </svg> </div> <div class="text-right"> <p class="text-2xl font-bold text-white">{{ streak_days or "5" }}</p> <p class="text-sm text-gray-300">Day Streak</p> </div> </div> <div class="flex items-center text-sm text-orange-400"> <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"> <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/> </svg> Keep it up! </div> </div> </div> <div class="grid lg:grid-cols-3 gap-8 mb-12"> <!-- Primary Actions --> <div class="lg:col-span-2 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 p-8"> <div class="flex items-center mb-8"> <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center mr-4"> <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/> </svg> </div> <h2 class="text-2xl font-bold text-white">Start Your Journey</h2> </div> <div class="grid md:grid-cols-2 gap-6"> <a href="/emotion-analysis" class="group block bg-gradient-to-br from-green-500 to-emerald-600 p-6 rounded-3xl transition-all duration-300 shadow-lg"> <div class="flex items-start justify-between mb-4"> <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"> <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-1.48.41-2.86 1.12-4.06l10.94 10.94C14.86 19.59 13.48 20 12 20z"/> </svg> </div> <svg class="w-6 h-6 text-white/60 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/> </svg> </div> <h3 class="text-xl font-bold text-white mb-2">Emotion Analysis</h3> <p class="text-green-100 text-sm leading-relaxed">Discover your emotional state through AI-powered voice, text, and facial analysis</p> <div class="mt-4 flex items-center text-green-200 text-sm"> <span class="w-2 h-2 bg-green-300 rounded-full mr-2"></span> Multi-modal AI analysis </div> </a> <a href="/therapy-session" class="group block bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl transition-all duration-300 shadow-lg"> <div class="flex items-start justify-between mb-4"> <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"> <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/> </svg> </div> <svg class="w-6 h-6 text-white/60 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/> </svg> </div> <h3 class="text-xl font-bold text-white mb-2">Therapy Session</h3> <p class="text-blue-100 text-sm leading-relaxed">Get personalized therapy exercises and coping strategies tailored to your needs</p> <div class="mt-4 flex items-center text-blue-200 text-sm"> <span class="w-2 h-2 bg-blue-300 rounded-full mr-2"></span> AI-powered personalization </div> </a> <a href="/accessibility" class="group block bg-gradient-to-br from-green-500 to-emerald-600 p-6 rounded-3xl transition-all duration-300 shadow-lg"> <div class="flex items-start justify-between mb-4"> <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"> <span class="text-2xl">♿</span> </div> <svg class="w-6 h-6 text-white/60 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/> </svg> </div> <h3 class="text-xl font-bold text-white mb-2">Accessibility Tools</h3> <p class="text-green-100 text-sm leading-relaxed">Customize your experience with accessibility features and inclusive design</p> <div class="mt-4 flex items-center text-green-200 text-sm"> <span class="w-2 h-2 bg-green-300 rounded-full mr-2"></span> Inclusive for everyone </div> </a> <a href="/analytics" class="group block bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl transition-all duration-300 shadow-lg"> <div class="flex items-start justify-between mb-4"> <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"> <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M3 13h2v8H3zm4-6h2v14H7zm4-6h2v20h-2zm4 2h2v18h-2zm4 5h2v13h-2z"/> </svg> </div> <svg class="w-6 h-6 text-white/60 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/> </svg> </div> <h3 class="text-xl font-bold text-white mb-2">Analytics & Insights</h3> <p class="text-blue-100 text-sm leading-relaxed">Track your mental wellness journey with detailed analytics and progress insights</p> <div class="mt-4 flex items-center text-blue-200 text-sm"> <span class="w-2 h-2 bg-blue-300 rounded-full mr-2"></span> Track your progress </div> </a> </div> </div> <!-- Quick Tools Sidebar --> <div class="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 p-6"> <div class="flex items-center mb-6"> <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center mr-3"> <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/> </svg> </div> <h3 class="text-lg font-semibold text-white">Quick Tools</h3> </div> <div class="space-y-4"> <button onclick="startBreathingExercise()" class="w-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 text-white p-4 rounded-xl transition-all duration-300 text-left"> <div class="flex items-center justify-between"> <div> <h4 class="font-medium text-green-300">Breathing Exercise</h4> <p class="text-sm text-gray-300 mt-1">5-minute guided session</p> </div> <span class="text-2xl">🫁</span> </div> </button> <button onclick="startMoodCheck()" class="w-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 text-white p-4 rounded-xl transition-all duration-300 text-left"> <div class="flex items-center justify-between"> <div> <h4 class="font-medium text-green-300">Quick Mood Check</h4> <p class="text-sm text-gray-300 mt-1">How are you feeling?</p> </div> <span class="text-2xl">😊</span> </div> </button> <button onclick="openJournal()" class="w-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 text-white p-4 rounded-xl transition-all duration-300 text-left"> <div class="flex items-center justify-between"> <div> <h4 class="font-medium text-green-300">Daily Journal</h4> <p class="text-sm text-gray-300 mt-1">Reflect on your day</p> </div> <span class="text-2xl">📝</span> </div> </button> <button onclick="viewResources()" class="w-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 text-white p-4 rounded-xl transition-all duration-300 text-left"> <div class="flex items-center justify-between"> <div> <h4 class="font-medium text-green-300">Wellness Resources</h4> <p class="text-sm text-gray-300 mt-1">Tips and guides</p> </div> <span class="text-2xl">📚</span> </div> </button> </div> </div> </div> <!-- Recent Activity & Insights --> <div class="grid lg:grid-cols-2 gap-8 mb-8"> <!-- Recent Activities --> <div class="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 p-6"> <div class="flex items-center justify-between mb-6"> <div class="flex items-center"> <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center mr-3"> <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L19 5.5L17 7H14V9H17L19 7.5L21 9M7 18C7 16.9 7.9 16 9 16S11 16.9 11 18S10.1 20 9 20S7 19.1 7 18M14 20.6L15.5 22L21 16.5L19.5 15L14 20.6Z"/> </svg> </div> <h2 class="text-xl font-semibold text-white">Recent Activity</h2> </div> <button class="text-gray-400 hover:text-white transition-colors"> <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/> </svg> </button> </div> {% if recent_activities %} <div class="space-y-4 max-h-80 overflow-y-auto"> {% for activity in recent_activities %} <div class="bg-white/5 rounded-xl p-4 border border-white/10 transition-all duration-300"> <div class="flex items-start justify-between"> <div class="flex-1"> <div class="flex items-center mb-2"> <span class="text-2xl mr-3">{{ activity.emoji }}</span> <h3 class="text-white font-medium">{{ activity.type }}</h3> </div> <p class="text-gray-300 text-sm leading-relaxed">{{ activity.description }}</p> <p class="text-gray-500 text-xs mt-2">{{ activity.timestamp }}</p> </div> </div> </div> {% endfor %} </div> {% else %} <div class="text-center py-12"> <div class="w-16 h-16 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-full mx-auto mb-4 flex items-center justify-center"> <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/> </svg> </div> <h3 class="text-white font-medium mb-2">Start Your Journey</h3> <p class="text-gray-400 text-sm mb-6 max-w-xs mx-auto">Your activities will appear here as you begin exploring our wellness tools.</p> <a href="/emotion-analysis" class="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg transition-all duration-300 font-medium"> Get Started <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/> </svg> </a> </div> {% endif %} </div> <!-- Daily Insights --> <div class="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 p-6"> <div class="flex items-center mb-6"> <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center mr-3"> <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"> <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26C17.81 13.47 19 11.38 19 9c0-3.86-3.14-7-7-7z"/> </svg> </div> <h2 class="text-xl font-semibold text-white">Daily Insights</h2> </div> <div class="space-y-6"> <div class="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 p-6 rounded-xl"> <div class="flex items-start"> <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center mr-4 mt-1"> <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/> </svg> </div> <div> <h3 class="font-semibold text-green-300 mb-2">Growth Tip</h3> <p class="text-green-100 text-sm leading-relaxed"> Practice the 4-7-8 breathing technique: inhale for 4 counts, hold for 7, exhale for 8. This can reduce anxiety by up to 50%. </p> </div> </div> </div> <div class="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-400/30 p-6 rounded-xl"> <div class="flex items-start"> <div class="w-8 h-8 bg-blue-400/20 rounded-lg flex items-center justify-center mr-4 mt-1"> <span class="text-blue-400">🧘</span> </div> <div> <h3 class="font-semibold text-blue-300 mb-2">Mindfulness Moment</h3> <p class="text-blue-100 text-sm leading-relaxed"> Take 30 seconds to notice: 3 things you can see, 2 things you can hear, and 1 thing you can touch right now. </p> </div> </div> </div> <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 p-6 rounded-xl"> <div class="flex items-start"> <div class="w-8 h-8 bg-purple-400/20 rounded-lg flex items-center justify-center mr-4 mt-1"> <span class="text-purple-400">💝</span> </div> <div> <h3 class="font-semibold text-purple-300 mb-2">Self-Care Reminder</h3> <p class="text-purple-100 text-sm leading-relaxed"> Remember to be kind to yourself today. Progress, not perfection, is the goal. </p> </div> </div> </div> </div> </div> </div> <!-- Crisis Support --> <div class="bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl p-8 text-white shadow-2xl"> <div class="text-center"> <div class="w-16 h-16 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center backdrop-blur-sm"> <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.982 16.5c-.77.833.192 2.5 1.732 2.5z"/> </svg> </div> <h2 class="text-2xl font-bold mb-3">Need Immediate Support?</h2> <p class="text-red-100 mb-8 max-w-2xl mx-auto leading-relaxed"> If you're experiencing a mental health crisis or having thoughts of self-harm, help is available 24/7. You're not alone. </p> <div class="flex flex-col sm:flex-row gap-4 justify-center"> <a href="tel:+912227546669" class="inline-flex items-center bg-white text-red-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold transition-colors duration-300 shadow-lg"> <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/> </svg> AASRA: 91-22-27546669 </a> <a href="/crisis-support" class="inline-flex items-center border-2 border-white text-white hover:bg-white hover:text-red-600 px-8 py-4 rounded-xl font-semibold transition-colors duration-300"> <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/> </svg> More Resources </a> </div> </div> </div> </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Existing wellness score update code
+    let currentScore = {{ wellness_score or 7.8 }};
+    const scoreElement = document.querySelector('.text-2xl.font-bold.text-white');
+    const progressBar = document.querySelector('.bg-gradient-to-r.from-green-400.to-emerald-500');
+
+    // Initialize Google Fit integration
+    initializeGoogleFit();
+
+    // Subtle score update every 30 seconds (no animations)
+    setInterval(() => {
+        const variation = (Math.random() - 0.5) * 0.2; // ±0.1 variation
+        const newScore = Math.max(0, Math.min(10, currentScore + variation));
+        if (scoreElement && Math.abs(newScore - currentScore) > 0.05) {
+            if (scoreElement.textContent.includes('/10')) {
+                scoreElement.innerHTML = `${newScore.toFixed(1)}<span class="text-lg text-gray-400">/10</span>`;
+            }
+            if (progressBar) {
+                progressBar.style.width = `${newScore * 10}%`;
+            }
+            currentScore = newScore;
+        }
+    }, 30000);
+});
+
+// Google Fit Integration Functions
+async function initializeGoogleFit() {
+    try {
+        // Check Google Fit connection status
+        const response = await fetch('/api/googlefit/status');
+        const status = await response.json();
+        
+        if (status.status === 'connected') {
+            showHealthWidget();
+            loadHealthSnapshot();
+        } else {
+            showConnectCard();
+        }
+    } catch (error) {
+        console.log('Google Fit not available:', error);
+        showConnectCard();
+    }
+}
+
+function showHealthWidget() {
+    // Show health widget and update banner
+    const widget = document.getElementById('health-widget');
+    const connect = document.getElementById('googlefit-connect');
+    const statusText = document.getElementById('googlefit-status-text');
+    const connectBtn = document.getElementById('googlefit-connect-btn');
+    const refreshBtn = document.getElementById('googlefit-refresh-btn');
+    
+    if (widget) widget.classList.remove('hidden');
+    if (connect) connect.style.display = 'none';
+    if (statusText) statusText.textContent = 'Connected - Loading health data...';
+    if (connectBtn) connectBtn.classList.add('hidden');
+    if (refreshBtn) refreshBtn.classList.remove('hidden');
+}
+
+function showConnectCard() {
+    // Show connect card, hide health widget, update banner
+    const widget = document.getElementById('health-widget');
+    const connect = document.getElementById('googlefit-connect');
+    const statusText = document.getElementById('googlefit-status-text');
+    const connectBtn = document.getElementById('googlefit-connect-btn');
+    const refreshBtn = document.getElementById('googlefit-refresh-btn');
+    
+    if (widget) widget.classList.add('hidden');
+    if (connect) connect.style.display = 'block';
+    if (statusText) statusText.textContent = 'Connect to see your health data and insights';
+    if (connectBtn) connectBtn.classList.remove('hidden');
+    if (refreshBtn) refreshBtn.classList.add('hidden');
+}
+
+function updateConnectionStatus(status, hasData = false) {
+    const statusText = document.getElementById('googlefit-status-text');
+    const connectBtn = document.getElementById('googlefit-connect-btn');
+    const refreshBtn = document.getElementById('googlefit-refresh-btn');
+    
+    if (status === 'connected') {
+        if (hasData) {
+            if (statusText) statusText.textContent = 'Connected - Health data loaded successfully';
+        } else {
+            if (statusText) statusText.textContent = 'Connected - No recent data found. Try re-authenticating.';
+        }
+        if (connectBtn) connectBtn.classList.add('hidden');
+        if (refreshBtn) refreshBtn.classList.remove('hidden');
+    } else {
+        if (statusText) statusText.textContent = 'Connect to see your health data and insights';
+        if (connectBtn) connectBtn.classList.remove('hidden');
+        if (refreshBtn) refreshBtn.classList.add('hidden');
+    }
+}
+
+async function connectGoogleFit() {
+    try {
+        const response = await fetch('/api/googlefit/auth');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Open popup for OAuth
+            const popup = window.open(
+                data.auth_url,
+                'googlefit_auth',
+                'width=600,height=700,scrollbars=yes,resizable=yes'
+            );
+            
+            // Listen for auth completion
+            const checkClosed = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkClosed);
+                    // Recheck status after popup closes
+                    setTimeout(() => {
+                        initializeGoogleFit();
+                    }, 1000);
+                }
+            }, 1000);
+            
+            // Listen for success message
+            window.addEventListener('message', (event) => {
+                if (event.data === 'googlefit_auth_success') {
+                    popup.close();
+                    clearInterval(checkClosed);
+                    showHealthWidget();
+                    loadHealthSnapshot();
+                }
+            });
+            
+        } else {
+            alert('Failed to initialize Google Fit authentication');
+        }
+    } catch (error) {
+        console.error('Google Fit connection error:', error);
+        alert('Error connecting to Google Fit. Please try again.');
+    }
+}
+
+async function loadHealthSnapshot() {
+    try {
+        // Request 1 year of data (8760 hours) to get any available data
+        const response = await fetch('/api/googlefit/snapshot?hours=8760');
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.snapshot) {
+            const metrics = data.snapshot.health_metrics || {};
+            const hasAnyData = Object.keys(metrics).length > 0;
+            
+            if (hasAnyData) {
+                // Update health metrics display with visualizations
+                updateHealthMetricsWithVisuals(metrics);
+                updateConnectionStatus('connected', true);
+                
+                // Show charts section
+                const chartsSection = document.getElementById('health-charts');
+                if (chartsSection) chartsSection.classList.remove('hidden');
+                
+                // Generate health insight
+                generateHealthInsight(metrics);
+            } else {
+                // No data available
+                showNoDataState();
+                updateConnectionStatus('connected', false);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading health snapshot:', error);
+    }
+}
+
+function updateHealthMetricsWithVisuals(metrics) {
+    // Steps
+    if (metrics.steps && metrics.steps.steps) {
+        const steps = metrics.steps.steps;
+        document.getElementById('health-steps').textContent = steps.toLocaleString();
+        
+        // Update progress bar (goal: 10,000 steps)
+        const stepsProgress = Math.min((steps / 10000) * 100, 100);
+        document.getElementById('steps-progress').style.width = `${stepsProgress}%`;
+        
+        // Update goal text
+        const remaining = Math.max(0, 10000 - steps);
+        if (remaining > 0) {
+            document.getElementById('steps-goal').textContent = `${remaining.toLocaleString()} to goal`;
+        } else {
+            document.getElementById('steps-goal').textContent = 'Goal achieved! 🎉';
+        }
+    } else {
+        document.getElementById('health-steps').textContent = 'No data';
+        document.getElementById('steps-progress').style.width = '0%';
+    }
+    
+    // Heart Rate
+    if (metrics.heart_rate) {
+        const heartRate = metrics.heart_rate.average || metrics.heart_rate.bpm;
+        if (heartRate) {
+            document.getElementById('health-heart-rate').textContent = Math.round(heartRate);
+            
+            // Determine heart rate zone (rough estimates)
+            let zone = 'Rest';
+            let progress = 0;
+            if (heartRate > 60 && heartRate <= 100) {
+                zone = 'Normal';
+                progress = 30;
+            } else if (heartRate > 100 && heartRate <= 140) {
+                zone = 'Active';
+                progress = 60;
+            } else if (heartRate > 140) {
+                zone = 'High';
+                progress = 90;
+            }
+            
+            document.getElementById('heart-rate-zone').textContent = zone;
+            document.getElementById('heart-rate-progress').style.width = `${progress}%`;
+        } else {
+            document.getElementById('health-heart-rate').textContent = '--';
+            document.getElementById('heart-rate-progress').style.width = '0%';
+        }
+    } else {
+        document.getElementById('health-heart-rate').textContent = '--';
+        document.getElementById('heart-rate-progress').style.width = '0%';
+    }
+    
+    // Calories
+    if (metrics.calories && metrics.calories.calories) {
+        const calories = metrics.calories.calories;
+        document.getElementById('health-calories').textContent = Math.round(calories);
+        
+        // Update progress bar (goal: 2,000 calories)
+        const caloriesProgress = Math.min((calories / 2000) * 100, 100);
+        document.getElementById('calories-progress').style.width = `${caloriesProgress}%`;
+        
+        // Update goal text
+        const remaining = Math.max(0, 2000 - calories);
+        if (remaining > 0) {
+            document.getElementById('calories-goal').textContent = `${Math.round(remaining)} to goal`;
+        } else {
+            document.getElementById('calories-goal').textContent = 'Goal achieved! 🔥';
+        }
+    } else {
+        document.getElementById('health-calories').textContent = '--';
+        document.getElementById('calories-progress').style.width = '0%';
+    }
+    
+    // Active Minutes
+    if (metrics.active_minutes) {
+        const minutes = metrics.active_minutes.active_minutes || metrics.active_minutes.duration_minutes;
+        if (minutes) {
+            document.getElementById('health-active-minutes').textContent = Math.round(minutes);
+            
+            // Update progress bar (goal: 30 minutes)
+            const activeProgress = Math.min((minutes / 30) * 100, 100);
+            document.getElementById('active-minutes-progress').style.width = `${activeProgress}%`;
+            
+            // Update goal text
+            const remaining = Math.max(0, 30 - minutes);
+            if (remaining > 0) {
+                document.getElementById('active-minutes-goal').textContent = `${Math.round(remaining)} min to goal`;
+            } else {
+                document.getElementById('active-minutes-goal').textContent = 'Goal achieved! ⚡';
+            }
+        } else {
+            document.getElementById('health-active-minutes').textContent = '--';
+            document.getElementById('active-minutes-progress').style.width = '0%';
+        }
+    } else {
+        document.getElementById('health-active-minutes').textContent = '--';
+        document.getElementById('active-minutes-progress').style.width = '0%';
+    }
+    
+    // Create simple charts
+    createHealthCharts(metrics);
+}
+
+function createHealthCharts(metrics) {
+    // Simple canvas-based charts (no external library needed)
+    
+    // Steps chart - simple bar representation
+    const stepsCanvas = document.getElementById('steps-chart');
+    if (stepsCanvas && metrics.steps) {
+        const ctx = stepsCanvas.getContext('2d');
+        ctx.clearRect(0, 0, stepsCanvas.width, stepsCanvas.height);
+        
+        // Draw simple bar chart
+        const steps = metrics.steps.steps || 0;
+        const maxSteps = 15000; // Scale
+        const barHeight = (steps / maxSteps) * (stepsCanvas.height - 40);
+        
+        // Background
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+        ctx.fillRect(50, 20, stepsCanvas.width - 100, stepsCanvas.height - 40);
+        
+        // Bar
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
+        ctx.fillRect(50, stepsCanvas.height - 20 - barHeight, stepsCanvas.width - 100, barHeight);
+        
+        // Text
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${steps.toLocaleString()} steps`, stepsCanvas.width / 2, stepsCanvas.height - 5);
+        ctx.fillText('Today', stepsCanvas.width / 2, 15);
+    }
+    
+    // Heart rate chart - simple gauge
+    const heartCanvas = document.getElementById('heart-rate-chart');
+    if (heartCanvas && metrics.heart_rate) {
+        const ctx = heartCanvas.getContext('2d');
+        ctx.clearRect(0, 0, heartCanvas.width, heartCanvas.height);
+        
+        const centerX = heartCanvas.width / 2;
+        const centerY = heartCanvas.height / 2;
+        const radius = 50;
+        
+        // Background circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.2)';
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        
+        // Heart rate arc
+        const heartRate = metrics.heart_rate.average || metrics.heart_rate.bpm || 0;
+        const angle = (heartRate / 200) * 2 * Math.PI; // Scale to 200 BPM max
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angle);
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        
+        // Center text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${Math.round(heartRate)}`, centerX, centerY);
+        ctx.font = '10px Arial';
+        ctx.fillText('BPM', centerX, centerY + 15);
+    }
+}
+
+function generateHealthInsight(metrics) {
+    const insights = [];
+    
+    if (metrics.steps && metrics.steps.steps) {
+        const steps = metrics.steps.steps;
+        if (steps >= 10000) {
+            insights.push("🎉 Excellent! You've hit your daily step goal. Physical activity boosts mood and reduces stress.");
+        } else if (steps >= 7500) {
+            insights.push("👍 Great job staying active! Just a bit more to reach the recommended 10,000 steps.");
+        } else if (steps >= 5000) {
+            insights.push("🚶‍♀️ You're making progress! Consider taking short walks to boost your mental clarity.");
+        } else {
+            insights.push("🌱 Every step counts! Even light activity can improve your mood and energy levels.");
+        }
+    }
+    
+    if (metrics.heart_rate && metrics.heart_rate.average) {
+        const hr = metrics.heart_rate.average;
+        if (hr >= 60 && hr <= 100) {
+            insights.push("❤️ Your heart rate looks healthy! Regular monitoring helps track stress and recovery.");
+        }
+    }
+    
+    if (metrics.active_minutes && metrics.active_minutes.duration_minutes) {
+        const minutes = metrics.active_minutes.duration_minutes;
+        if (minutes >= 30) {
+            insights.push("⏱️ Fantastic! You've exceeded the daily recommended 30 minutes of activity.");
+        } else if (minutes >= 15) {
+            insights.push("💪 Good activity level! Consider adding a few more minutes for optimal mental wellness.");
+        }
+    }
+    
+    // Display random insight if available
+    if (insights.length > 0) {
+        const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+        document.getElementById('health-insight-text').textContent = randomInsight;
+    }
+}
+
+async function refreshHealthData() {
+    // Show loading state
+    document.getElementById('health-steps').textContent = '--';
+    document.getElementById('health-heart-rate').textContent = '-- BPM';
+    document.getElementById('health-calories').textContent = '--';
+    document.getElementById('health-active-minutes').textContent = '-- min';
+    document.getElementById('health-insight-text').textContent = 'Refreshing health data...';
+    
+    // Reload data
+    await loadHealthSnapshot();
+}
+
+function learnMoreHealth() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-slate-800 rounded-2xl p-8 max-w-lg w-full text-center border border-slate-600 max-h-[80vh] overflow-y-auto">
+            <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-pink-500 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <span class="text-3xl">🏃‍♀️</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">Health Data Integration</h3>
+            <div class="text-left space-y-4 text-gray-300">
+                <p><strong class="text-white">What we track:</strong></p>
+                <ul class="list-disc list-inside space-y-2 ml-4">
+                    <li>Daily steps and distance</li>
+                    <li>Heart rate patterns</li>
+                    <li>Calories burned</li>
+                    <li>Active minutes</li>
+                    <li>Sleep patterns</li>
+                    <li>Activity types</li>
+                </ul>
+                <p><strong class="text-white">Privacy:</strong> All data is processed locally and used only to provide personalized wellness insights. We never share your health information.</p>
+                <p><strong class="text-white">Benefits:</strong> Understanding the connection between physical activity and mental wellness helps create better therapy recommendations.</p>
+            </div>
+            <div class="flex gap-4 mt-8">
+                <button onclick="closeModal()" class="flex-1 bg-gray-600 text-white py-3 rounded-xl hover:bg-gray-700 transition-colors">
+                    Close
+                </button>
+                <button onclick="closeModal(); connectGoogleFit();" class="flex-1 bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors">
+                    Connect Now
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Existing quick tools functions
+function startBreathingExercise() {
+    // Create breathing exercise modal (no animations)
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full text-center border border-slate-600">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <span class="text-3xl">🫁</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4">Breathing Exercise</h3>
+            <p class="text-gray-300 mb-6">Follow the visual guide for a 5-minute breathing session</p>
+            <div class="flex gap-4">
+                <button onclick="closeModal()" class="flex-1 bg-gray-600 text-white py-3 rounded-xl hover:bg-gray-700 transition-colors">
+                    Close
+                </button>
+                <button onclick="window.location.href='/breathing-exercise'" class="flex-1 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                    Start
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function startMoodCheck() {
+    window.location.href = '/emotion-analysis?quick=true';
+}
+
+function openJournal() {
+    window.location.href = '/journal';
+}
+
+function viewResources() {
+    window.location.href = '/resources';
+}
+
+function closeModal() {
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) {
+        modal.remove();
+    }
+}
+</script>
+
+<!-- Google Fit Health Widget HTML (Added via JavaScript) -->
+<script>
+// Add health widget HTML after page load
+document.addEventListener('DOMContentLoaded', function() {
+    const statsGrid = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4');
+    if (statsGrid && statsGrid.parentNode) {
+        const healthSection = document.createElement('div');
+        healthSection.id = 'googlefit-section';
+        healthSection.className = 'mb-8';
+        healthSection.innerHTML = `
+            <!-- Google Fit Login Button (Always visible) -->
+            <div id="googlefit-login-banner" class="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 rounded-xl p-4 mb-6 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-red-500/30 rounded-lg flex items-center justify-center mr-4">
+                        <span class="text-2xl">🏃‍♀️</span>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-semibold">Google Fit Integration</h3>
+                        <p id="googlefit-status-text" class="text-red-200 text-sm">Connect to see your health data and insights</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="connectGoogleFit()" id="googlefit-connect-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Connect Google Fit
+                    </button>
+                    <button onclick="refreshHealthData()" id="googlefit-refresh-btn" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Health Data Widget (Hidden until connected) -->
+            <div id="health-widget" class="hidden bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 p-6 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-red-400 to-pink-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-xl">🏃‍♀️</span>
+                        </div>
+                        <h2 class="text-xl font-semibold text-white">Health Snapshot</h2>
+                    </div>
+                    <button onclick="refreshHealthData()" class="text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Steps -->
+                    <div class="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-400/30 p-4 rounded-xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">👟</span>
+                            <div class="text-right">
+                                <p id="health-steps" class="text-xl font-bold text-white">--</p>
+                                <p class="text-xs text-blue-300">Steps</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="w-full bg-blue-900/30 rounded-full h-2">
+                                <div id="steps-progress" class="bg-blue-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p id="steps-goal" class="text-xs text-blue-300 mt-1">Goal: 10,000</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Heart Rate -->
+                    <div class="bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-400/30 p-4 rounded-xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">❤️</span>
+                            <div class="text-right">
+                                <p id="health-heart-rate" class="text-xl font-bold text-white">--</p>
+                                <p class="text-xs text-red-300">Avg BPM</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="flex items-center justify-between text-xs text-red-300">
+                                <span>Rest</span>
+                                <span id="heart-rate-zone" class="font-medium">--</span>
+                                <span>Max</span>
+                            </div>
+                            <div class="w-full bg-red-900/30 rounded-full h-2 mt-1">
+                                <div id="heart-rate-progress" class="bg-red-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calories -->
+                    <div class="bg-gradient-to-br from-orange-500/20 to-orange-600/20 border border-orange-400/30 p-4 rounded-xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">🔥</span>
+                            <div class="text-right">
+                                <p id="health-calories" class="text-xl font-bold text-white">--</p>
+                                <p class="text-xs text-orange-300">Calories</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="w-full bg-orange-900/30 rounded-full h-2">
+                                <div id="calories-progress" class="bg-orange-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p id="calories-goal" class="text-xs text-orange-300 mt-1">Goal: 2,000</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Minutes -->
+                    <div class="bg-gradient-to-br from-green-500/20 to-green-600/20 border border-green-400/30 p-4 rounded-xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">⏱️</span>
+                            <div class="text-right">
+                                <p id="health-active-minutes" class="text-xl font-bold text-white">--</p>
+                                <p class="text-xs text-green-300">Active Min</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="w-full bg-green-900/30 rounded-full h-2">
+                                <div id="active-minutes-progress" class="bg-green-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p id="active-minutes-goal" class="text-xs text-green-300 mt-1">Goal: 30 min</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Health Charts Section -->
+                <div id="health-charts" class="mt-6 hidden">
+                    <h3 class="text-lg font-semibold text-white mb-4">Health Trends</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Steps Chart -->
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <h4 class="text-white font-medium mb-3">Steps Over Time</h4>
+                            <canvas id="steps-chart" width="300" height="150"></canvas>
+                        </div>
+                        
+                        <!-- Heart Rate Chart -->
+                        <div class="bg-white/5 rounded-xl p-4">
+                            <h4 class="text-white font-medium mb-3">Heart Rate Zones</h4>
+                            <canvas id="heart-rate-chart" width="300" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Health Insights -->
+                <div id="health-insights" class="mt-4 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-xl">
+                    <div class="flex items-center mb-2">
+                        <span class="text-xl mr-2">💡</span>
+                        <h3 class="text-purple-300 font-medium">Health Insight</h3>
+                    </div>
+                    <p id="health-insight-text" class="text-purple-100 text-sm">Connect Google Fit to see personalized health insights based on your activity data.</p>
+                </div>
+            </div>
+
+            <!-- Google Fit Connection Card -->
+            <div id="googlefit-connect" class="bg-gradient-to-br from-red-500/20 to-pink-600/20 border border-red-400/30 rounded-2xl p-8 text-center">
+                <div class="w-16 h-16 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center backdrop-blur-sm">
+                    <span class="text-3xl">🏃‍♀️</span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-4">Connect Your Health Data</h2>
+                <p class="text-red-100 mb-6 max-w-2xl mx-auto leading-relaxed">
+                    Link your Google Fit account to get personalized wellness insights based on your physical activity, sleep patterns, and health metrics.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="connectGoogleFit()" class="inline-flex items-center bg-white text-red-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold transition-colors duration-300 shadow-lg">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Connect Google Fit
+                    </button>
+                    <button onclick="learnMoreHealth()" class="inline-flex items-center border-2 border-white text-white hover:bg-white hover:text-red-600 px-8 py-4 rounded-xl font-semibold transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Learn More
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Insert after the stats grid
+        statsGrid.parentNode.insertBefore(healthSection, statsGrid.nextSibling);
+    }
+});
+</script>
+{% endblock %}

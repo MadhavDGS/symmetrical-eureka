@@ -1,0 +1,784 @@
+{% extends "base.html" %}
+
+{% block title %}Art & Music Therapy - Manas Wellness{% endblock %}
+
+{% block head %}
+<style>
+/* Clean styles for Art & Music Therapy */
+
+/* Custom styles for Art & Music Therapy */
+.therapy-card {
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .therapy-card {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.therapy-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Drawing Canvas Styles */
+#drawingCanvas {
+    cursor: crosshair;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+}
+
+.tool-button {
+    padding: 8px 16px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tool-button:hover, .tool-button.active {
+    border-color: #4f46e5;
+    background: #4f46e5;
+    color: white;
+}
+
+.color-option {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.color-option:hover, .color-option.selected {
+    border-color: #4f46e5;
+}
+
+/* Music Therapy Styles */
+.music-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+}
+
+.mood-button {
+    padding: 12px 24px;
+    border-radius: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.mood-button:hover, .mood-button.selected {
+    background: rgba(255, 255, 255, 0.9);
+    color: #4f46e5;
+}
+
+.track-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+    transition: all 0.3s ease;
+}
+
+.track-card:hover {
+    transform: translateY(-2px);
+}
+
+.track-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.track-artist {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.track-benefit {
+    color: #059669;
+    font-size: 12px;
+}
+
+.track-score {
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.music-player-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.control-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #f3f4f6;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.control-button:hover {
+    background: #e5e7eb;
+}
+
+.control-button.primary {
+    background: #4f46e5;
+    color: white;
+}
+
+.control-button.primary:hover {
+    background: #3730a3;
+}
+
+/* Loading States */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Voice Recording Styles */
+.voice-recorder {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.record-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.record-button:hover {
+    transform: scale(1.1);
+}
+
+.record-button.recording {
+    animation: pulse-record 1s infinite;
+}
+
+@keyframes pulse-record {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+}
+
+/* Session Summary Styles */
+.session-summary {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #4f46e5;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .therapy-card {
+        margin: 16px 0;
+    }
+    
+    .mood-button {
+        padding: 8px 16px;
+        font-size: 14px;
+        margin: 4px;
+    }
+    
+    .track-card {
+        padding: 12px;
+        margin: 8px 0;
+    }
+    
+    .music-player-controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* Error and Success States */
+.error-message {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid #dc2626;
+}
+
+.success-message {
+    background: #dcfce7;
+    color: #166534;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid #16a34a;
+}
+
+/* Spotify Player Styles */
+.spotify-embed {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.playlist-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.playlist-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced Music Player */
+.enhanced-player {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.progress-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.volume-slider {
+    width: 80px;
+}
+
+.queue-container {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.queue-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 4px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.queue-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.queue-item.current {
+    background: rgba(255, 255, 255, 0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8" style="position: relative; z-index: 1;">
+
+    <div class="container mx-auto px-6" style="position: relative; z-index: 10;">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Art & Music Therapy Studio
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Express yourself through creative art and discover therapeutic music tailored to your emotional needs
+            </p>
+        </div>
+
+        <!-- Session Summary -->
+        <div class="session-summary mb-8 text-center" style="position: relative; z-index: 5;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="stat-card ">
+                    <div class="stat-number" id="artTimeSpent">0</div>
+                    <div class="stat-label">Minutes Creating Art</div>
+                </div>
+                <div class="stat-card ">
+                    <div class="stat-number" id="voiceEntriesCount">0</div>
+                    <div class="stat-label">Voice Journal Entries</div>
+                </div>
+                <div class="stat-card ">
+                    <div class="stat-number" id="musicListenTime">0</div>
+                    <div class="stat-label">Minutes of Music Therapy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" style="position: relative; z-index: 5;">
+            <!-- Art Therapy Section -->
+            <div class="therapy-card bg-white/80 dark:bg-gray-800/80 rounded-xl p-6 shadow-lg ">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <span class="mr-3">🎨</span>
+                    Digital Art Canvas
+                </h2>
+                
+                <!-- Drawing Tools -->
+                <div class="mb-6">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button class="tool-button active " data-tool="brush">
+                            Brush
+                        </button>
+                        <button class="tool-button " data-tool="eraser">
+                            Eraser
+                        </button>
+                    </div>
+                    
+                    <!-- Color Palette -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <div class="color-option selected " data-color="#000000" style="background: #000000;"></div>
+                        <div class="color-option " data-color="#ff0000" style="background: #ff0000;"></div>
+                        <div class="color-option " data-color="#00ff00" style="background: #00ff00;"></div>
+                        <div class="color-option " data-color="#0000ff" style="background: #0000ff;"></div>
+                        <div class="color-option " data-color="#ffff00" style="background: #ffff00;"></div>
+                        <div class="color-option " data-color="#ff00ff" style="background: #ff00ff;"></div>
+                        <div class="color-option " data-color="#00ffff" style="background: #00ffff;"></div>
+                        <div class="color-option " data-color="#8b4513" style="background: #8b4513;"></div>
+                    </div>
+                    
+                    <!-- Brush Size -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Size:</label>
+                        <input type="range" id="brushSize" min="1" max="50" value="5" class="flex-1">
+                        <span id="sizeDisplay" class="text-sm text-gray-600 dark:text-gray-400">5px</span>
+                    </div>
+                </div>
+                
+                <!-- Drawing Canvas -->
+                <canvas id="drawingCanvas" width="400" height="300" class="w-full border-2 border-gray-300 rounded-lg mb-4"></canvas>
+                
+                <!-- Canvas Actions -->
+                <div class="flex gap-3">
+                    <button id="clearCanvas" class="control-button ">
+                        Clear Canvas
+                    </button>
+                    <button id="saveArt" class="control-button primary ">
+                        Save Artwork
+                    </button>
+                </div>
+            </div>
+
+            <!-- Voice Journaling Section -->
+            <div class="therapy-card voice-recorder shadow-lg ">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <span class="mr-3">🎤</span>
+                    Voice Journaling
+                </h2>
+                
+                <!-- Recording Interface -->
+                <div class="text-center mb-6">
+                    <button id="recordButton" class="record-button ">
+                        🎤
+                    </button>
+                    <p id="recordingStatus" class="mt-4 text-white text-lg">
+                        Press to start recording your thoughts
+                    </p>
+                    <div id="recordingTimer" class="mt-2 text-2xl font-bold text-white hidden">
+                        00:00
+                    </div>
+                </div>
+                
+                <!-- Audio Visualizer -->
+                <div id="audioVisualizer" class="hidden mb-6">
+                    <div class="flex items-center justify-center space-x-1">
+                        <div class="w-1 h-8 bg-white rounded animate-pulse"></div>
+                        <div class="w-1 h-12 bg-white rounded animate-pulse" style="animation-delay: 0.1s;"></div>
+                        <div class="w-1 h-6 bg-white rounded animate-pulse" style="animation-delay: 0.2s;"></div>
+                        <div class="w-1 h-10 bg-white rounded animate-pulse" style="animation-delay: 0.3s;"></div>
+                        <div class="w-1 h-4 bg-white rounded animate-pulse" style="animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+                
+                <!-- Voice Analysis Results -->
+                <div id="voiceAnalysis" class="hidden">
+                    <h4 class="text-lg font-bold text-white mb-3">Emotional Analysis</h4>
+                    <div id="emotionResults" class="mb-4"></div>
+                    <div id="therapyInsights" class="bg-white/20 rounded-lg p-4">
+                        <p class="text-white text-sm"></p>
+                    </div>
+                </div>
+                
+                <!-- Recent Recordings -->
+                <div class="mt-6">
+                    <h4 class="text-lg font-bold text-white mb-3">Recent Entries</h4>
+                    <div id="recentRecordings" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Music Therapy Section -->
+        <div class="mt-8">
+            <div class="therapy-card music-section shadow-lg ">
+                <h2 class="text-3xl font-bold mb-6 flex items-center">
+                    <span class="mr-3">🎵</span>
+                    Therapeutic Music Discovery
+                </h2>
+                
+                <!-- Mood Selection -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">How are you feeling right now?</h3>
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button class="mood-selector mood-button " data-mood="happy">
+                            Happy & Energetic
+                        </button>
+                        <button class="mood-selector mood-button " data-mood="sad">
+                            Sad & Reflective
+                        </button>
+                        <button class="mood-selector mood-button " data-mood="anxious">
+                            Anxious & Worried
+                        </button>
+                        <button class="mood-selector mood-button " data-mood="calm">
+                            Peaceful & Calm
+                        </button>
+                        <button class="mood-selector mood-button " data-mood="focused">
+                            Need Focus
+                        </button>
+                        <button class="mood-selector mood-button " data-mood="motivated">
+                            Need Motivation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Current Track Display -->
+                <div class="mb-6 text-center">
+                    <p id="currentTrack" class="text-lg font-medium">
+                        Select your mood to discover therapeutic music
+                    </p>
+                    <button id="playPauseBtn" class="control-button primary mt-3 ">
+                        Choose Your Mood
+                    </button>
+                </div>
+
+                <!-- Enhanced Music Player -->
+                <div id="musicPlayerContainer" class="enhanced-player mt-6 hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex-1">
+                            <h4 id="currentTrackName" class="font-bold text-lg">Track Name</h4>
+                            <p id="currentTrackArtist" class="text-sm opacity-80">Artist Name</p>
+                        </div>
+                        <div class="music-player-controls">
+                            <button id="prevBtn" class="control-button " onclick="musicTherapy.previousTrack()">⏮️</button>
+                            <button id="playPauseMainBtn" class="control-button primary " onclick="musicTherapy.toggleMainPlayer()">▶️</button>
+                            <button id="nextBtn" class="control-button " onclick="musicTherapy.nextTrack()">⏭️</button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-bar mb-4" onclick="musicTherapy.seekTo(event)">
+                        <div id="progressBar" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+
+                    <!-- Time Display -->
+                    <div class="flex justify-between text-sm mb-4">
+                        <span id="currentTime">0:00</span>
+                        <span id="totalTime">0:00</span>
+                    </div>
+
+                    <!-- Volume and Loop Controls -->
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="volume-control">
+                            <span class="text-sm">🔊</span>
+                            <input type="range" id="volumeSlider" min="0" max="100" value="70" class="volume-slider" onchange="musicTherapy.setVolume(this.value)">
+                            <span id="volumeValue" class="text-sm">70%</span>
+                        </div>
+                        <button id="loopBtn" class="control-button " onclick="musicTherapy.toggleLoop()">
+                            Loop: <span>Off</span>
+                        </button>
+                    </div>
+
+                    <!-- Playlist Queue -->
+                    <div class="mt-4">
+                        <h5 class="font-bold mb-2">Playlist Queue</h5>
+                        <div id="playlistQueue" class="queue-container"></div>
+                    </div>
+                </div>
+
+                <!-- Spotify Playlist Container -->
+                <div id="playlistContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <!-- Playlists will be loaded here -->
+                </div>
+
+                <!-- Embedded Player -->
+                <div id="embeddedPlayer" class="mt-6 spotify-embed">
+                    <!-- Spotify embeds will appear here -->
+                </div>
+
+                <!-- Mood Benefits Display -->
+                <div id="moodBenefits" class="mt-6">
+                    <!-- Therapeutic benefits will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Emotion Summary -->
+        <div class="mt-8 therapy-card bg-white/80 dark:bg-gray-800/80 rounded-xl p-6 shadow-lg">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Today's Emotional Journey</h3>
+            <div id="emotionBadges" class="flex flex-wrap gap-2 mb-4">
+                <!-- Emotion badges will appear here -->
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="stat-card">
+                    <div class="stat-number" id="tracksPlayed">0</div>
+                    <div class="stat-label">Tracks Played</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="moodsExplored">0</div>
+                    <div class="stat-label">Moods Explored</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="therapyScore">0</div>
+                    <div class="stat-label">Wellness Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Player for Local Tracks -->
+    <audio id="localAudioPlayer" 
+           onplay="musicTherapy.onAudioPlay()" 
+           onpause="musicTherapy.onAudioPause()" 
+           onerror="musicTherapy.onAudioError()" 
+           ontimeupdate="musicTherapy.updateProgress()" 
+           onloadedmetadata="musicTherapy.updateDuration()"
+           onended="musicTherapy.trackEnded()"
+           style="display: none;">
+    </audio>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/enhanced_music_therapy.js') }}"></script>
+<script>
+// Initialize the Enhanced Music Therapy System on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing Enhanced Music Therapy System...');
+    
+    // Initialize the enhanced music therapy system
+    try {
+        window.enhancedMusicTherapy = new EnhancedMusicTherapy();
+        window.musicTherapy = window.enhancedMusicTherapy;
+        console.log('✅ Enhanced Music Therapy System initialized successfully!');
+    } catch (error) {
+        console.error('❌ Error initializing Enhanced Music Therapy System:', error);
+        // Fallback initialization if enhanced system fails
+        initBasicFunctionality();
+    }
+    
+    // Load saved session data
+    const savedData = JSON.parse(localStorage.getItem('therapySessionData') || '{}');
+    if (savedData.artTime) document.getElementById('artTimeSpent').textContent = savedData.artTime;
+    if (savedData.voiceCount) document.getElementById('voiceEntriesCount').textContent = savedData.voiceCount;
+    if (savedData.musicTime) document.getElementById('musicListenTime').textContent = savedData.musicTime;
+    
+    // Save session data periodically
+    setInterval(() => {
+        const sessionData = {
+            artTime: document.getElementById('artTimeSpent').textContent,
+            voiceCount: document.getElementById('voiceEntriesCount').textContent,
+            musicTime: document.getElementById('musicListenTime').textContent,
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('therapySessionData', JSON.stringify(sessionData));
+    }, 30000); // Save every 30 seconds
+    
+    console.log('✅ Page initialization complete!');
+});
+
+// Basic fallback functionality
+function initBasicFunctionality() {
+    console.log('🔄 Initializing basic functionality as fallback...');
+    
+    // Basic mood selector functionality
+    document.querySelectorAll('.mood-selector').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('.mood-selector').forEach(b => {
+                b.classList.remove('bg-white', 'text-gray-800');
+                b.style.background = '';
+                b.style.color = '';
+            });
+            
+            // Add active class to clicked button
+            this.style.background = 'rgba(255, 255, 255, 0.9)';
+            this.style.color = '#4f46e5';
+            
+            const mood = this.dataset.mood;
+            console.log('Selected mood:', mood);
+            
+            // Update current track display
+            document.getElementById('currentTrack').textContent = `Loading ${mood} therapy music...`;
+            document.getElementById('playPauseBtn').textContent = '⏳ Loading...';
+            
+            // Simulate loading
+            setTimeout(() => {
+                document.getElementById('currentTrack').textContent = `${mood.charAt(0).toUpperCase() + mood.slice(1)} therapy playlist ready`;
+                document.getElementById('playPauseBtn').innerHTML = '▶️ Start Music Therapy';
+                document.getElementById('playPauseBtn').onclick = () => startBasicPlayback(mood);
+            }, 1500);
+        });
+    });
+    
+    // Basic canvas functionality
+    const canvas = document.getElementById('drawingCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        
+        canvas.addEventListener('mousedown', () => { isDrawing = true; });
+        canvas.addEventListener('mouseup', () => { isDrawing = false; });
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.fillStyle = '#4f46e5';
+            ctx.fillRect(e.clientX - rect.left, e.clientY - rect.top, 3, 3);
+        });
+        
+        document.getElementById('clearCanvas').onclick = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+    }
+    
+    console.log('✅ Basic functionality initialized');
+}
+
+function startBasicPlayback(mood) {
+    console.log('Starting basic playback for mood:', mood);
+    
+    document.getElementById('currentTrack').textContent = `🎵 Playing ${mood} therapy music`;
+    document.getElementById('playPauseBtn').innerHTML = '⏸️ Pause Music';
+    document.getElementById('playPauseBtn').onclick = () => pauseBasicPlayback();
+    
+    // Show some sample playlists
+    const container = document.getElementById('playlistContainer');
+    container.innerHTML = `
+        <div class="p-4 bg-white/20 rounded-lg">
+            <h4 class="font-bold text-white mb-2">🎵 ${mood.charAt(0).toUpperCase() + mood.slice(1)} Therapy Playlist</h4>
+            <p class="text-sm text-white/80">Therapeutic music curated for your ${mood} mood</p>
+            <button class="mt-2 bg-white/30 hover:bg-white/50 text-white px-3 py-1 rounded text-sm" onclick="alert('Music therapy session started!')">
+                🎧 Listen Now
+            </button>
+        </div>
+        <div class="p-4 bg-white/20 rounded-lg">
+            <h4 class="font-bold text-white mb-2">🎼 Relaxation Mix</h4>
+            <p class="text-sm text-white/80">Calming sounds to support your wellness journey</p>
+            <button class="mt-2 bg-white/30 hover:bg-white/50 text-white px-3 py-1 rounded text-sm" onclick="alert('Relaxation music started!')">
+                🎧 Listen Now
+            </button>
+        </div>
+    `;
+    
+    // Update music time counter
+    const currentTime = parseInt(document.getElementById('musicListenTime').textContent);
+    document.getElementById('musicListenTime').textContent = currentTime + 1;
+}
+
+function pauseBasicPlayback() {
+    document.getElementById('currentTrack').textContent = '⏸️ Music paused';
+    document.getElementById('playPauseBtn').innerHTML = '▶️ Resume Music';
+    document.getElementById('playPauseBtn').onclick = () => startBasicPlayback('therapy');
+}
+
+// Test function for debugging
+function testMusicTherapy() {
+    console.log('Testing Enhanced Music Therapy system...');
+    if (window.enhancedMusicTherapy) {
+        console.log('✅ Enhanced Music Therapy is available');
+        console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.enhancedMusicTherapy)));
+        window.enhancedMusicTherapy.testAudio();
+    } else {
+        console.error('❌ Enhanced Music Therapy not initialized');
+    }
+}
+
+// Test API connectivity
+function testAPI() {
+    console.log('Testing API connectivity...');
+    fetch('/api/music/mood-enhanced?mood=happy')
+        .then(response => response.json())
+        .then(data => {
+            console.log('✅ API test successful:', data);
+        })
+        .catch(error => {
+            console.error('❌ API test failed:', error);
+        });
+}
+</script>
+{% endblock %}

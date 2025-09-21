@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Manas Wellness{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Something went wrong
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-circle text-danger" style="font-size: 64px;"></i>
+                    </div>
+                    
+                    <h5 class="card-title mb-3">We encountered an error</h5>
+                    
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Error Details:</strong><br>
+                            {{ error }}
+                        </div>
+                    {% else %}
+                        <p class="card-text mb-4">
+                            An unexpected error occurred. Please try again or contact support if the problem persists.
+                        </p>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="javascript:history.back()" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>Go Back
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Return to Dashboard
+                        </a>
+                    </div>
+                    
+                    <hr class="mt-4">
+                    
+                    <div class="text-muted">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            If this error persists, please contact our support team at 
+                            <a href="mailto:support@manaswellness.com">support@manaswellness.com</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Emergency Support Card -->
+            <div class="card mt-3 border-warning">
+                <div class="card-body bg-light">
+                    <h6 class="card-title text-warning">
+                        <i class="fas fa-phone me-2"></i>Need Immediate Help?
+                    </h6>
+                    <p class="card-text small mb-0">
+                        If you're in crisis, don't wait. Reach out now:
+                        <strong>Crisis Helpline: 988</strong> or 
+                        <strong>Emergency: 911</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-close if opened in popup
+if (window.opener) {
+    setTimeout(() => {
+        window.close();
+    }, 5000);
+}
+
+// Show detailed error info in console for debugging
+{% if error %}
+console.error('Manas Wellness Error:', {{ error | tojson | safe }});
+{% endif %}
+</script>
+{% endblock %}
