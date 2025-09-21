@@ -3,8 +3,22 @@
 
 import cv2
 import numpy as np
-import mediapipe as mp
-import librosa
+try:
+    import mediapipe as mp
+    MEDIAPIPE_AVAILABLE = True
+except ImportError:
+    MEDIAPIPE_AVAILABLE = False
+    mp = None
+    print("Warning: mediapipe not available. Face emotion detection will be disabled.")
+
+try:
+    import librosa
+    LIBROSA_AVAILABLE = True
+except ImportError:
+    LIBROSA_AVAILABLE = False
+    librosa = None
+    print("Warning: librosa not available. Audio emotion detection will be disabled.")
+
 import json
 import logging
 from typing import Dict, List, Optional, Any
@@ -24,14 +38,19 @@ class EmotionDetector:
     def __init__(self):
         """Initialize emotion detection components"""
         # MediaPipe setup for facial emotion detection
-        self.mp_face_mesh = mp.solutions.face_mesh
-        self.mp_drawing = mp.solutions.drawing_utils
-        self.face_mesh = self.mp_face_mesh.FaceMesh(
-            static_image_mode=True,
-            max_num_faces=1,
-            refine_landmarks=True,
-            min_detection_confidence=0.5
-        )
+        if MEDIAPIPE_AVAILABLE:
+            self.mp_face_mesh = mp.solutions.face_mesh
+            self.mp_drawing = mp.solutions.drawing_utils
+            self.face_mesh = self.mp_face_mesh.FaceMesh(
+                static_image_mode=True,
+                max_num_faces=1,
+                refine_landmarks=True,
+                min_detection_confidence=0.5
+            )
+        else:
+            self.mp_face_mesh = None
+            self.mp_drawing = None
+            self.face_mesh = None
         
         # Emotion mapping for facial landmarks
         self.emotion_landmarks = {

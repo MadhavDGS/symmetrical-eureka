@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Aarohan Mental Wellness{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 backdrop-blur-sm">
+    <div class="absolute inset-0 bg-gradient-to-r from-green-900/10 to-blue-900/10"></div>
+    <div class="relative max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Page Header -->
+        <div class="text-center mb-12">
+            <div class="mb-6">
+                <div class="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-2xl">
+                    <svg class="w-10 h-10 text-green-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L19 5.5L17 7H14V9H17L19 7.5L21 9M7 18C7 16.9 7.9 16 9 16S11 16.9 11 18S10.1 20 9 20S7 19.1 7 18M14 20.6L15.5 22L21 16.5L19.5 15L14 20.6Z"/>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-4">
+                Welcome to Your Wellness Journey
+            </h1>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                Your personalized mental health companion powered by AI. Track emotions, access therapy tools, and build healthier habits.
+            </p>
+        </div>
+
+        <!-- Google Fit Login Banner (Always Visible) -->
+        <div id="googlefit-login-banner" class="bg-gradient-to-r from-red-500/30 to-pink-500/30 border-2 border-red-400/50 rounded-2xl p-6 mb-8 shadow-xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-red-500/40 rounded-xl flex items-center justify-center mr-6">
+                        <span class="text-3xl">🏃‍♀️</span>
+                    </div>
+                    <div>
+                        <h3 id="googlefit-status-text" class="text-xl font-bold text-white mb-2">Connect Google Fit for Health Insights</h3>
+                        <p class="text-red-100">Link your fitness data to get personalized wellness recommendations</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button id="googlefit-connect-btn" onclick="connectGoogleFit()" class="bg-white text-red-600 hover:bg-gray-100 px-6 py-3 rounded-xl font-semibold transition-colors duration-300 shadow-lg">
+                        Connect Now
+                    </button>
+                    <button id="googlefit-refresh-btn" onclick="refreshHealthData()" class="hidden bg-red-600 text-white hover:bg-red-700 px-6 py-3 rounded-xl font-semibold transition-colors duration-300">
+                        Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rest of dashboard content will be added by JavaScript -->
+        <div id="dashboard-content">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Google Fit Integration Functions
+async function connectGoogleFit() {
+    try {
+        const response = await fetch('/api/googlefit/auth');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Open popup for OAuth
+            const popup = window.open(
+                data.auth_url,
+                'googlefit_auth',
+                'width=600,height=700,scrollbars=yes,resizable=yes'
+            );
+            
+            // Check if popup was blocked
+            if (!popup) {
+                alert('Popup blocked! Please allow popups for this site and try again.');
+                return;
+            }
+            
+            // Monitor popup for completion
+            const checkClosed = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkClosed);
+                    // Refresh the page to update status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }, 1000);
+            
+        } else {
+            alert('Failed to initiate Google Fit connection: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error connecting to Google Fit:', error);
+        alert('Error connecting to Google Fit. Please try again.');
+    }
+}
+
+async function refreshHealthData() {
+    try {
+        const statusText = document.getElementById('googlefit-status-text');
+        if (statusText) {
+            statusText.textContent = 'Refreshing health data...';
+        }
+        
+        const response = await fetch('/api/googlefit/snapshot?hours=168'); // 1 week
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            if (statusText) {
+                statusText.textContent = 'Health data updated successfully!';
+            }
+            // Update UI with new data
+            updateHealthDisplay(data.snapshot);
+        } else {
+            if (statusText) {
+                statusText.textContent = 'Failed to refresh data. Please try again.';
+            }
+        }
+    } catch (error) {
+        console.error('Error refreshing health data:', error);
+        const statusText = document.getElementById('googlefit-status-text');
+        if (statusText) {
+            statusText.textContent = 'Error refreshing data. Please try again.';
+        }
+    }
+}
+
+function updateHealthDisplay(snapshot) {
+    // Update the banner status
+    const statusText = document.getElementById('googlefit-status-text');
+    const connectBtn = document.getElementById('googlefit-connect-btn');
+    const refreshBtn = document.getElementById('googlefit-refresh-btn');
+    
+    if (statusText) statusText.textContent = 'Connected - Health data loaded';
+    if (connectBtn) connectBtn.classList.add('hidden');
+    if (refreshBtn) refreshBtn.classList.remove('hidden');
+    
+    // Display health metrics if available
+    if (snapshot && snapshot.health_metrics) {
+        const metrics = snapshot.health_metrics;
+        console.log('Health metrics:', metrics);
+        
+        // You can add more UI updates here to display the actual data
+        // For now, just log it to console
+    }
+}
+
+// Check Google Fit status on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/googlefit/status');
+        const data = await response.json();
+        
+        const statusText = document.getElementById('googlefit-status-text');
+        const connectBtn = document.getElementById('googlefit-connect-btn');
+        const refreshBtn = document.getElementById('googlefit-refresh-btn');
+        
+        if (data.status === 'connected') {
+            if (statusText) statusText.textContent = 'Connected - Click refresh to load health data';
+            if (connectBtn) connectBtn.classList.add('hidden');
+            if (refreshBtn) refreshBtn.classList.remove('hidden');
+            
+            // Automatically load health data
+            refreshHealthData();
+        } else {
+            if (statusText) statusText.textContent = 'Connect Google Fit for Health Insights';
+            if (connectBtn) connectBtn.classList.remove('hidden');
+            if (refreshBtn) refreshBtn.classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Error checking Google Fit status:', error);
+    }
+});
+</script>
+{% endblock %}

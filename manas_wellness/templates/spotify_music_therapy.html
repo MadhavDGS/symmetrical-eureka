@@ -1,0 +1,1677 @@
+{% extends "base.html" %}
+
+{% block title %}Spotify Music Therapy - Manas Wellness{% endblock %}
+
+{% block head %}
+<style>
+/* Spotify-Inspired Dark Theme */
+:root {
+  --bg-black: #000;
+  --bg-dark: #121212;
+  --bg-elevated: #1e1e1e;
+  --bg-card: #181818;
+  --bg-hover: #2a2a2a;
+  --text-white: #fff;
+  --text-gray: #b3b3b3;
+  --text-dim: #6a6a6a;
+  --spotify-green: #1db954;
+  --spotify-green-hover: #1ed760;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --gradient-green: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    font-family: 'Spotify Circular', 'Helvetica', sans-serif;
+}
+
+.hero-section {
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    padding: 48px 24px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+}
+
+.hero-section h1 {
+    color: var(--text-white);
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 16px;
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-section p {
+    color: var(--text-gray);
+    font-size: 1.125rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-subtle);
+}
+
+.stat-card:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--spotify-green);
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--text-gray);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-container {
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    padding: 32px 24px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 24px;
+    color: var(--text-white);
+}
+
+.mood-category {
+    margin-bottom: 48px;
+}
+
+.mood-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+}
+
+.mood-emoji {
+    font-size: 32px;
+    width: 48px;
+    height: 48px;
+    background: var(--spotify-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mood-info h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 4px;
+}
+
+.mood-info p {
+    color: var(--text-gray);
+    font-size: 14px;
+}
+
+.tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.track-card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 16px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+}
+
+.track-card:hover {
+    background: var(--bg-hover);
+    transform: scale(1.02);
+    box-shadow: var(--shadow);
+}
+
+.track-card img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    object-fit: cover;
+}
+
+.track-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-artist {
+    font-size: 14px;
+    color: var(--text-gray);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--spotify-green);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.track-card:hover .play-btn {
+    opacity: 1;
+}
+
+.play-btn:hover {
+    background: var(--spotify-green-hover);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.playlists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.playlist-card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    overflow: hidden;
+}
+
+.playlist-card:hover {
+    background: var(--bg-hover);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+}
+
+.playlist-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-green);
+}
+
+.playlist-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    object-fit: cover;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.spotify-embed {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 16px;
+    box-shadow: var(--shadow);
+}
+
+.btn-spotify {
+    background: var(--spotify-green);
+    color: white;
+    border: none;
+    border-radius: 500px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-spotify:hover {
+    background: var(--spotify-green-hover);
+    transform: scale(1.04);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-white);
+    border: 1px solid var(--border-subtle);
+    border-radius: 500px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-secondary:hover {
+    background: var(--text-white);
+    color: var(--bg-dark);
+    transform: scale(1.04);
+}
+
+.floating-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    min-width: 300px;
+    z-index: 1000;
+}
+
+.spotify-connect-notice {
+    margin: 20px 0;
+    padding: 16px;
+    background: rgba(29, 185, 84, 0.1);
+    border: 1px solid rgba(29, 185, 84, 0.3);
+    border-radius: 12px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.spotify-connect-notice:hover {
+    background: rgba(29, 185, 84, 0.15);
+    border-color: rgba(29, 185, 84, 0.4);
+}
+
+.btn-spotify {
+    background: linear-gradient(45deg, #1DB954, #1ed760);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.btn-spotify:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
+}
+
+.floating-player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border-subtle);
+    padding: 16px;
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.floating-player.active {
+    transform: translateY(0);
+}
+
+.player-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.now-playing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.now-playing img {
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+}
+
+.loading-shimmer {
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
+    .tracks-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    
+    .playlists-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+        /* Mood Grid Cards */
+        .mood-option {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .mood-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: var(--accent-primary);
+        }
+
+        .mood-option.active {
+            background: linear-gradient(135deg, var(--accent-primary), #1ed760);
+            color: white;
+            transform: scale(1.02);
+        }
+
+.mood-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.mood-description {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.current-session {
+    background: rgba(29, 185, 84, 0.1);
+    border: 1px solid rgba(29, 185, 84, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    backdrop-filter: blur(5px);
+}
+
+.session-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.track-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.track-info p {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.control-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-sm:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.btn-outline-sm {
+    background: transparent;
+    color: var(--accent-primary);
+    border: 1px solid var(--accent-primary);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-sm:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.benefits-section {
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 3px solid #3b82f6;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    backdrop-filter: blur(5px);
+}
+
+.benefits-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.benefits-section p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.recommended-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(10px);
+}
+
+.track-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.track-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.track-item:hover {
+    border-color: var(--accent-primary);
+    background: rgba(29, 185, 84, 0.05);
+}
+
+.track-thumbnail {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.track-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.track-info-compact {
+    flex: 1;
+}
+
+.track-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.track-artist {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.playlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.playlist-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+}
+
+.playlist-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--shadow-medium);
+}
+
+.playlist-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.playlist-thumbnail {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.playlist-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.playlist-info {
+    flex: 1;
+}
+
+.playlist-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.playlist-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.playlist-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.spotify-player {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
+}
+
+.spotify-player h3 {
+    color: var(--text-primary);
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.spotify-player iframe {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px var(--shadow-medium);
+}
+
+.progress-section {
+    background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 32px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.progress-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.progress-item {
+    padding: 16px;
+}
+
+.progress-number {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin-bottom: 4px;
+}
+
+.progress-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.loading-container {
+    text-align: center;
+    padding: 32px 20px;
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 12px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-state {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    margin: 16px 0;
+    backdrop-filter: blur(5px);
+}
+
+.error-title {
+    font-weight: 600;
+    color: #ef4444;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.error-message {
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 24px 16px;
+    }
+    
+    .section-container {
+        padding: 20px 16px;
+    }
+    
+    .mood-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main id="main-content" class="min-h-screen">
+    <!-- Spotify Web Playback SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Hero Section -->
+                <div class="hero-section">
+            <h1>🎵 Music Therapy</h1>
+            <p>Discover curated therapeutic playlists and tracks powered by Spotify. Explore different moods and let music guide your wellness journey with real-time playback.</p>
+            
+            <!-- Spotify Connect Notice -->
+            <div class="spotify-connect-notice" style="margin: 20px 0; padding: 16px; background: rgba(29, 185, 84, 0.1); border: 1px solid rgba(29, 185, 84, 0.3); border-radius: 12px; text-align: center;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <span style="color: #1DB954; font-weight: 600;">🎧 Enhanced Experience Available</span>
+                    <button class="btn-spotify" onclick="connectSpotify()" style="font-size: 14px; padding: 8px 16px;">
+                        Connect Spotify Premium
+                    </button>
+                </div>
+                <p style="margin: 8px 0 0 0; font-size: 13px; color: #b3b3b3;">Connect your Spotify Premium account for full playback controls and seamless streaming</p>
+            </div>
+        </div>
+
+        <!-- Session Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="tracksPlayed">0</div>
+                <div class="stat-label">Tracks Played Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="sessionTime">0</div>
+                <div class="stat-label">Minutes Listened</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="moodsExplored">6</div>
+                <div class="stat-label">Available Moods</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="wellnessScore">95</div>
+                <div class="stat-label">Wellness Score</div>
+            </div>
+        </div>
+
+        <!-- Motivated Section (WORKING - MOVED TO TOP) -->
+        <div class="mood-category">
+            <div class="mood-header">
+                <div class="mood-emoji">💪</div>
+                <div class="mood-info">
+                    <h3>Need Motivation</h3>
+                    <p>Inspiring music to fuel your drive and determination</p>
+                </div>
+            </div>
+            
+            <div class="tracks-grid" id="motivated-tracks">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <div class="section-container">
+                <h3 class="section-title">Motivational Playlists</h3>
+                <div class="playlists-grid" id="motivated-playlists">
+                    <!-- Dynamic playlists will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Focus Section (WORKING - MOVED TO SECOND) -->
+        <div class="mood-category">
+            <div class="mood-header">
+                <div class="mood-emoji">🎯</div>
+                <div class="mood-info">
+                    <h3>Need Focus</h3>
+                    <p>Concentration-boosting instrumentals for productivity</p>
+                </div>
+            </div>
+            
+            <div class="tracks-grid" id="focused-tracks">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <div class="section-container">
+                <h3 class="section-title">Focus Playlists</h3>
+                <div class="playlists-grid" id="focused-playlists">
+                    <!-- Dynamic playlists will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Happy & Energetic Section -->
+        <div class="mood-category">
+            <div class="mood-header">
+                <div class="mood-emoji">😊</div>
+                <div class="mood-info">
+                    <h3>Happy & Energetic</h3>
+                    <p>Upbeat tracks to amplify your joy and positive energy</p>
+                </div>
+            </div>
+            
+            <div class="tracks-grid" id="happy-tracks">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <div class="section-container">
+                <h3 class="section-title">Happy Playlists</h3>
+                <div class="playlists-grid" id="happy-playlists">
+                    <!-- Dynamic playlists will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Peaceful & Calm Section -->
+        <div class="mood-category">
+            <div class="mood-header">
+                <div class="mood-emoji">🧘</div>
+                <div class="mood-info">
+                    <h3>Peaceful & Calm</h3>
+                    <p>Soothing music for relaxation and mindfulness</p>
+                </div>
+            </div>
+            
+            <div class="tracks-grid" id="calm-tracks">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <div class="section-container">
+                <h3 class="section-title">Calm Playlists</h3>
+                <div class="playlists-grid" id="calm-playlists">
+                    <!-- Dynamic playlists will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sad & Reflective Section -->
+        <div class="mood-category">
+            <div class="mood-header">
+                <div class="mood-emoji">💭</div>
+                <div class="mood-info">
+                    <h3>Sad & Reflective</h3>
+                    <p>Healing music for processing difficult emotions</p>
+                </div>
+            </div>
+            
+            <div class="tracks-grid" id="sad-tracks">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <div class="section-container">
+                <h3 class="section-title">Reflective Playlists</h3>
+                <div class="playlists-grid" id="sad-playlists">
+                    <!-- Dynamic playlists will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Anxious & Worried Section -->
+        <div class="mood-category">
+            <div class="mood-header">
+                <div class="mood-emoji">🌱</div>
+                <div class="mood-info">
+                    <h3>Anxious & Worried</h3>
+                    <p>Calming tracks to reduce stress and anxiety</p>
+                </div>
+            </div>
+            
+            <div class="tracks-grid" id="anxious-tracks">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <div class="section-container">
+                <h3 class="section-title">Anti-Anxiety Playlists</h3>
+                <div class="playlists-grid" id="anxious-playlists">
+                    <!-- Dynamic playlists will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Spotify Player -->
+    <div class="floating-player" id="floatingPlayer">
+        <div class="player-content">
+            <div class="now-playing" id="nowPlaying">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMURCOTU0Ii8+CjxwYXRoIGQ9Ik0xMjAgMTIwaDQ4djI0aDI0djI0aC00OHYtNDh6TTE0NCA5NmgyNHYyNGgtMjR2LTI0ek0xNjggMTIwaDI0djI0aC0yNHYtMjR6TTE0NCAyMTZoLTI0di00OGgyNHY0OHpNOTYgMTkyaDI0djI0SDk2di0yNHoiIGZpbGw9IiNGRkZGRkYiLz48L3N2Zz4K" 
+                     alt="Now Playing" 
+                     id="playerAlbumArt"
+                     crossorigin="anonymous"
+                     loading="lazy"
+                     style="opacity: 1; transition: opacity 0.3s ease;">
+                <div>
+                    <div class="track-title" id="playerTrackName">Select a track to play</div>
+                    <div class="track-artist" id="playerArtistName">Spotify Music Therapy</div>
+                </div>
+            </div>
+            <div class="player-controls">
+                <button class="btn-spotify" id="playerToggle" onclick="togglePlayback()">Play</button>
+                <button class="btn-secondary" id="playerNext" onclick="nextTrack()">Next</button>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class SpotifyMusicTherapy {
+    constructor() {
+        this.player = null;
+        this.deviceId = null;
+        this.isPlaying = false;
+        this.currentTrack = null;
+        this.accessToken = null;
+        
+        // Real Spotify API endpoints
+        this.apiEndpoints = {
+            tracks: '/api/spotify/tracks',
+            playlists: '/api/spotify/playlists',
+            search: '/api/spotify/search',
+            play: '/api/spotify/play'
+        };
+        
+        // Mood categories with search terms for Spotify API
+        this.moodCategories = {
+            happy: {
+                searchTerms: [
+                    'pharrell williams happy', 'katrina and the waves walking on sunshine', 
+                    'bobby mcferrin dont worry be happy', 'feel good inc gorillaz', 'good as hell lizzo',
+                    'upbeat pop', 'feel good hits', 'positive vibes music'
+                ],
+                playlistQueries: ['feel good', 'happy hits', 'uplifting', 'positive vibes']
+            },
+            calm: {
+                searchTerms: [
+                    'ludovico einaudi una mattina', 'max richter sleep', 'brian eno ambient 1',
+                    'olafur arnalds re member', 'peaceful piano music', 'nature sounds',
+                    'meditation music', 'relaxing classical'
+                ],
+                playlistQueries: ['peaceful piano', 'calm', 'meditation', 'sleep sounds']
+            },
+            focused: {
+                searchTerms: [
+                    'ludovico einaudi nuvole bianche', 'max richter on the nature of daylight', 
+                    'olafur arnalds near light', 'nils frahm says', 'kiasmos blurred ep',
+                    'ambient study music', 'lo-fi hip hop', 'classical for studying'
+                ],
+                playlistQueries: ['deep focus', 'study music', 'concentration', 'brain food']
+            },
+            sad: {
+                searchTerms: [
+                    'bon iver re stacks', 'the national fake empire', 'radiohead creep', 
+                    'johnny cash hurt', 'adele someone like you', 'sad piano music',
+                    'melancholy indie', 'emotional ballads'
+                ],
+                playlistQueries: ['sad songs', 'emotional music', 'heartbreak', 'melancholy indie']
+            },
+            anxious: {
+                searchTerms: [
+                    'brian eno ambient 1', 'tim hecker ravedeath', 'william basinski disintegration loops',
+                    'stars of the lid tired sounds', 'anxiety relief music', 'calm piano',
+                    'nature sounds rain', 'meditation music for anxiety'
+                ],
+                playlistQueries: ['anxiety relief', 'stress relief', 'calming music', 'nature sounds']
+            },
+            motivated: {
+                searchTerms: [
+                    'kanye west stronger', 'eminem till i collapse', 'queen dont stop me now',
+                    'survivor eye of the tiger', 'imagine dragons believer', 'dua lipa levitating',
+                    'workout motivation', 'pump up anthems'
+                ],
+                playlistQueries: ['motivation', 'workout hits', 'pump up songs', 'energy boost']
+            }
+        };
+        
+        this.sessionStats = {
+            tracksPlayed: 0,
+            sessionTime: 0,
+            currentStreak: 0
+        };
+        
+        this.init();
+    }
+    
+    setupSpotifyCallback() {
+        // Define the global callback function that Spotify SDK expects
+        const self = this;
+        window.onSpotifyWebPlaybackSDKReady = function() {
+            console.log('🎵 Spotify Web Playback SDK Ready!');
+            self.initializePlayer();
+        };
+    }
+    
+    async init() {
+        console.log('🎵 Initializing Spotify Music Therapy...');
+        
+        try {
+            // Check URL parameters for auth success
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('auth') === 'success') {
+                hideSpotifyNotice();
+                console.log('✅ Spotify authentication successful!');
+            }
+            
+            // Initialize Spotify Web Playbook SDK - this will be called when SDK loads
+            this.setupSpotifyCallback();
+            
+            // Load session data
+            this.loadSessionData();
+            
+            // Start session timer
+            this.startSessionTimer();
+            
+            // Load all mood categories on page load
+            await this.loadAllMoodCategories();
+            
+            console.log('✅ Spotify Music Therapy initialized successfully!');
+        } catch (error) {
+            console.error('❌ Error initializing Spotify Music Therapy:', error);
+            this.handleInitError(error);
+        }
+    }
+    
+    async initializePlayer() {
+        try {
+            // First check if we have a valid user token with streaming access
+            const tokenResponse = await fetch('/api/spotify/token');
+            const tokenData = await tokenResponse.json();
+            
+            // Check if the token has streaming access
+            if (!tokenData.access_token || !tokenData.scope || !tokenData.scope.includes('streaming')) {
+                console.log('🔄 No streaming token available, showing auth notice');
+                this.showSpotifyNotice();
+                return;
+            }
+            
+            this.accessToken = tokenData.access_token;
+            
+            this.player = new Spotify.Player({
+                name: 'Manas Wellness Music Therapy',
+                getOAuthToken: cb => { cb(this.accessToken); },
+                volume: 0.7
+            });
+
+            // Error handling
+            this.player.addListener('initialization_error', ({ message }) => {
+                console.error('Spotify Player initialization error:', message);
+            });
+
+            this.player.addListener('authentication_error', ({ message }) => {
+                console.error('Spotify Player authentication error:', message);
+                this.handleAuthError();
+            });
+
+            // Ready event
+            this.player.addListener('ready', ({ device_id }) => {
+                console.log('🎶 Spotify Player ready with Device ID', device_id);
+                this.deviceId = device_id;
+                this.showFloatingPlayer();
+                hideSpotifyNotice(); // Hide connection notice when player is ready
+            });
+
+            // Player state changed
+            this.player.addListener('player_state_changed', (state) => {
+                if (state) {
+                    this.updatePlayerUI(state);
+                }
+            });
+
+            // Connect to the player
+            this.player.connect();
+            
+        } catch (error) {
+            console.error('Error initializing Spotify player:', error);
+            this.showSpotifyNotice();
+        }
+    }
+    
+    async getAccessToken() {
+        try {
+            const response = await fetch('/api/spotify/token');
+            const data = await response.json();
+            return data.access_token;
+        } catch (error) {
+            console.error('Error getting access token:', error);
+            throw new Error('Unable to authenticate with Spotify');
+        }
+    }
+    
+    async loadAllMoodCategories() {
+        console.log('🔄 Loading all mood categories...');
+        
+        const moods = Object.keys(this.moodCategories);
+        const loadPromises = moods.map(mood => this.loadMoodContent(mood));
+        
+        try {
+            await Promise.all(loadPromises);
+            console.log('✅ All mood categories loaded successfully!');
+        } catch (error) {
+            console.error('❌ Error loading mood categories:', error);
+            this.fallbackToStaticContent();
+        }
+    }
+    
+    async loadMoodContent(mood) {
+        try {
+            // Load both tracks and playlists for this mood
+            const [tracks, playlists] = await Promise.all([
+                this.fetchMoodTracks(mood),
+                this.fetchMoodPlaylists(mood)
+            ]);
+            
+            this.renderMoodTracks(mood, tracks);
+            this.renderMoodPlaylists(mood, playlists);
+            
+        } catch (error) {
+            console.error(`Error loading content for ${mood}:`, error);
+            this.renderFallbackContent(mood);
+        }
+    }
+    
+    async fetchMoodTracks(mood) {
+        // Try Gemini AI recommendations first
+        try {
+            const response = await fetch('/api/spotify/gemini-recommendations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    mood: mood,
+                    context: `User is looking for ${mood} music for mental wellness and therapy`
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.tracks.length > 0) {
+                    console.log(`🎵 Got ${data.tracks.length} AI-recommended tracks for ${mood}`);
+                    return data.tracks;
+                }
+            }
+        } catch (error) {
+            console.warn('Gemini recommendations failed, falling back to basic search:', error);
+        }
+        
+        // Fallback to original search method
+        const category = this.moodCategories[mood];
+        const searchTerm = category.searchTerms[Math.floor(Math.random() * category.searchTerms.length)];
+        
+        try {
+            const response = await fetch(`${this.apiEndpoints.search}?q=${encodeURIComponent(searchTerm)}&type=track&limit=8`);
+            
+            if (!response.ok) throw new Error('API request failed');
+            
+            const data = await response.json();
+            return data.tracks?.items || [];
+        } catch (error) {
+            console.warn(`API not available for ${mood} tracks, using fallback`);
+            return this.getFallbackTracks(mood);
+        }
+    }
+    
+    async fetchMoodPlaylists(mood) {
+        const category = this.moodCategories[mood];
+        const searchTerm = category.playlistQueries[Math.floor(Math.random() * category.playlistQueries.length)];
+        
+        try {
+            const response = await fetch(`${this.apiEndpoints.search}?q=${encodeURIComponent(searchTerm)}&type=playlist&limit=6`);
+            
+            if (!response.ok) throw new Error('API request failed');
+            
+            const data = await response.json();
+            return data.playlists?.items || [];
+        } catch (error) {
+            console.warn(`API not available for ${mood} playlists, using fallback`);
+            return this.getFallbackPlaylists(mood);
+        }
+    }
+    
+    renderMoodTracks(mood, tracks) {
+        const container = document.getElementById(`${mood}-tracks`);
+        if (!container || !tracks.length) return;
+        
+        // Show loading shimmer first
+        container.innerHTML = Array(8).fill().map(() => `
+            <div class="track-card loading-shimmer">
+                <div style="height: 200px; background: var(--bg-hover); border-radius: 4px;"></div>
+                <div class="track-title" style="height: 20px; background: var(--bg-hover); margin: 8px 0;"></div>
+                <div class="track-artist" style="height: 16px; background: var(--bg-hover);"></div>
+            </div>
+        `).join('');
+        
+        // Load actual content after delay
+        setTimeout(() => {
+            container.innerHTML = tracks.map(track => {
+                // Prioritize real Spotify images, fallback to placeholder if needed
+                const spotifyImage = track.album?.images?.[0]?.url;
+                const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMURCOTU0Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgZmlsbD0iI0ZGRkZGRiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2cHgiPlRyYWNrPC90ZXh0Pjwvc3ZnPgo=';
+                const artistName = track.artists?.[0]?.name || 'Unknown Artist';
+                const trackName = track.name || 'Unknown Track';
+                const spotifyUrl = track.external_urls?.spotify || '#';
+                
+                return `
+                    <div class="track-card" onclick="playTrack('${track.id}', '${trackName}', '${artistName}', '${spotifyImage || fallbackImage}')">
+                        <div style="position: relative;">
+                            <img src="${spotifyImage || fallbackImage}" 
+                                 alt="${trackName}" 
+                                 loading="lazy"
+                                 crossorigin="anonymous"
+                                 onload="this.style.opacity='1'"
+                                 onerror="console.log('Image failed:', this.src); this.src='${fallbackImage}'; this.style.opacity='1';"
+                                 style="opacity: 0; transition: opacity 0.3s ease;">
+                            <button class="play-btn">▶</button>
+                        </div>
+                        <div class="track-title">${trackName}</div>
+                        <div class="track-artist">${artistName}</div>
+                        ${track.gemini_reason ? `<div class="track-reason" style="font-size: 11px; color: #b3b3b3; margin-top: 4px;">${track.gemini_reason}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }, 800);
+    }
+    
+    renderMoodPlaylists(mood, playlists) {
+        const container = document.getElementById(`${mood}-playlists`);
+        if (!container || !playlists.length) return;
+        
+        // Show loading shimmer first
+        container.innerHTML = Array(6).fill().map(() => `
+            <div class="playlist-card loading-shimmer">
+                <div class="playlist-image" style="background: var(--bg-hover);"></div>
+                <div style="height: 24px; background: var(--bg-hover); margin: 8px 0;"></div>
+                <div style="height: 16px; background: var(--bg-hover); margin-bottom: 16px;"></div>
+                <div style="height: 40px; background: var(--bg-hover); border-radius: 20px;"></div>
+            </div>
+        `).join('');
+        
+        // Load actual content after delay
+        setTimeout(() => {
+            container.innerHTML = playlists.map(playlist => {
+                // Prioritize real Spotify images, fallback to placeholder if needed
+                const spotifyImage = playlist.images?.[0]?.url;
+                const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMURCOTU0Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgZmlsbD0iI0ZGRkZGRiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0cHgiPlBsYXlsaXN0PC90ZXh0Pjwvc3ZnPgo=';
+                const playlistName = playlist.name || 'Unknown Playlist';
+                const description = playlist.description || `Curated ${mood} playlist`;
+                const spotifyUrl = playlist.external_urls?.spotify || '#';
+                const embedId = playlist.id;
+                
+                return `
+                    <div class="playlist-card">
+                        <img src="${spotifyImage || fallbackImage}" 
+                             alt="${playlistName}" 
+                             class="playlist-image" 
+                             loading="lazy"
+                             crossorigin="anonymous"
+                             onload="this.style.opacity='1'"
+                             onerror="console.log('Playlist image failed:', this.src); this.src='${fallbackImage}'; this.style.opacity='1';"
+                             style="opacity: 0; transition: opacity 0.3s ease;">
+                        <h4 class="track-title">${playlistName}</h4>
+                        <p class="track-artist">${description}</p>
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <button class="btn-spotify" onclick="window.open('${spotifyUrl}', '_blank')">
+                                Open in Spotify
+                            </button>
+                            <button class="btn-secondary" onclick="togglePlaylistEmbed('${embedId}', '${mood}')">
+                                Preview
+                            </button>
+                        </div>
+                        <div class="spotify-embed" id="embed-${embedId}" style="display: none; margin-top: 16px;">
+                            <iframe src="https://open.spotify.com/embed/playlist/${embedId}?utm_source=generator&theme=0" 
+                                    width="100%" height="380" frameborder="0" 
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                                    loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }, 1200);
+    }
+    
+    getFallbackTracks(mood) {
+        const fallbackData = {
+            happy: [
+                { id: '1', name: 'Happy', artists: [{ name: 'Pharrell Williams' }], album: { images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273e8107e6d9214baa81bb79bba' }] }, external_urls: { spotify: 'https://open.spotify.com/track/60nZcImufyMA1MKQY3dcCH' } },
+                { id: '2', name: 'Good as Hell', artists: [{ name: 'Lizzo' }], album: { images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273c5716278c8c0a1c66d6e3aaf' }] }, external_urls: { spotify: 'https://open.spotify.com/track/1ZjZLEz8lGCQLfBHPOGBSm' } }
+            ],
+            calm: [
+                { id: '3', name: 'Weightless', artists: [{ name: 'Marconi Union' }], album: { images: [{ url: 'https://i.scdn.co/image/ab67616d0000b2736de84d063a8a3c5c9be9b1dc' }] }, external_urls: { spotify: 'https://open.spotify.com/track/2QjOHCTQ1Jl3zawyYOpxh6' } },
+                { id: '4', name: 'Clair de Lune', artists: [{ name: 'Claude Debussy' }], album: { images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273d3cbdb5e80a4cc9bf4db6b98' }] }, external_urls: { spotify: 'https://open.spotify.com/track/2wc7TjlQKnIDHraPdGHkQn' } }
+            ]
+        };
+        
+        return fallbackData[mood] || fallbackData.calm;
+    }
+    
+    getFallbackPlaylists(mood) {
+        const fallbackData = {
+            happy: [
+                { id: '37i9dQZF1DX9XIFQuFvzM4', name: 'Feel Good Hits', description: 'All the hits that make you feel good', images: [{ url: 'https://i.scdn.co/image/ab67706f00000003ca5a7517156021292e5663a6' }], external_urls: { spotify: 'https://open.spotify.com/playlist/37i9dQZF1DX9XIFQuFvzM4' } },
+                { id: '37i9dQZF1DXdPec7aLTmlC', name: 'Happy Pop', description: 'Upbeat pop hits to brighten your day', images: [{ url: 'https://i.scdn.co/image/ab67706f00000003b5c9e095bcade457cd8f5b50' }], external_urls: { spotify: 'https://open.spotify.com/playlist/37i9dQZF1DXdPec7aLTmlC' } }
+            ],
+            calm: [
+                { id: '37i9dQZF1DX4sWSpwAYIy1', name: 'Peaceful Piano', description: 'Relax and indulge with beautiful piano pieces', images: [{ url: 'https://i.scdn.co/image/ab67706f000000039b9b09361f3a8bb1b6d0c86f' }], external_urls: { spotify: 'https://open.spotify.com/playlist/37i9dQZF1DX4sWSpwAYIy1' } },
+                { id: '37i9dQZF1DWZeKCadgRdKQ', name: 'Deep Focus', description: 'Keep calm and focus with ambient and post-rock music', images: [{ url: 'https://i.scdn.co/image/ab67706f00000003d073e07c1a6b01abc8a5ce6f' }], external_urls: { spotify: 'https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ' } }
+            ]
+        };
+        
+        return fallbackData[mood] || fallbackData.calm;
+    }
+    
+    renderFallbackContent(mood) {
+        console.log(`🔄 Loading fallback content for ${mood}...`);
+        const tracks = this.getFallbackTracks(mood);
+        const playlists = this.getFallbackPlaylists(mood);
+        
+        this.renderMoodTracks(mood, tracks);
+        this.renderMoodPlaylists(mood, playlists);
+    }
+    
+    fallbackToStaticContent() {
+        console.log('🔄 Loading all fallback content...');
+        const moods = Object.keys(this.moodCategories);
+        moods.forEach(mood => this.renderFallbackContent(mood));
+    }
+    
+    async playTrack(trackId, trackName, artistName, image) {
+        console.log(`🎵 Playing: ${trackName} by ${artistName}`);
+        
+        // Update floating player
+        this.updateFloatingPlayer(trackName, artistName, image);
+        this.showFloatingPlayer();
+        
+        // Update stats
+        this.sessionStats.tracksPlayed++;
+        this.updateStatsDisplay();
+        
+        // Try to play via Spotify Web Playback SDK
+        if (this.player && this.deviceId) {
+            try {
+                await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ uris: [`spotify:track:${trackId}`] }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.accessToken}`
+                    }
+                });
+                
+                this.isPlaying = true;
+                this.currentTrack = { trackId, trackName, artistName, image };
+                
+            } catch (error) {
+                console.error('Error playing track:', error);
+                // Fallback to opening Spotify
+                window.open(`https://open.spotify.com/track/${trackId}`, '_blank');
+            }
+        } else {
+            // Fallback to opening Spotify
+            window.open(`https://open.spotify.com/track/${trackId}`, '_blank');
+        }
+    }
+    
+    togglePlaylistEmbed(playlistId, mood) {
+        const embedContainer = document.getElementById(`embed-${playlistId}`);
+        if (!embedContainer) return;
+        
+        if (embedContainer.style.display === 'none') {
+            embedContainer.style.display = 'block';
+            // Track playlist interaction
+            this.sessionStats.tracksPlayed++;
+            this.updateStatsDisplay();
+        } else {
+            embedContainer.style.display = 'none';
+        }
+    }
+    
+    updateFloatingPlayer(trackName, artistName, image) {
+        document.getElementById('playerTrackName').textContent = trackName;
+        document.getElementById('playerArtistName').textContent = artistName;
+        
+        // Enhanced image loading with fallback (same as track cards)
+        const albumArt = document.getElementById('playerAlbumArt');
+        const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMURCOTU0Ii8+CjxwYXRoIGQ9Ik0xMjAgMTIwaDQ4djI0aDI0djI0aC00OHYtNDh6TTE0NCA5NmgyNHYyNGgtMjR2LTI0ek0xNjggMTIwaDI0djI0aC0yNHYtMjR6TTE0NCAyMTZoLTI0di00OGgyNHY0OHpNOTYgMTkyaDI0djI0SDk2di0yNHoiIGZpbGw9IiNGRkZGRkYiLz48L3N2Zz4K';
+        
+        if (image && image !== fallbackImage) {
+            // Set image with fade-in effect and error handling
+            albumArt.style.opacity = '0';
+            albumArt.onload = () => {
+                albumArt.style.opacity = '1';
+            };
+            albumArt.onerror = () => {
+                console.log('Player image failed:', albumArt.src);
+                albumArt.src = fallbackImage;
+                albumArt.style.opacity = '1';
+            };
+            albumArt.src = image;
+        } else {
+            albumArt.src = fallbackImage;
+            albumArt.style.opacity = '1';
+        }
+    }
+    
+    showFloatingPlayer() {
+        document.getElementById('floatingPlayer').classList.add('active');
+    }
+    
+    hideFloatingPlayer() {
+        document.getElementById('floatingPlayer').classList.remove('active');
+    }
+    
+    updatePlayerUI(state) {
+        const { track_window: { current_track }, paused } = state;
+        
+        if (current_track) {
+            this.updateFloatingPlayer(
+                current_track.name,
+                current_track.artists[0].name,
+                current_track.album.images[0].url
+            );
+        }
+        
+        this.isPlaying = !paused;
+        document.getElementById('playerToggle').textContent = paused ? 'Play' : 'Pause';
+    }
+    
+    updateStatsDisplay() {
+        document.getElementById('tracksPlayed').textContent = this.sessionStats.tracksPlayed;
+        document.getElementById('sessionTime').textContent = Math.floor(this.sessionStats.sessionTime / 60);
+    }
+    
+    loadSessionData() {
+        const saved = localStorage.getItem('spotifyMusicTherapySession');
+        if (saved) {
+            this.sessionStats = { ...this.sessionStats, ...JSON.parse(saved) };
+            this.updateStatsDisplay();
+        }
+    }
+    
+    saveSessionData() {
+        localStorage.setItem('spotifyMusicTherapySession', JSON.stringify(this.sessionStats));
+    }
+    
+    startSessionTimer() {
+        setInterval(() => {
+            if (this.isPlaying) {
+                this.sessionStats.sessionTime++;
+                this.updateStatsDisplay();
+                this.saveSessionData();
+            }
+        }, 1000);
+    }
+    
+    handleInitError(error) {
+        console.error('Initialization failed, falling back to static content:', error);
+        this.fallbackToStaticContent();
+    }
+    
+    handleAuthError() {
+        console.log('Spotify authentication failed, using embed-only mode');
+        this.deviceId = null;
+        this.hideFloatingPlayer();
+        this.showSpotifyNotice();
+        this.fallbackToEmbeds();
+    }
+    
+    showSpotifyNotice() {
+        const notice = document.querySelector('.spotify-connect-notice');
+        if (notice) {
+            notice.style.display = 'block';
+        }
+    }
+    
+    fallbackToEmbeds() {
+        console.log('🔄 Falling back to Spotify embeds...');
+        // Disable player functionality but keep embeds working
+        this.player = null;
+        this.deviceId = null;
+    }
+}
+
+// Global functions for UI interaction
+function connectSpotify() {
+    fetch('/api/spotify/auth')
+        .then(response => response.json())
+        .then(data => {
+            if (data.auth_url) {
+                // Open Spotify auth in a popup window
+                const popup = window.open(
+                    data.auth_url,
+                    'spotify-auth',
+                    'width=500,height=600,scrollbars=yes,resizable=yes'
+                );
+                
+                // Monitor popup for completion
+                const checkClosed = setInterval(() => {
+                    if (popup.closed) {
+                        clearInterval(checkClosed);
+                        // Reload page to check if auth was successful
+                        window.location.reload();
+                    }
+                }, 1000);
+            } else {
+                console.error('Failed to get Spotify auth URL:', data);
+                alert('Unable to connect to Spotify. Please try again later.');
+            }
+        })
+        .catch(error => {
+            console.error('Spotify auth error:', error);
+            alert('Connection failed. Please check your internet connection and try again.');
+        });
+}
+
+function hideSpotifyNotice() {
+    const notice = document.querySelector('.spotify-connect-notice');
+    if (notice) {
+        notice.style.display = 'none';
+    }
+}
+
+// Global functions for UI interaction
+function playTrack(trackId, trackName, artistName, image) {
+    if (window.spotifyTherapy) {
+        window.spotifyTherapy.playTrack(trackId, trackName, artistName, image);
+    }
+}
+
+function togglePlaylistEmbed(playlistId, mood) {
+    if (window.spotifyTherapy) {
+        window.spotifyTherapy.togglePlaylistEmbed(playlistId, mood);
+    }
+}
+
+function togglePlayback() {
+    if (window.spotifyTherapy && window.spotifyTherapy.player) {
+        window.spotifyTherapy.player.togglePlay();
+    }
+}
+
+function nextTrack() {
+    if (window.spotifyTherapy && window.spotifyTherapy.player) {
+        window.spotifyTherapy.player.nextTrack();
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Starting Spotify Music Therapy...');
+    window.spotifyTherapy = new SpotifyMusicTherapy();
+    
+    // Check for authentication success parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('auth') === 'success') {
+        console.log('🎉 Spotify authentication successful! Player will initialize automatically.');
+        hideSpotifyNotice();
+        // Clear the URL parameter
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('error')) {
+        const error = urlParams.get('error');
+        console.error('Spotify auth error:', error);
+        alert(`Spotify authentication failed: ${error}. Please try again.`);
+        // Clear the URL parameter
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+
+// Export for external use
+window.SpotifyMusicTherapy = SpotifyMusicTherapy;
+</script>
+{% endblock %}

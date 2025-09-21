@@ -4,7 +4,36 @@
 
 {% block head %}
 <style>
-/* Clean styles for Art & Music Therapy */
+/* Enhanced Accessibility Styles for Disabled Users */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.keyboard-focus {
+    outline: 3px solid #4F46E5;
+    outline-offset: 2px;
+}
+
+.high-contrast {
+    filter: contrast(150%) saturate(200%);
+}
+
+.eye-tracking-target {
+    transition: all 0.3s ease;
+}
+
+.eye-tracking-target.gaze-focused {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
+}
 
 /* Custom styles for Art & Music Therapy */
 .therapy-card {
@@ -348,13 +377,116 @@
 .queue-item.current {
     background: rgba(255, 255, 255, 0.2);
 }
+
+/* Accessibility Features for Disabled Users */
+.accessibility-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.accessibility-controls.dark {
+    background: rgba(31, 41, 55, 0.95);
+    color: white;
+}
+
+.accessibility-button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    margin: 4px 0;
+    border: none;
+    border-radius: 6px;
+    background: #f3f4f6;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.accessibility-button:hover {
+    background: #e5e7eb;
+}
+
+.accessibility-button.active {
+    background: #4f46e5;
+    color: white;
+}
+
+#eyeTrackingCursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #4f46e5, #3730a3);
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+}
+
+#voiceCommandIndicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dc2626;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+#voiceCommandIndicator.listening {
+    background: #16a34a;
+    animation: pulse-record 1s infinite;
+}
+
+.breathing-guide {
+    text-align: center;
+    padding: 40px;
+}
+
+.breathing-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    margin: 0 auto 20px;
+    transition: transform 4s ease-in-out;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8" style="position: relative; z-index: 1;">
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8">
+    <!-- Accessibility Controls for Disabled Users -->
+    <div id="accessibilityControls" class="accessibility-controls eye-tracking-target">
+        <h4 class="font-bold mb-3 text-sm">Accessibility</h4>
+        <button id="enableEyeTracking" class="accessibility-button eye-tracking-target">
+            Enable Eye Tracking
+        </button>
+        <button id="enableVoiceControl" class="accessibility-button eye-tracking-target">
+            Enable Voice Control
+            <span id="voiceCommandIndicator"></span>
+        </button>
+        <button id="toggleHighContrast" class="accessibility-button eye-tracking-target">
+            High Contrast
+        </button>
+        <button id="enableBreathingGuide" class="accessibility-button eye-tracking-target">
+            Breathing Guide
+        </button>
+        <button id="emergencySupport" class="accessibility-button bg-red-500 text-white eye-tracking-target">
+            Emergency Support
+        </button>
+    </div>
 
-    <div class="container mx-auto px-6" style="position: relative; z-index: 10;">
+    <!-- Eye Tracking Cursor -->
+    <div id="eyeTrackingCursor"></div>
+
+    <div class="container mx-auto px-6">
         <!-- Header -->
         <div class="text-center mb-12">
             <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -366,26 +498,26 @@
         </div>
 
         <!-- Session Summary -->
-        <div class="session-summary mb-8 text-center" style="position: relative; z-index: 5;">
+        <div class="session-summary mb-8 text-center">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="stat-card ">
+                <div class="stat-card eye-tracking-target">
                     <div class="stat-number" id="artTimeSpent">0</div>
                     <div class="stat-label">Minutes Creating Art</div>
                 </div>
-                <div class="stat-card ">
+                <div class="stat-card eye-tracking-target">
                     <div class="stat-number" id="voiceEntriesCount">0</div>
                     <div class="stat-label">Voice Journal Entries</div>
                 </div>
-                <div class="stat-card ">
+                <div class="stat-card eye-tracking-target">
                     <div class="stat-number" id="musicListenTime">0</div>
                     <div class="stat-label">Minutes of Music Therapy</div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" style="position: relative; z-index: 5;">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Art Therapy Section -->
-            <div class="therapy-card bg-white/80 dark:bg-gray-800/80 rounded-xl p-6 shadow-lg ">
+            <div class="therapy-card bg-white/80 dark:bg-gray-800/80 rounded-xl p-6 shadow-lg eye-tracking-target">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                     <span class="mr-3">🎨</span>
                     Digital Art Canvas
@@ -394,24 +526,24 @@
                 <!-- Drawing Tools -->
                 <div class="mb-6">
                     <div class="flex flex-wrap gap-2 mb-4">
-                        <button class="tool-button active " data-tool="brush">
+                        <button class="tool-button active eye-tracking-target" data-tool="brush">
                             Brush
                         </button>
-                        <button class="tool-button " data-tool="eraser">
+                        <button class="tool-button eye-tracking-target" data-tool="eraser">
                             Eraser
                         </button>
                     </div>
                     
                     <!-- Color Palette -->
                     <div class="flex flex-wrap gap-2 mb-4">
-                        <div class="color-option selected " data-color="#000000" style="background: #000000;"></div>
-                        <div class="color-option " data-color="#ff0000" style="background: #ff0000;"></div>
-                        <div class="color-option " data-color="#00ff00" style="background: #00ff00;"></div>
-                        <div class="color-option " data-color="#0000ff" style="background: #0000ff;"></div>
-                        <div class="color-option " data-color="#ffff00" style="background: #ffff00;"></div>
-                        <div class="color-option " data-color="#ff00ff" style="background: #ff00ff;"></div>
-                        <div class="color-option " data-color="#00ffff" style="background: #00ffff;"></div>
-                        <div class="color-option " data-color="#8b4513" style="background: #8b4513;"></div>
+                        <div class="color-option selected eye-tracking-target" data-color="#000000" style="background: #000000;"></div>
+                        <div class="color-option eye-tracking-target" data-color="#ff0000" style="background: #ff0000;"></div>
+                        <div class="color-option eye-tracking-target" data-color="#00ff00" style="background: #00ff00;"></div>
+                        <div class="color-option eye-tracking-target" data-color="#0000ff" style="background: #0000ff;"></div>
+                        <div class="color-option eye-tracking-target" data-color="#ffff00" style="background: #ffff00;"></div>
+                        <div class="color-option eye-tracking-target" data-color="#ff00ff" style="background: #ff00ff;"></div>
+                        <div class="color-option eye-tracking-target" data-color="#00ffff" style="background: #00ffff;"></div>
+                        <div class="color-option eye-tracking-target" data-color="#8b4513" style="background: #8b4513;"></div>
                     </div>
                     
                     <!-- Brush Size -->
@@ -427,17 +559,17 @@
                 
                 <!-- Canvas Actions -->
                 <div class="flex gap-3">
-                    <button id="clearCanvas" class="control-button ">
+                    <button id="clearCanvas" class="control-button eye-tracking-target">
                         Clear Canvas
                     </button>
-                    <button id="saveArt" class="control-button primary ">
+                    <button id="saveArt" class="control-button primary eye-tracking-target">
                         Save Artwork
                     </button>
                 </div>
             </div>
 
             <!-- Voice Journaling Section -->
-            <div class="therapy-card voice-recorder shadow-lg ">
+            <div class="therapy-card voice-recorder shadow-lg eye-tracking-target">
                 <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
                     <span class="mr-3">🎤</span>
                     Voice Journaling
@@ -445,7 +577,7 @@
                 
                 <!-- Recording Interface -->
                 <div class="text-center mb-6">
-                    <button id="recordButton" class="record-button ">
+                    <button id="recordButton" class="record-button eye-tracking-target">
                         🎤
                     </button>
                     <p id="recordingStatus" class="mt-4 text-white text-lg">
@@ -486,7 +618,7 @@
 
         <!-- Music Therapy Section -->
         <div class="mt-8">
-            <div class="therapy-card music-section shadow-lg ">
+            <div class="therapy-card music-section shadow-lg eye-tracking-target">
                 <h2 class="text-3xl font-bold mb-6 flex items-center">
                     <span class="mr-3">🎵</span>
                     Therapeutic Music Discovery
@@ -496,22 +628,22 @@
                 <div class="mb-8">
                     <h3 class="text-xl font-bold mb-4">How are you feeling right now?</h3>
                     <div class="flex flex-wrap gap-3 justify-center">
-                        <button class="mood-selector mood-button " data-mood="happy">
+                        <button class="mood-selector mood-button eye-tracking-target" data-mood="happy">
                             Happy & Energetic
                         </button>
-                        <button class="mood-selector mood-button " data-mood="sad">
+                        <button class="mood-selector mood-button eye-tracking-target" data-mood="sad">
                             Sad & Reflective
                         </button>
-                        <button class="mood-selector mood-button " data-mood="anxious">
+                        <button class="mood-selector mood-button eye-tracking-target" data-mood="anxious">
                             Anxious & Worried
                         </button>
-                        <button class="mood-selector mood-button " data-mood="calm">
+                        <button class="mood-selector mood-button eye-tracking-target" data-mood="calm">
                             Peaceful & Calm
                         </button>
-                        <button class="mood-selector mood-button " data-mood="focused">
+                        <button class="mood-selector mood-button eye-tracking-target" data-mood="focused">
                             Need Focus
                         </button>
-                        <button class="mood-selector mood-button " data-mood="motivated">
+                        <button class="mood-selector mood-button eye-tracking-target" data-mood="motivated">
                             Need Motivation
                         </button>
                     </div>
@@ -522,7 +654,7 @@
                     <p id="currentTrack" class="text-lg font-medium">
                         Select your mood to discover therapeutic music
                     </p>
-                    <button id="playPauseBtn" class="control-button primary mt-3 ">
+                    <button id="playPauseBtn" class="control-button primary mt-3 eye-tracking-target">
                         Choose Your Mood
                     </button>
                 </div>
@@ -535,9 +667,9 @@
                             <p id="currentTrackArtist" class="text-sm opacity-80">Artist Name</p>
                         </div>
                         <div class="music-player-controls">
-                            <button id="prevBtn" class="control-button " onclick="musicTherapy.previousTrack()">⏮️</button>
-                            <button id="playPauseMainBtn" class="control-button primary " onclick="musicTherapy.toggleMainPlayer()">▶️</button>
-                            <button id="nextBtn" class="control-button " onclick="musicTherapy.nextTrack()">⏭️</button>
+                            <button id="prevBtn" class="control-button eye-tracking-target" onclick="musicTherapy.previousTrack()">⏮️</button>
+                            <button id="playPauseMainBtn" class="control-button primary eye-tracking-target" onclick="musicTherapy.toggleMainPlayer()">▶️</button>
+                            <button id="nextBtn" class="control-button eye-tracking-target" onclick="musicTherapy.nextTrack()">⏭️</button>
                         </div>
                     </div>
 
@@ -559,7 +691,7 @@
                             <input type="range" id="volumeSlider" min="0" max="100" value="70" class="volume-slider" onchange="musicTherapy.setVolume(this.value)">
                             <span id="volumeValue" class="text-sm">70%</span>
                         </div>
-                        <button id="loopBtn" class="control-button " onclick="musicTherapy.toggleLoop()">
+                        <button id="loopBtn" class="control-button eye-tracking-target" onclick="musicTherapy.toggleLoop()">
                             Loop: <span>Off</span>
                         </button>
                     </div>
@@ -621,6 +753,10 @@
            onended="musicTherapy.trackEnded()"
            style="display: none;">
     </audio>
+
+    <!-- Screen Reader Announcements -->
+    <div id="status-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    <div id="alert-announcements" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
 </div>
 {% endblock %}
 
@@ -632,14 +768,23 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing Enhanced Music Therapy System...');
     
     // Initialize the enhanced music therapy system
-    try {
-        window.enhancedMusicTherapy = new EnhancedMusicTherapy();
-        window.musicTherapy = window.enhancedMusicTherapy;
-        console.log('✅ Enhanced Music Therapy System initialized successfully!');
-    } catch (error) {
-        console.error('❌ Error initializing Enhanced Music Therapy System:', error);
-        // Fallback initialization if enhanced system fails
-        initBasicFunctionality();
+    window.enhancedMusicTherapy = new EnhancedMusicTherapy();
+    
+    // Initialize traditional components for compatibility
+    if (typeof ArtTherapyCanvas !== 'undefined') {
+        window.artTherapy = new ArtTherapyCanvas();
+    }
+    
+    if (typeof VoiceJournaling !== 'undefined') {
+        window.voiceJournal = new VoiceJournaling();
+    }
+    
+    // Set up global music therapy reference for compatibility
+    window.musicTherapy = window.enhancedMusicTherapy;
+    
+    // Initialize Enhanced Accessibility for Disabled Users
+    if (typeof AccessibilityManager !== 'undefined') {
+        window.accessibilityManager = new AccessibilityManager();
     }
     
     // Load saved session data
@@ -659,126 +804,17 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('therapySessionData', JSON.stringify(sessionData));
     }, 30000); // Save every 30 seconds
     
-    console.log('✅ Page initialization complete!');
+    console.log('Enhanced Music Therapy System initialized successfully!');
 });
-
-// Basic fallback functionality
-function initBasicFunctionality() {
-    console.log('🔄 Initializing basic functionality as fallback...');
-    
-    // Basic mood selector functionality
-    document.querySelectorAll('.mood-selector').forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remove active class from all buttons
-            document.querySelectorAll('.mood-selector').forEach(b => {
-                b.classList.remove('bg-white', 'text-gray-800');
-                b.style.background = '';
-                b.style.color = '';
-            });
-            
-            // Add active class to clicked button
-            this.style.background = 'rgba(255, 255, 255, 0.9)';
-            this.style.color = '#4f46e5';
-            
-            const mood = this.dataset.mood;
-            console.log('Selected mood:', mood);
-            
-            // Update current track display
-            document.getElementById('currentTrack').textContent = `Loading ${mood} therapy music...`;
-            document.getElementById('playPauseBtn').textContent = '⏳ Loading...';
-            
-            // Simulate loading
-            setTimeout(() => {
-                document.getElementById('currentTrack').textContent = `${mood.charAt(0).toUpperCase() + mood.slice(1)} therapy playlist ready`;
-                document.getElementById('playPauseBtn').innerHTML = '▶️ Start Music Therapy';
-                document.getElementById('playPauseBtn').onclick = () => startBasicPlayback(mood);
-            }, 1500);
-        });
-    });
-    
-    // Basic canvas functionality
-    const canvas = document.getElementById('drawingCanvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        
-        canvas.addEventListener('mousedown', () => { isDrawing = true; });
-        canvas.addEventListener('mouseup', () => { isDrawing = false; });
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.fillStyle = '#4f46e5';
-            ctx.fillRect(e.clientX - rect.left, e.clientY - rect.top, 3, 3);
-        });
-        
-        document.getElementById('clearCanvas').onclick = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        };
-    }
-    
-    console.log('✅ Basic functionality initialized');
-}
-
-function startBasicPlayback(mood) {
-    console.log('Starting basic playback for mood:', mood);
-    
-    document.getElementById('currentTrack').textContent = `🎵 Playing ${mood} therapy music`;
-    document.getElementById('playPauseBtn').innerHTML = '⏸️ Pause Music';
-    document.getElementById('playPauseBtn').onclick = () => pauseBasicPlayback();
-    
-    // Show some sample playlists
-    const container = document.getElementById('playlistContainer');
-    container.innerHTML = `
-        <div class="p-4 bg-white/20 rounded-lg">
-            <h4 class="font-bold text-white mb-2">🎵 ${mood.charAt(0).toUpperCase() + mood.slice(1)} Therapy Playlist</h4>
-            <p class="text-sm text-white/80">Therapeutic music curated for your ${mood} mood</p>
-            <button class="mt-2 bg-white/30 hover:bg-white/50 text-white px-3 py-1 rounded text-sm" onclick="alert('Music therapy session started!')">
-                🎧 Listen Now
-            </button>
-        </div>
-        <div class="p-4 bg-white/20 rounded-lg">
-            <h4 class="font-bold text-white mb-2">🎼 Relaxation Mix</h4>
-            <p class="text-sm text-white/80">Calming sounds to support your wellness journey</p>
-            <button class="mt-2 bg-white/30 hover:bg-white/50 text-white px-3 py-1 rounded text-sm" onclick="alert('Relaxation music started!')">
-                🎧 Listen Now
-            </button>
-        </div>
-    `;
-    
-    // Update music time counter
-    const currentTime = parseInt(document.getElementById('musicListenTime').textContent);
-    document.getElementById('musicListenTime').textContent = currentTime + 1;
-}
-
-function pauseBasicPlayback() {
-    document.getElementById('currentTrack').textContent = '⏸️ Music paused';
-    document.getElementById('playPauseBtn').innerHTML = '▶️ Resume Music';
-    document.getElementById('playPauseBtn').onclick = () => startBasicPlayback('therapy');
-}
 
 // Test function for debugging
 function testMusicTherapy() {
-    console.log('Testing Enhanced Music Therapy system...');
     if (window.enhancedMusicTherapy) {
-        console.log('✅ Enhanced Music Therapy is available');
-        console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.enhancedMusicTherapy)));
+        console.log('Testing Enhanced Music Therapy...');
         window.enhancedMusicTherapy.testAudio();
     } else {
-        console.error('❌ Enhanced Music Therapy not initialized');
+        console.error('Enhanced Music Therapy not initialized');
     }
-}
-
-// Test API connectivity
-function testAPI() {
-    console.log('Testing API connectivity...');
-    fetch('/api/music/mood-enhanced?mood=happy')
-        .then(response => response.json())
-        .then(data => {
-            console.log('✅ API test successful:', data);
-        })
-        .catch(error => {
-            console.error('❌ API test failed:', error);
-        });
 }
 </script>
 {% endblock %}
