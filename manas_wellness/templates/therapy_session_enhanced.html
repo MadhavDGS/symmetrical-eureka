@@ -1,0 +1,861 @@
+{% extends "base.html" %}
+
+{% block title %}Enhanced Therapy Session - Aarohan{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-white mb-4">
+            <svg class="svg-icon-lg inline mr-3" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            Personalized Therapy Session
+        </h1>
+        <p class="text-lg text-gray-300">AI-generated therapy exercises tailored to your emotional state and journal insights</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Main Therapy Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Current Emotion State -->
+            <div class="bg-dark-700 rounded-xl shadow-lg p-6 glass-effect border border-dark-600">
+                <h2 class="text-xl font-semibold text-white mb-4">Your Current State</h2>
+                <div id="emotion-display" class="text-center p-6 bg-dark-800 rounded-lg border border-dark-600">
+                    {% if initial_emotion and source == 'analysis' %}
+                    <div class="text-center">
+                        <span class="text-4xl mb-2 block">😊</span>
+                        <h3 id="current-emotion" class="text-2xl font-bold text-white mb-2 capitalize">{{ initial_emotion }}</h3>
+                        <p class="text-gray-400 mb-4">Based on your recent emotion analysis</p>
+                        <button onclick="generateTherapyFromEmotion('{{ initial_emotion }}')" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            Generate Therapy Session
+                        </button>
+                    </div>
+                    {% else %}
+                    <p class="text-gray-400 mb-4">Let's understand your current emotional state to provide personalized therapy</p>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-500 mb-3">Choose how you'd like to share your emotions:</div>
+                        
+                        <!-- Quick emotion selection -->
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <button onclick="selectQuickEmotion('happy')" class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                <span class="text-2xl block">😊</span>
+                                <span class="text-sm text-gray-300">Happy</span>
+                            </button>
+                            <button onclick="selectQuickEmotion('sad')" class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                <span class="text-2xl block">😢</span>
+                                <span class="text-sm text-gray-300">Sad</span>
+                            </button>
+                            <button onclick="selectQuickEmotion('anxious')" class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                <span class="text-2xl block">😰</span>
+                                <span class="text-sm text-gray-300">Anxious</span>
+                            </button>
+                            <button onclick="selectQuickEmotion('angry')" class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                <span class="text-2xl block">😠</span>
+                                <span class="text-sm text-gray-300">Angry</span>
+                            </button>
+                            <button onclick="selectQuickEmotion('stressed')" class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                <span class="text-2xl block">😫</span>
+                                <span class="text-sm text-gray-300">Stressed</span>
+                            </button>
+                            <button onclick="selectQuickEmotion('neutral')" class="quick-emotion-btn p-3 bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors">
+                                <span class="text-2xl block">😐</span>
+                                <span class="text-sm text-gray-300">Neutral</span>
+                            </button>
+                        </div>
+                        
+                        <div class="text-center space-y-3">
+                            <div class="text-xs text-gray-500">or choose your approach:</div>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <button onclick="startDetailedEmotionAnalysis()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm">
+                                    📊 Emotion Analysis
+                                </button>
+                                <button onclick="loadJournalInsights()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                    📔 Use Journal Insights
+                                </button>
+                                <button onclick="showRecentMood()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm">
+                                    📈 Recent Mood Pattern
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Journal Context Panel -->
+            <div id="journal-context" class="bg-dark-700 rounded-xl shadow-lg p-6 glass-effect border border-dark-600 hidden">
+                <h3 class="text-lg font-semibold text-white mb-4">📔 Recent Journal Insights</h3>
+                <div id="journal-entries-preview" class="space-y-3">
+                    <!-- Journal entries will be loaded here -->
+                </div>
+                <div class="mt-4 flex space-x-2">
+                    <button onclick="generateTherapyFromJournal()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Generate Therapy from Journal
+                    </button>
+                    <button onclick="hideJournalContext()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+
+            <!-- Therapy Content Area -->
+            <div id="therapy-content" class="bg-dark-700 rounded-xl shadow-lg p-6 glass-effect border border-dark-600 hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-white">Your Therapy Session</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="regenerateTherapy()" class="text-sm bg-dark-800 text-gray-300 px-3 py-1 rounded-md hover:bg-dark-600 border border-dark-600 transition-colors">
+                            🔄 Regenerate
+                        </button>
+                        <button onclick="saveSession()" class="text-sm bg-green-800 text-green-200 px-3 py-1 rounded-md hover:bg-green-700 border border-green-600 transition-colors">
+                            💾 Save Session
+                        </button>
+                    </div>
+                </div>
+                <div id="therapy-display" class="space-y-6">
+                    <!-- Therapy content will be loaded here -->
+                </div>
+                
+                <!-- Session Feedback -->
+                <div class="mt-8 p-4 bg-blue-900 bg-opacity-30 rounded-lg border border-blue-600">
+                    <h3 class="text-lg font-medium text-blue-200 mb-3">How was this session?</h3>
+                    <div class="flex space-x-2 mb-3">
+                        <button onclick="rateSession(1)" class="p-2 rounded hover:bg-blue-800 transition-colors" title="Poor">
+                            <span class="text-xl text-red-400">😞</span>
+                        </button>
+                        <button onclick="rateSession(2)" class="p-2 rounded hover:bg-blue-800 transition-colors" title="Fair">
+                            <span class="text-xl text-orange-400">😕</span>
+                        </button>
+                        <button onclick="rateSession(3)" class="p-2 rounded hover:bg-blue-800 transition-colors" title="Good">
+                            <span class="text-xl text-yellow-400">😐</span>
+                        </button>
+                        <button onclick="rateSession(4)" class="p-2 rounded hover:bg-blue-800 transition-colors" title="Very Good">
+                            <span class="text-xl text-green-400">😊</span>
+                        </button>
+                        <button onclick="rateSession(5)" class="p-2 rounded hover:bg-blue-800 transition-colors" title="Excellent">
+                            <span class="text-xl text-green-500">🤩</span>
+                        </button>
+                    </div>
+                    <textarea id="session-feedback" rows="3" class="w-full px-3 py-2 bg-dark-800 border border-dark-600 text-white placeholder-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Share your thoughts about this session (optional)..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-dark-700 rounded-xl shadow-lg p-6 glass-effect border border-dark-600">
+                <h3 class="text-lg font-semibold text-white mb-4">Quick Exercises</h3>
+                <div class="space-y-3">
+                    <button onclick="quickBreathing()" class="w-full text-left p-3 bg-blue-800 bg-opacity-30 hover:bg-blue-700 hover:bg-opacity-40 rounded-lg transition-colors border border-blue-600">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">🫁</span>
+                            <div>
+                                <p class="font-medium text-blue-200">Breathing Exercise</p>
+                                <p class="text-sm text-blue-300">5-minute calm</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="quickMindfulness()" class="w-full text-left p-3 bg-green-800 bg-opacity-30 hover:bg-green-700 hover:bg-opacity-40 rounded-lg transition-colors border border-green-600">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">🧘</span>
+                            <div>
+                                <p class="font-medium text-green-200">Mindfulness</p>
+                                <p class="text-sm text-green-300">Present moment</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="quickGratitude()" class="w-full text-left p-3 bg-yellow-800 bg-opacity-30 hover:bg-yellow-700 hover:bg-opacity-40 rounded-lg transition-colors border border-yellow-600">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">🙏</span>
+                            <div>
+                                <p class="font-medium text-yellow-200">Gratitude Journal</p>
+                                <p class="text-sm text-yellow-300">Count blessings</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="quickArt()" class="w-full text-left p-3 bg-purple-800 bg-opacity-30 hover:bg-purple-700 hover:bg-purple-600 hover:bg-opacity-40 rounded-lg transition-colors border border-purple-600">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">🎨</span>
+                            <div>
+                                <p class="font-medium text-purple-200">Art Therapy</p>
+                                <p class="text-sm text-purple-300">Creative expression</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Tracking -->
+            <div class="bg-dark-700 rounded-xl shadow-lg p-6 glass-effect border border-dark-600">
+                <h3 class="text-lg font-semibold text-white mb-4">Your Progress</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm text-gray-300 mb-1">
+                            <span>Sessions This Week</span>
+                            <span id="weekly-sessions">0/5</span>
+                        </div>
+                        <div class="w-full bg-dark-800 rounded-full h-2">
+                            <div id="weekly-progress" class="bg-indigo-600 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between text-sm text-gray-300 mb-1">
+                            <span>Mood Improvement</span>
+                            <span id="mood-improvement">+0%</span>
+                        </div>
+                        <div class="w-full bg-dark-800 rounded-full h-2">
+                            <div id="mood-progress" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between text-sm text-gray-300 mb-1">
+                            <span>Stress Management</span>
+                            <span id="stress-management">Good</span>
+                        </div>
+                        <div class="w-full bg-dark-800 rounded-full h-2">
+                            <div id="stress-progress" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crisis Support -->
+            <div class="bg-red-900 bg-opacity-30 border border-red-600 rounded-xl p-4">
+                <h3 class="text-sm font-medium text-red-200 mb-2">Need Immediate Help?</h3>
+                <div class="text-xs text-red-300 space-y-1">
+                    <p>AASRA: <a href="tel:+912227546669" class="underline hover:text-red-100">91-22-27546669</a></p>
+                    <p>Sneha: <a href="tel:+914424640050" class="underline hover:text-red-100">044-24640050</a></p>
+                    <p>Emergency: <a href="tel:112" class="underline font-bold hover:text-red-100">112</a></p>
+                </div>
+                <button onclick="showCrisisSupport()" class="mt-2 w-full bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 transition-colors">
+                    Get Crisis Support
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Breathing Exercise Modal -->
+<div id="breathing-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-dark-700 border border-dark-600 rounded-xl p-8 max-w-md w-full mx-4">
+        <div class="text-center">
+            <h3 class="text-xl font-semibold text-white mb-4">Breathing Exercise</h3>
+            <div id="breathing-circle" class="w-32 h-32 mx-auto mb-6 rounded-full bg-blue-800 bg-opacity-30 border border-blue-600 flex items-center justify-center">
+                <div class="w-24 h-24 rounded-full bg-blue-600 transition-all duration-4000" id="breathing-inner"></div>
+            </div>
+            <p id="breathing-instruction" class="text-lg text-gray-300 mb-4">Get ready...</p>
+            <div class="flex space-x-4">
+                <button onclick="closeBreathingModal()" class="flex-1 bg-dark-800 text-gray-300 py-2 px-4 rounded-lg hover:bg-dark-600 border border-dark-600 transition-colors">
+                    Close
+                </button>
+                <button onclick="startBreathing()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    Start
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSessionId = null;
+let currentEmotion = null;
+let journalEntries = [];
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadProgressData();
+});
+
+// Quick emotion selection for immediate therapy
+function selectQuickEmotion(emotion) {
+    console.log('Quick emotion selected:', emotion);
+    
+    const emotionDisplay = document.getElementById('emotion-display');
+    const emotionEmojis = {
+        'happy': '😊', 'sad': '😢', 'anxious': '😰', 
+        'angry': '😠', 'stressed': '😫', 'neutral': '😐'
+    };
+    
+    emotionDisplay.innerHTML = `
+        <div class="text-center">
+            <span class="text-4xl mb-2 block">${emotionEmojis[emotion] || '😐'}</span>
+            <h3 class="text-2xl font-bold text-white mb-2 capitalize">${emotion}</h3>
+            <p class="text-gray-400 mb-4">Quick emotion selection</p>
+            <button onclick="generateTherapyFromEmotion('${emotion}')" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                Generate Therapy Session
+            </button>
+            <button onclick="resetEmotionSelection()" class="ml-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                Change
+            </button>
+        </div>
+    `;
+}
+
+// Load journal insights for therapy
+async function loadJournalInsights() {
+    try {
+        const response = await fetch('/api/journal/recent?limit=3');
+        const data = await response.json();
+        
+        if (data.success && data.entries.length > 0) {
+            journalEntries = data.entries;
+            displayJournalContext(data.entries);
+            document.getElementById('journal-context').classList.remove('hidden');
+        } else {
+            alert('No recent journal entries found. Please create some journal entries first.');
+        }
+    } catch (error) {
+        console.error('Error loading journal insights:', error);
+        alert('Unable to load journal insights. Please try again.');
+    }
+}
+
+// Display journal context
+function displayJournalContext(entries) {
+    const preview = document.getElementById('journal-entries-preview');
+    
+    preview.innerHTML = entries.map(entry => `
+        <div class="bg-dark-800 p-3 rounded-lg border border-dark-600">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-300">
+                    ${new Date(entry.created_at).toLocaleDateString()}
+                </span>
+                <span class="text-xs px-2 py-1 bg-${getMoodColor(entry.mood)}-800 text-${getMoodColor(entry.mood)}-200 rounded">
+                    ${entry.mood || 'No mood'}
+                </span>
+            </div>
+            <p class="text-sm text-gray-400 mb-2">${entry.content_preview}</p>
+            ${entry.emotion_detected ? `<span class="text-xs text-purple-300">Emotion: ${entry.emotion_detected}</span>` : ''}
+        </div>
+    `).join('');
+}
+
+function getMoodColor(mood) {
+    const colors = {
+        'happy': 'green', 'sad': 'blue', 'anxious': 'yellow',
+        'angry': 'red', 'stressed': 'orange', 'calm': 'green'
+    };
+    return colors[mood?.toLowerCase()] || 'gray';
+}
+
+// Generate therapy from journal insights
+async function generateTherapyFromJournal() {
+    if (journalEntries.length === 0) {
+        alert('No journal entries available for therapy generation.');
+        return;
+    }
+    
+    try {
+        const latestEntry = journalEntries[0];
+        
+        const response = await fetch('/api/journal/therapy-insights', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                journal_entry_id: latestEntry.id,
+                journal_text: latestEntry.content
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayJournalBasedTherapy(result.therapy_insights);
+            currentSessionId = result.session_id;
+            document.getElementById('therapy-content').classList.remove('hidden');
+            document.getElementById('journal-context').classList.add('hidden');
+            
+            // Update emotion display
+            updateEmotionDisplay('journal-based');
+        } else {
+            alert('Unable to generate therapy from journal. Please try again.');
+        }
+    } catch (error) {
+        console.error('Journal therapy generation error:', error);
+        alert('Error generating therapy from journal. Please try again.');
+    }
+}
+
+// Display journal-based therapy
+function displayJournalBasedTherapy(therapyInsights) {
+    const display = document.getElementById('therapy-display');
+    
+    let insights;
+    try {
+        insights = typeof therapyInsights === 'string' ? JSON.parse(therapyInsights) : therapyInsights;
+    } catch (e) {
+        // If not JSON, treat as plain text
+        insights = { 
+            immediate_strategies: [therapyInsights],
+            therapy_exercise: { type: 'reflection', description: therapyInsights }
+        };
+    }
+    
+    const content = `
+        <div class="space-y-6">
+            <div class="bg-green-900 bg-opacity-30 p-6 rounded-lg border border-green-600">
+                <h3 class="text-lg font-semibold text-green-200 mb-3">📔 Based on Your Journal</h3>
+                <p class="text-green-100 mb-4">This therapy session is personalized based on your recent journal entries and emotional patterns.</p>
+            </div>
+            
+            ${insights.immediate_strategies ? `
+            <div class="bg-blue-900 bg-opacity-30 p-6 rounded-lg border border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-200 mb-3">🎯 Immediate Strategies</h3>
+                <ul class="space-y-2">
+                    ${(Array.isArray(insights.immediate_strategies) ? insights.immediate_strategies : [insights.immediate_strategies]).map(strategy => 
+                        `<li class="text-blue-100 flex items-start">
+                            <span class="text-blue-400 mr-2">•</span>
+                            ${strategy}
+                        </li>`
+                    ).join('')}
+                </ul>
+            </div>
+            ` : ''}
+            
+            ${insights.therapy_exercise ? `
+            <div class="bg-purple-900 bg-opacity-30 p-6 rounded-lg border border-purple-600">
+                <h3 class="text-lg font-semibold text-purple-200 mb-3">🧘 Recommended Exercise</h3>
+                <p class="text-purple-100">${insights.therapy_exercise.description || insights.therapy_exercise}</p>
+                ${insights.therapy_exercise.type === 'breathing' ? `
+                    <button onclick="quickBreathing()" class="mt-3 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                        Start Breathing Exercise
+                    </button>
+                ` : ''}
+            </div>
+            ` : ''}
+            
+            <div class="bg-yellow-900 bg-opacity-30 p-6 rounded-lg border border-yellow-600">
+                <h3 class="text-lg font-semibold text-yellow-200 mb-3">📝 Journal Integration</h3>
+                <p class="text-yellow-100 mb-3">Continue your wellness journey by:</p>
+                <ul class="space-y-1 text-yellow-100">
+                    <li>• Reflecting on today's therapy session in your journal</li>
+                    <li>• Writing about any insights or feelings that emerged</li>
+                    <li>• Setting intention for tomorrow's self-care</li>
+                </ul>
+                <button onclick="openJournal()" class="mt-3 bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                    Open Journal
+                </button>
+            </div>
+        </div>
+    `;
+    
+    display.innerHTML = content;
+}
+
+// Hide journal context
+function hideJournalContext() {
+    document.getElementById('journal-context').classList.add('hidden');
+}
+
+// Reset emotion selection
+function resetEmotionSelection() {
+    location.reload();
+}
+
+// Detailed emotion analysis (redirects to analysis page)
+function startDetailedEmotionAnalysis() {
+    window.location.href = '/emotion-analysis?return=therapy';
+}
+
+// Show recent mood pattern
+async function showRecentMood() {
+    try {
+        const response = await fetch('/api/journal/recent?limit=7');
+        const data = await response.json();
+        
+        if (data.success && data.entries.length > 0) {
+            const moodPattern = analyzeMoodPattern(data.entries);
+            displayMoodPattern(moodPattern);
+        } else {
+            alert('No recent mood data available. Please journal regularly to track your mood patterns.');
+        }
+    } catch (error) {
+        console.error('Error loading mood pattern:', error);
+        alert('Unable to load mood pattern. Please try again.');
+    }
+}
+
+// Analyze mood pattern from journal entries
+function analyzeMoodPattern(entries) {
+    const moods = entries.map(entry => entry.mood).filter(mood => mood);
+    const emotions = entries.map(entry => entry.emotion_detected).filter(emotion => emotion);
+    
+    return {
+        recent_moods: moods.slice(0, 5),
+        dominant_emotion: emotions.length > 0 ? emotions[0] : 'neutral',
+        mood_trend: calculateMoodTrend(entries),
+        entry_count: entries.length
+    };
+}
+
+// Display mood pattern
+function displayMoodPattern(pattern) {
+    const emotionDisplay = document.getElementById('emotion-display');
+    
+    emotionDisplay.innerHTML = `
+        <div class="text-center">
+            <h3 class="text-xl font-bold text-white mb-4">📈 Your Recent Mood Pattern</h3>
+            
+            <div class="bg-dark-800 p-4 rounded-lg mb-4">
+                <p class="text-gray-300 mb-2">Recent moods: ${pattern.recent_moods.join(', ') || 'No mood data'}</p>
+                <p class="text-gray-300 mb-2">Dominant emotion: <span class="capitalize text-purple-300">${pattern.dominant_emotion}</span></p>
+                <p class="text-gray-300">Trend: <span class="text-green-300">${pattern.mood_trend}</span></p>
+            </div>
+            
+            <button onclick="generateTherapyFromMoodPattern('${pattern.dominant_emotion}')" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                Generate Therapy for Current Pattern
+            </button>
+            <button onclick="resetEmotionSelection()" class="ml-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                Back
+            </button>
+        </div>
+    `;
+}
+
+// Calculate mood trend
+function calculateMoodTrend(entries) {
+    if (entries.length < 2) return 'Insufficient data';
+    
+    const moodScores = entries.map(entry => {
+        const mood = entry.mood?.toLowerCase();
+        const scores = { 'happy': 5, 'calm': 4, 'neutral': 3, 'sad': 2, 'anxious': 1, 'angry': 1, 'stressed': 1 };
+        return scores[mood] || 3;
+    });
+    
+    const recent = moodScores.slice(0, 3).reduce((a, b) => a + b, 0) / Math.min(3, moodScores.length);
+    const older = moodScores.slice(3).reduce((a, b) => a + b, 0) / Math.max(1, moodScores.length - 3);
+    
+    if (recent > older + 0.5) return 'Improving';
+    if (recent < older - 0.5) return 'Declining';
+    return 'Stable';
+}
+
+// Generate therapy from mood pattern
+async function generateTherapyFromMoodPattern(dominantEmotion) {
+    generateTherapyFromEmotion(dominantEmotion);
+}
+
+// Generate therapy from known emotion
+async function generateTherapyFromEmotion(emotion) {
+    try {
+        currentEmotion = emotion;
+        
+        const emotionData = {
+            primary_emotion: emotion,
+            confidence: 0.8,
+            timestamp: new Date().toISOString(),
+            source: 'user_selection'
+        };
+        
+        const button = event.target;
+        const originalText = button.textContent;
+        button.textContent = 'Generating...';
+        button.disabled = true;
+        
+        const response = await fetch('/api/therapy/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                emotion_state: emotionData,
+                session_id: currentSessionId || generateSessionId()
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayTherapyContent(result.therapy_content);
+            currentSessionId = result.session_id;
+            document.getElementById('therapy-content').classList.remove('hidden');
+            updateEmotionDisplay(emotion);
+        } else {
+            alert('Unable to generate therapy session. Please try again.');
+        }
+        
+        button.textContent = originalText;
+        button.disabled = false;
+        
+    } catch (error) {
+        console.error('Therapy generation error:', error);
+        alert('Error generating therapy session. Please try again.');
+        
+        if (event && event.target) {
+            event.target.textContent = 'Generate Therapy Session';
+            event.target.disabled = false;
+        }
+    }
+}
+
+// Generate session ID
+function generateSessionId() {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Update emotion display
+function updateEmotionDisplay(emotion) {
+    const emotionDisplay = document.getElementById('emotion-display');
+    const emotionEmojis = {
+        'happy': '😊', 'sad': '😢', 'angry': '😠', 'anxious': '😰', 
+        'stressed': '😤', 'calm': '😌', 'excited': '🤩', 'neutral': '😐',
+        'journal-based': '📔'
+    };
+    
+    emotionDisplay.innerHTML = `
+        <div class="text-center">
+            <span class="text-4xl mb-2 block">${emotionEmojis[emotion] || '😐'}</span>
+            <h3 class="text-2xl font-bold text-white mb-2 capitalize">${emotion === 'journal-based' ? 'Journal-Based Therapy' : emotion}</h3>
+            <p class="text-green-400">Therapy session active</p>
+        </div>
+    `;
+}
+
+// Display therapy content
+function displayTherapyContent(therapy) {
+    const display = document.getElementById('therapy-display');
+    let content = '';
+    
+    if (therapy.type === 'breathing') {
+        content = `
+            <div class="bg-blue-900 bg-opacity-30 p-6 rounded-lg border border-blue-600">
+                <h3 class="text-lg font-semibold text-blue-200 mb-3">🫁 Breathing Exercise</h3>
+                <p class="text-blue-100 mb-4">${therapy.description}</p>
+                <button onclick="startInteractiveBreathing()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Start Breathing Exercise
+                </button>
+            </div>
+        `;
+    } else if (therapy.type === 'mindfulness') {
+        content = `
+            <div class="bg-green-900 bg-opacity-30 p-6 rounded-lg border border-green-600">
+                <h3 class="text-lg font-semibold text-green-200 mb-3">🧘 Mindfulness Practice</h3>
+                <p class="text-green-100 mb-4">${therapy.description}</p>
+                <div class="space-y-2">
+                    ${therapy.steps.map((step, index) => `
+                        <div class="flex items-start">
+                            <span class="bg-green-700 text-green-100 rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium mr-3 mt-1">${index + 1}</span>
+                            <p class="text-green-100">${step}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    } else if (therapy.type === 'journaling') {
+        content = `
+            <div class="bg-yellow-900 bg-opacity-30 p-6 rounded-lg border border-yellow-600">
+                <h3 class="text-lg font-semibold text-yellow-200 mb-3">📝 Journaling Prompt</h3>
+                <p class="text-yellow-100 mb-4">${therapy.prompt}</p>
+                <textarea id="journal-response" class="w-full h-32 p-3 bg-dark-800 border border-yellow-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Write your thoughts here..."></textarea>
+                <div class="mt-3 flex space-x-2">
+                    <button onclick="saveJournalEntry()" class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                        Save Entry
+                    </button>
+                    <button onclick="openJournal()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        Open Full Journal
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    display.innerHTML = content;
+}
+
+// Quick exercises
+function quickBreathing() {
+    document.getElementById('breathing-modal').classList.remove('hidden');
+}
+
+function quickMindfulness() {
+    const therapyContent = {
+        type: 'mindfulness',
+        description: 'Take a moment to center yourself with this quick mindfulness exercise.',
+        steps: [
+            'Sit comfortably and close your eyes',
+            'Take three deep breaths',
+            'Notice five things you can hear',
+            'Notice four things you can feel',
+            'Notice three things you can smell',
+            'Take another deep breath and open your eyes'
+        ]
+    };
+    
+    displayTherapyContent(therapyContent);
+    document.getElementById('therapy-content').classList.remove('hidden');
+}
+
+function quickGratitude() {
+    const therapyContent = {
+        type: 'journaling',
+        prompt: 'Write down three things you are grateful for today. They can be big or small - what matters is acknowledging the positive aspects of your life.'
+    };
+    
+    displayTherapyContent(therapyContent);
+    document.getElementById('therapy-content').classList.remove('hidden');
+}
+
+function quickArt() {
+    window.location.href = '/art-music-therapy?focus=art&mood=' + (currentEmotion || 'neutral');
+}
+
+// Breathing exercise modal functions
+function closeBreathingModal() {
+    document.getElementById('breathing-modal').classList.add('hidden');
+}
+
+function startBreathing() {
+    const instruction = document.getElementById('breathing-instruction');
+    const innerCircle = document.getElementById('breathing-inner');
+    let phase = 0;
+    let cycles = 0;
+    const maxCycles = 5;
+    
+    function breatheCycle() {
+        if (cycles >= maxCycles) {
+            instruction.textContent = 'Great job! You completed the breathing exercise.';
+            return;
+        }
+        
+        switch(phase) {
+            case 0: // Inhale
+                instruction.textContent = 'Breathe in slowly...';
+                innerCircle.style.transform = 'scale(1.5)';
+                innerCircle.style.transition = 'transform 4s ease-in-out';
+                setTimeout(() => { phase = 1; breatheCycle(); }, 4000);
+                break;
+            case 1: // Hold
+                instruction.textContent = 'Hold your breath...';
+                setTimeout(() => { phase = 2; breatheCycle(); }, 2000);
+                break;
+            case 2: // Exhale
+                instruction.textContent = 'Breathe out slowly...';
+                innerCircle.style.transform = 'scale(1)';
+                setTimeout(() => { phase = 3; breatheCycle(); }, 4000);
+                break;
+            case 3: // Hold
+                instruction.textContent = 'Hold...';
+                setTimeout(() => {
+                    phase = 0;
+                    cycles++;
+                    instruction.textContent = `Cycle ${cycles + 1} of ${maxCycles}`;
+                    setTimeout(breatheCycle, 1000);
+                }, 2000);
+                break;
+        }
+    }
+    
+    breatheCycle();
+}
+
+// Session management
+async function rateSession(rating) {
+    if (!currentSessionId) return;
+    
+    const feedback = document.getElementById('session-feedback').value;
+    
+    try {
+        await fetch('/api/feedback/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: currentSessionId,
+                type: 'therapy_session',
+                rating: rating,
+                comments: feedback
+            })
+        });
+        
+        alert('Thank you for your feedback!');
+    } catch (error) {
+        console.error('Feedback submission error:', error);
+    }
+}
+
+async function saveSession() {
+    if (!currentSessionId) {
+        alert('No active session to save');
+        return;
+    }
+    alert('Session saved successfully!');
+}
+
+function regenerateTherapy() {
+    if (currentEmotion) {
+        generateTherapyFromEmotion(currentEmotion);
+    } else {
+        alert('Please complete emotion analysis first');
+    }
+}
+
+function showCrisisSupport() {
+    window.location.href = '/crisis-support';
+}
+
+function openJournal() {
+    window.location.href = '/journal';
+}
+
+async function saveJournalEntry() {
+    const content = document.getElementById('journal-response').value;
+    if (!content.trim()) {
+        alert('Please write something before saving.');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/journal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                'journal_entry': content,
+                'mood': currentEmotion || 'neutral',
+                'source': 'therapy_session'
+            })
+        });
+        
+        if (response.ok) {
+            alert('Journal entry saved successfully!');
+            document.getElementById('journal-response').value = '';
+        } else {
+            alert('Error saving journal entry. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error saving journal entry:', error);
+        alert('Error saving journal entry. Please try again.');
+    }
+}
+
+// Load progress data
+async function loadProgressData() {
+    try {
+        // This would normally fetch real data from the server
+        // For now, we'll use sample data
+        document.getElementById('weekly-sessions').textContent = '3/5';
+        document.getElementById('weekly-progress').style.width = '60%';
+        document.getElementById('mood-improvement').textContent = '+15%';
+        document.getElementById('mood-progress').style.width = '75%';
+        document.getElementById('stress-progress').style.width = '80%';
+    } catch (error) {
+        console.error('Error loading progress data:', error);
+    }
+}
+
+// Check if returning from emotion analysis
+const urlParams = new URLSearchParams(window.location.search);
+const emotionData = urlParams.get('emotion');
+if (emotionData) {
+    try {
+        currentEmotion = JSON.parse(decodeURIComponent(emotionData));
+        generateTherapyFromEmotion(currentEmotion);
+    } catch (error) {
+        console.error('Error parsing emotion data:', error);
+    }
+}
+</script>
+
+{% endblock %}

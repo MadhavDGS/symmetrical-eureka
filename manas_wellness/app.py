@@ -428,6 +428,72 @@ def generate_therapy():
         logger.error(f"Therapy generation error: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/journal/therapy-insights', methods=['POST'])
+def generate_therapy_from_journal():
+    """Generate therapy recommendations based on journal entry analysis"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'error': 'User not authenticated'})
+    
+    data = request.json
+    journal_entry_id = data.get('journal_entry_id')
+    journal_text = data.get('journal_text', '')
+    
+    try:
+        conn = get_db_connection()
+        
+        # Get journal entry details if ID provided
+        if journal_entry_id:
+            entry = conn.execute('''
+                SELECT * FROM journal_entries WHERE id = ? AND user_id = ?
+            ''', (journal_entry_id, user_id)).fetchone()
+            if entry:
+                journal_text = entry['content']
+                ai_insights = entry['ai_insights']
+                mood = entry['mood']
+                emotion_detected = entry['emotion_detected']
+        
+        # Generate therapy recommendations based on journal analysis
+        therapy_prompt = f"""
+        Based on this journal entry analysis, provide specific therapy recommendations:
+        
+        Journal Content: {journal_text[:500]}...
+        Detected Emotion: {emotion_detected if 'emotion_detected' in locals() else 'Not specified'}
+        Mood: {mood if 'mood' in locals() else 'Not specified'}
+        
+        Provide:
+        1. Immediate coping strategies (2-3 actionable steps)
+        2. Therapy exercise recommendation (breathing, mindfulness, journaling prompt)
+        3. Long-term wellness suggestions
+        4. When to seek additional support
+        
+        Format as JSON with keys: immediate_strategies, therapy_exercise, long_term_suggestions, support_guidance
+        """
+        
+        # Get AI response
+        therapy_insights = gemini_text(therapy_prompt)
+        
+        # Store the therapy recommendation
+        therapy_session_id = str(uuid.uuid4())
+        conn.execute('''
+            INSERT OR REPLACE INTO therapy_sessions 
+            (user_id, session_id, therapy_type, content, source_journal_id, created_at)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ''', (user_id, therapy_session_id, 'journal_based', therapy_insights, journal_entry_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'therapy_insights': therapy_insights,
+            'session_id': therapy_session_id,
+            'source': 'journal_analysis'
+        })
+        
+    except Exception as e:
+        logger.error(f"Journal therapy insights error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/api/therapy/recommendations', methods=['POST'])
 def get_therapy_recommendations():
     """Get quick therapy recommendations based on current emotion"""
@@ -922,6 +988,44 @@ def journal_page():
         return render_template('journal.html', 
                              journal_entries=[],
                              streak_data={'current_streak': 0, 'longest_streak': 0, 'total_entries': 0})
+
+@app.route('/api/journal/recent', methods=['GET'])
+def get_recent_journal_entries():
+    """Get recent journal entries for therapy session context"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'error': 'User not authenticated'})
+    
+    try:
+        conn = get_db_connection()
+        limit = request.args.get('limit', 5, type=int)
+        
+        entries = conn.execute('''
+            SELECT id, content, mood, emotion_detected, ai_insights, created_at, sentiment_score
+            FROM journal_entries 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT ?
+        ''', (user_id, limit)).fetchall()
+        
+        journal_entries = []
+        for entry in entries:
+            entry_dict = dict(entry)
+            # Truncate content for therapy context
+            entry_dict['content_preview'] = entry_dict['content'][:200] + "..." if len(entry_dict['content']) > 200 else entry_dict['content']
+            journal_entries.append(entry_dict)
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'entries': journal_entries,
+            'count': len(journal_entries)
+        })
+        
+    except Exception as e:
+        logger.error(f"Recent journal entries error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
 
 def get_current_streak(user_id, conn):
     """Calculate current journaling streak for user"""
